@@ -1,0 +1,22 @@
+{
+  "name": "agenda",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web app for Agenda, a calendar and task planner built around time-blocking.",
+  "license": "MIT",
+  "author": "Andrea Gil Guimerà",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "webpack serve --config config/webpack/webpack.dev.ts",
+    "build": "webpack --config config/webpack/webpack.prod.ts",
+    "analyze": "webpack --config config/webpack/webpack.prod.ts --env analyze",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "~6.0.3"
+  }
+}
