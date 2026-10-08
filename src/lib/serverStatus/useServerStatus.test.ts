@@ -94,4 +94,32 @@ describe('useServerStatus', () => {
     expect(fetchMock.mock.calls.length).toBe(callsBeforeUnmount);
     jest.useRealTimers();
   });
+
+  it('does not retry an aborted startup check after unmount', async () => {
+    jest.useFakeTimers({ advanceTimers: true });
+    const fetchMock = jest.fn((_input: RequestInfo | URL, init?: RequestInit) => {
+      const signal = init?.signal;
+
+      return new Promise<Response>((_resolve, reject) => {
+        signal?.addEventListener(
+          'abort',
+          () => {
+            reject(new Error('aborted'));
+          },
+          { once: true },
+        );
+      });
+    });
+    global.fetch = fetchMock;
+
+    const { unmount } = renderHook(() => useServerStatus());
+    unmount();
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(10_000);
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    jest.useRealTimers();
+  });
 });
