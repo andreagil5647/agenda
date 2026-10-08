@@ -4,7 +4,7 @@ import { useAuth } from '../../lib/auth/AuthContext';
 type AuthMode = 'login' | 'register';
 
 export function AuthScreen(): JSX.Element {
-  const { login, register, error, clearError } = useAuth();
+  const { login, register, startDemo, error, clearError } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,6 +29,17 @@ export function AuthScreen(): JSX.Element {
       } else {
         await login({ email, password });
       }
+    } catch {
+      // The provider stores the user-facing error.
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDemo = async (): Promise<void> => {
+    setIsSubmitting(true);
+    try {
+      await startDemo();
     } catch {
       // The provider stores the user-facing error.
     } finally {
@@ -108,6 +119,16 @@ export function AuthScreen(): JSX.Element {
 
           <button className="primary-action" type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Working...' : isRegistering ? 'Create account' : 'Log in'}
+          </button>
+          <button
+            className="secondary-action"
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => {
+              void handleDemo();
+            }}
+          >
+            Try demo
           </button>
         </form>
       </div>

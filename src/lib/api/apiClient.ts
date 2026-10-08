@@ -84,6 +84,7 @@ async function request<TResponse>(
 
 export const apiClient = {
   getSession: () => request<SessionResponse>('/auth/session'),
+  demo: () => request<AuthenticatedSession>('/auth/demo', { method: 'POST' }),
   register: (body: RegisterRequest) =>
     request<AuthenticatedSession>('/auth/register', { method: 'POST', body }),
   login: (body: LoginRequest) =>
