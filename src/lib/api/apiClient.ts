@@ -2,9 +2,15 @@ import { env } from '../env';
 import type {
   ApiErrorBody,
   AuthenticatedSession,
+  Calendar,
+  CreateCalendarRequest,
+  CreateTaskRequest,
+  CreateTimedEventRequest,
+  EventBlock,
   LoginRequest,
   RegisterRequest,
   SessionResponse,
+  Task,
 } from './types';
 
 type JsonBody = object;
@@ -90,4 +96,20 @@ export const apiClient = {
   login: (body: LoginRequest) =>
     request<AuthenticatedSession>('/auth/login', { method: 'POST', body }),
   logout: (csrfToken: string) => request<undefined>('/auth/logout', { method: 'POST', csrfToken }),
+  listCalendars: () => request<Calendar[]>('/calendars'),
+  createCalendar: (body: CreateCalendarRequest, csrfToken: string) =>
+    request<Calendar>('/calendars', { method: 'POST', body, csrfToken }),
+  listTasks: () => request<Task[]>('/tasks'),
+  createTask: (body: CreateTaskRequest, csrfToken: string) =>
+    request<Task>('/tasks', { method: 'POST', body, csrfToken }),
+  updateTask: (id: string, body: Partial<CreateTaskRequest>, csrfToken: string) =>
+    request<Task>(`/tasks/${id}`, { method: 'PATCH', body, csrfToken }),
+  deleteTask: (id: string, csrfToken: string) =>
+    request<undefined>(`/tasks/${id}`, { method: 'DELETE', csrfToken }),
+  listEvents: (from: string, to: string) =>
+    request<EventBlock[]>(`/events?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+  createEvent: (body: CreateTimedEventRequest, csrfToken: string) =>
+    request<EventBlock>('/events', { method: 'POST', body, csrfToken }),
+  deleteEvent: (id: string, csrfToken: string) =>
+    request<undefined>(`/events/${id}`, { method: 'DELETE', csrfToken }),
 };
