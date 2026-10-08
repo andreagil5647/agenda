@@ -34,8 +34,8 @@ Types in use: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`,
 ## Before opening a pull request
 
 ```bash
-npm run lint && npm run typecheck && npm test
-npm run build
+pnpm run lint && pnpm run typecheck && pnpm test
+pnpm run build
 ```
 
 ## Bugs worth writing up
