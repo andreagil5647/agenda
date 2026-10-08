@@ -21,6 +21,62 @@ const authSession = {
   csrfToken: 'csrf-token',
 } as const;
 
+const calendar = {
+  id: '507f1f77bcf86cd799439011',
+  name: 'Work',
+  colorKey: 'blue',
+  visible: true,
+  defaultReminderMinutes: [10],
+  order: 1,
+  version: 1,
+  createdAt: '2026-10-08T08:00:00.000Z',
+  updatedAt: '2026-10-08T08:00:00.000Z',
+} as const;
+
+const task = {
+  id: '507f1f77bcf86cd799439012',
+  title: 'Draft launch checklist',
+  dueDate: '2026-10-08',
+  priority: 'high',
+  status: 'todo',
+  estimateMinutes: 60,
+  order: 'a0',
+  version: 1,
+  createdAt: '2026-10-08T08:00:00.000Z',
+  updatedAt: '2026-10-08T08:00:00.000Z',
+} as const;
+
+const eventBlock = {
+  id: '507f1f77bcf86cd799439013',
+  calendarId: calendar.id,
+  title: 'Focus block',
+  notes: null,
+  taskId: task.id,
+  kind: 'timed',
+  startUtc: '2026-10-08T09:00:00.000Z',
+  endUtc: '2026-10-08T10:00:00.000Z',
+  timeZone: 'Europe/Madrid',
+  startDate: null,
+  endDate: null,
+  version: 1,
+  createdAt: '2026-10-08T08:00:00.000Z',
+  updatedAt: '2026-10-08T08:00:00.000Z',
+} as const;
+
+interface PlannerPayload {
+  calendars: readonly unknown[];
+  tasks: readonly unknown[];
+  events: readonly unknown[];
+}
+
+function plannerResponses({
+  calendars = [calendar],
+  tasks = [task],
+  events = [eventBlock],
+}: Partial<PlannerPayload> = {}): Response[] {
+  return [jsonResponse(calendars), jsonResponse(tasks), jsonResponse(events)];
+}
+
 function jsonResponse(body: unknown, status = 200): Response {
   return createResponse({
     body,
@@ -71,6 +127,18 @@ function fetchCall(fetchMock: jest.MockedFunction<typeof fetch>, index: number) 
   return call;
 }
 
+function findFetchCall(
+  fetchMock: jest.MockedFunction<typeof fetch>,
+  predicate: (url: string, init: RequestInit | undefined) => boolean,
+) {
+  const call = fetchMock.mock.calls.find(([input, init]) => predicate(requestUrl(input), init));
+  if (!call) {
+    throw new Error('Expected fetch call was not made');
+  }
+
+  return call;
+}
+
 function requestUrl(input: Parameters<typeof fetch>[0]): string {
   return typeof input === 'string' || input instanceof URL ? input.toString() : input.url;
 }
@@ -110,6 +178,7 @@ describe('App', () => {
       jsonResponse({ status: 'ok' }),
       jsonResponse({ user: null }),
       jsonResponse(authSession, 201),
+      ...plannerResponses(),
     );
     const user = userEvent.setup();
 
@@ -137,6 +206,7 @@ describe('App', () => {
     const fetchMock = mockFetch(
       jsonResponse({ status: 'ok' }),
       jsonResponse(authSession),
+      ...plannerResponses(),
       emptyResponse(),
     );
     const user = userEvent.setup();
@@ -150,10 +220,68 @@ describe('App', () => {
       expect(screen.getByLabelText('Email')).toBeInTheDocument();
     });
 
-    const [url, init] = fetchCall(fetchMock, 2);
+    const [url, init] = findFetchCall(
+      fetchMock,
+      (requestUrl, requestInit) =>
+        requestUrl.endsWith('/auth/logout') && requestInit?.method === 'POST',
+    );
     expect(requestUrl(url)).toMatch(/\/auth\/logout$/);
     expect(init).toMatchObject({ method: 'POST', credentials: 'include' });
     expect(init?.headers).toMatchObject({ 'X-CSRF-Token': 'csrf-token' });
+  });
+
+  it('loads planner resources for an authenticated session', async () => {
+    const fetchMock = mockFetch(
+      jsonResponse({ status: 'ok' }),
+      jsonResponse(authSession),
+      ...plannerResponses(),
+    );
+
+    render(<App />);
+
+    expect(await screen.findByText('Focus block')).toBeInTheDocument();
+    expect(screen.getAllByText('Draft launch checklist').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Work').length).toBeGreaterThan(0);
+
+    expect(findFetchCall(fetchMock, (url) => url.endsWith('/calendars'))).toBeDefined();
+    expect(findFetchCall(fetchMock, (url) => url.endsWith('/tasks'))).toBeDefined();
+    expect(findFetchCall(fetchMock, (url) => url.includes('/events?from='))).toBeDefined();
+  });
+
+  it('sends the CSRF token when creating planner tasks', async () => {
+    const createdTask = { ...task, id: '507f1f77bcf86cd799439014', title: 'Write tests' };
+    const fetchMock = mockFetch(
+      jsonResponse({ status: 'ok' }),
+      jsonResponse(authSession),
+      ...plannerResponses(),
+      jsonResponse(createdTask, 201),
+      ...plannerResponses({ tasks: [task, createdTask] }),
+    );
+    const user = userEvent.setup();
+
+    render(<App />);
+
+    await screen.findAllByText('Draft launch checklist');
+    await user.type(screen.getByPlaceholderText('New task'), 'Write tests');
+    await user.click(screen.getByRole('button', { name: 'Add task' }));
+
+    await waitFor(() => {
+      expect(
+        findFetchCall(fetchMock, (url, init) => url.endsWith('/tasks') && init?.method === 'POST'),
+      ).toBeDefined();
+    });
+
+    const [, init] = findFetchCall(
+      fetchMock,
+      (url, requestInit) => url.endsWith('/tasks') && requestInit?.method === 'POST',
+    );
+    expect(init).toMatchObject({ method: 'POST', credentials: 'include' });
+    expect(init?.headers).toMatchObject({ 'X-CSRF-Token': 'csrf-token' });
+    expect(requestBody(init)).toMatchObject({
+      title: 'Write tests',
+      priority: 'medium',
+      estimateMinutes: 30,
+    });
   });
 
   it('shows API errors on the auth form', async () => {

@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 import { AuthScreen } from '../features/auth/AuthScreen';
+import { PlannerDashboard } from '../features/planner/PlannerDashboard';
 import { AuthProvider, useAuth } from '../lib/auth/AuthContext';
 import { env } from '../lib/env';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
@@ -28,37 +29,6 @@ function ServerGate({ children }: { children: JSX.Element }): JSX.Element {
         </p>
       </div>
     </main>
-  );
-}
-
-function TimelinePreview(): JSX.Element {
-  const blocks = [
-    { time: '09:00', title: 'Focus block', type: 'Task' },
-    { time: '11:30', title: 'Product review', type: 'Event' },
-    { time: '14:00', title: 'Write launch notes', type: 'Task' },
-  ];
-
-  return (
-    <section className="timeline-panel" aria-labelledby="timeline-title">
-      <div className="panel-header">
-        <div>
-          <p className="eyebrow">Today</p>
-          <h2 id="timeline-title">Timeline</h2>
-        </div>
-        <span>3 blocks</span>
-      </div>
-      <div className="timeline-list">
-        {blocks.map((block) => (
-          <div className="timeline-row" key={`${block.time}-${block.title}`}>
-            <span className="time">{block.time}</span>
-            <div>
-              <strong>{block.title}</strong>
-              <span>{block.type}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 }
 
@@ -99,23 +69,7 @@ function AppShell(): JSX.Element {
           </p>
         )}
 
-        <div className="planner-grid">
-          <TimelinePreview />
-          <section className="task-panel" aria-labelledby="task-title">
-            <div className="panel-header">
-              <div>
-                <p className="eyebrow">Inbox</p>
-                <h2 id="task-title">Tasks</h2>
-              </div>
-              <span>Next up</span>
-            </div>
-            <ul>
-              <li>Shape calendar CRUD from the API contract</li>
-              <li>Draft the first day-planning interaction</li>
-              <li>Keep the OpenAPI types in sync</li>
-            </ul>
-          </section>
-        </div>
+        <PlannerDashboard />
       </section>
     </main>
   );
@@ -167,7 +121,8 @@ const APP_STYLES = `
   }
 
   button,
-  input {
+  input,
+  select {
     font: inherit;
   }
 
@@ -277,7 +232,18 @@ const APP_STYLES = `
     background: #ffffff;
   }
 
-  input:focus {
+  select {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #c9d0d9;
+    border-radius: 6px;
+    padding: 0 12px;
+    color: #17202a;
+    background: #ffffff;
+  }
+
+  input:focus,
+  select:focus {
     border-color: #2563eb;
     outline: 3px solid rgb(37 99 235 / 18%);
   }
@@ -306,6 +272,24 @@ const APP_STYLES = `
     border-color: #c9d0d9;
     background: #ffffff;
     color: #17202a;
+  }
+
+  .icon-action {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #c9d0d9;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #59636f;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .checkbox-action {
+    width: 22px;
+    height: 22px;
+    accent-color: #2563eb;
+    cursor: pointer;
   }
 
   .form-error {
@@ -394,13 +378,24 @@ const APP_STYLES = `
 
   .planner-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.8fr);
     gap: 20px;
+    align-items: start;
   }
 
   .timeline-panel,
-  .task-panel {
+  .task-panel,
+  .calendar-panel {
+    border: 1px solid #d8dde4;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 20px 60px rgb(23 32 42 / 8%);
     padding: 20px;
+  }
+
+  .side-stack {
+    display: grid;
+    gap: 20px;
   }
 
   .panel-header {
@@ -413,18 +408,25 @@ const APP_STYLES = `
 
   .panel-header span,
   .timeline-row span,
-  .task-panel li {
+  .task-list li,
+  .empty-state {
     color: #59636f;
+  }
+
+  .date-control {
+    min-width: 180px;
   }
 
   .timeline-list {
     display: grid;
     gap: 12px;
+    margin-bottom: 18px;
   }
 
   .timeline-row {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    align-items: center;
     gap: 12px;
     border-radius: 6px;
     background: #f6f7f9;
@@ -441,11 +443,81 @@ const APP_STYLES = `
     color: #1746a2;
   }
 
-  .task-panel ul {
+  .inline-form {
     display: grid;
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .inline-form.compact {
+    grid-template-columns: minmax(0, 1fr) minmax(110px, 0.55fr) auto;
+  }
+
+  .inline-form .primary-action {
+    min-width: 110px;
+  }
+
+  .task-list {
+    display: grid;
+    gap: 10px;
+    list-style: none;
     margin: 0;
-    padding-left: 20px;
+    padding: 0;
+  }
+
+  .task-list li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    border-radius: 6px;
+    background: #f6f7f9;
+    padding: 10px;
+  }
+
+  .task-list li.done span {
+    text-decoration: line-through;
+  }
+
+  .task-list small {
+    color: #7b8591;
+    font-weight: 700;
+  }
+
+  .calendar-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .calendar-pill {
+    border-radius: 999px;
+    background: #edf0f4;
+    color: #344050;
+    padding: 6px 10px;
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  .calendar-pill.blue {
+    background: #eaf1ff;
+    color: #1746a2;
+  }
+
+  .calendar-pill.green {
+    background: #e9f8ef;
+    color: #19603a;
+  }
+
+  .calendar-pill.purple {
+    background: #f1edff;
+    color: #5333a3;
+  }
+
+  .calendar-pill.rose {
+    background: #fff0f3;
+    color: #9f1d3d;
   }
 
   @media (max-width: 760px) {
@@ -467,6 +539,17 @@ const APP_STYLES = `
 
     .workspace {
       padding: 20px 16px;
+    }
+
+    .topbar,
+    .panel-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .inline-form,
+    .inline-form.compact {
+      grid-template-columns: 1fr;
     }
 
     .auth-copy h1,
