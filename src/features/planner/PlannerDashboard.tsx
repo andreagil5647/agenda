@@ -47,6 +47,10 @@ function localInputToIso(value: string): string {
   return new Date(value).toISOString();
 }
 
+function dateTimeInputValue(date: string, hour: number, minute: number): string {
+  return `${date}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
 function friendlyError(error: unknown): string {
   if (error instanceof ApiError) {
     return error.message;
@@ -72,6 +76,8 @@ export function PlannerDashboard(): JSX.Element {
   });
 
   const defaultCalendarId = state.calendars[0]?.id ?? '';
+  const defaultBlockStart = dateTimeInputValue(selectedDate, 9, 0);
+  const defaultBlockEnd = dateTimeInputValue(selectedDate, 9, 30);
   const visibleEvents = useMemo(
     () =>
       state.events
@@ -106,13 +112,14 @@ export function PlannerDashboard(): JSX.Element {
 
   const createCalendar = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const name = readFormString(form, 'name');
     const colorKey = readFormString(form, 'colorKey') || 'blue';
 
     try {
       await apiClient.createCalendar({ name, colorKey, defaultReminderMinutes: [10] }, csrfToken);
-      event.currentTarget.reset();
+      formElement.reset();
       await loadPlanner();
     } catch (error) {
       setState((current) => ({ ...current, error: friendlyError(error) }));
@@ -121,7 +128,8 @@ export function PlannerDashboard(): JSX.Element {
 
   const createTask = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const title = readFormString(form, 'title');
     const dueDate = readFormString(form, 'dueDate') || selectedDate;
     const estimateMinutes = Number(readFormString(form, 'estimateMinutes') || '30');
@@ -131,7 +139,7 @@ export function PlannerDashboard(): JSX.Element {
         { title, dueDate, priority: 'medium', estimateMinutes },
         csrfToken,
       );
-      event.currentTarget.reset();
+      formElement.reset();
       await loadPlanner();
     } catch (error) {
       setState((current) => ({ ...current, error: friendlyError(error) }));
@@ -140,7 +148,8 @@ export function PlannerDashboard(): JSX.Element {
 
   const createEvent = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const title = readFormString(form, 'title');
     const calendarId = readFormString(form, 'calendarId') || defaultCalendarId;
     const taskId = readFormString(form, 'taskId') || null;
@@ -160,7 +169,7 @@ export function PlannerDashboard(): JSX.Element {
         },
         csrfToken,
       );
-      event.currentTarget.reset();
+      formElement.reset();
       await loadPlanner();
     } catch (error) {
       setState((current) => ({ ...current, error: friendlyError(error) }));
@@ -209,6 +218,7 @@ export function PlannerDashboard(): JSX.Element {
           <label className="date-control">
             Date
             <input
+              name="selectedDate"
               type="date"
               value={selectedDate}
               onChange={(event) => {
@@ -267,8 +277,12 @@ export function PlannerDashboard(): JSX.Element {
           </div>
         )}
 
-        <form className="inline-form" onSubmit={(event) => void createEvent(event)}>
-          <input name="title" placeholder="Block title" required />
+        <form
+          className="inline-form"
+          autoComplete="off"
+          onSubmit={(event) => void createEvent(event)}
+        >
+          <input name="title" placeholder="Block title" autoComplete="off" required />
           <select
             key={defaultCalendarId}
             name="calendarId"
@@ -290,8 +304,22 @@ export function PlannerDashboard(): JSX.Element {
               </option>
             ))}
           </select>
-          <input name="start" type="datetime-local" required />
-          <input name="end" type="datetime-local" required />
+          <input
+            key={`start-${selectedDate}`}
+            name="start"
+            type="datetime-local"
+            aria-label="Block start"
+            defaultValue={defaultBlockStart}
+            required
+          />
+          <input
+            key={`end-${selectedDate}`}
+            name="end"
+            type="datetime-local"
+            aria-label="Block end"
+            defaultValue={defaultBlockEnd}
+            required
+          />
           <button type="submit" className="primary-action" disabled={!defaultCalendarId}>
             Add block
           </button>
@@ -308,10 +336,27 @@ export function PlannerDashboard(): JSX.Element {
             <span>{state.tasks.length} tasks</span>
           </div>
 
-          <form className="inline-form" onSubmit={(event) => void createTask(event)}>
-            <input name="title" placeholder="New task" required />
-            <input key={selectedDate} name="dueDate" type="date" defaultValue={selectedDate} />
-            <input name="estimateMinutes" type="number" min="5" max="1440" defaultValue="30" />
+          <form
+            className="inline-form"
+            autoComplete="off"
+            onSubmit={(event) => void createTask(event)}
+          >
+            <input name="title" placeholder="New task" autoComplete="off" required />
+            <input
+              key={selectedDate}
+              name="dueDate"
+              type="date"
+              aria-label="Task due date"
+              defaultValue={selectedDate}
+            />
+            <input
+              name="estimateMinutes"
+              type="number"
+              min="5"
+              max="1440"
+              aria-label="Task estimate minutes"
+              defaultValue="30"
+            />
             <button type="submit" className="primary-action">
               Add task
             </button>
@@ -350,8 +395,12 @@ export function PlannerDashboard(): JSX.Element {
             </div>
             <span>{state.calendars.length}</span>
           </div>
-          <form className="inline-form compact" onSubmit={(event) => void createCalendar(event)}>
-            <input name="name" placeholder="Calendar name" required />
+          <form
+            className="inline-form compact"
+            autoComplete="off"
+            onSubmit={(event) => void createCalendar(event)}
+          >
+            <input name="name" placeholder="Calendar name" autoComplete="off" required />
             <select name="colorKey" aria-label="Calendar color" defaultValue="blue">
               <option value="blue">Blue</option>
               <option value="green">Green</option>

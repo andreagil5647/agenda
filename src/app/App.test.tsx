@@ -282,6 +282,9 @@ describe('App', () => {
       priority: 'medium',
       estimateMinutes: 30,
     });
+    expect(await screen.findAllByText('Write tests')).toHaveLength(2);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText('New task')).toHaveValue('');
   });
 
   it('shows API errors on the auth form', async () => {
