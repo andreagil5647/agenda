@@ -24,7 +24,6 @@ Done:
 Known gaps in the done items:
 
 - [ ] `PlannerDashboard.tsx` mixes data fetching, state, date helpers, forms and rendering
-- [ ] Tests mock `fetch` by call order
 - [ ] Blocks are listed, not laid out on a time grid, and nothing can be dragged yet
 
 ## Build order
@@ -42,7 +41,7 @@ Known gaps in the done items:
       components never call the client directly.
 - [ ] **Feature split.** `calendars`, `tasks` and `timeline` features with their own
       components and hooks; date helpers in `lib/time` with unit tests.
-- [ ] **Test network layer.** MSW handlers instead of order-based `fetch` mocks, and a
+- [x] **Test network layer.** MSW handlers instead of order-based `fetch` mocks, and a
       coverage threshold in CI.
 - [ ] **Routing and settings.** Day, Week, Tasks and Settings routes; a settings screen for
       time zone, week start, hour cycle and theme.

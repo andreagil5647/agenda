@@ -19,7 +19,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | Build      | Webpack 5, hand-written dev/prod config, SWC (`swc-loader`) |
 | Styles     | CSS Modules on design tokens, light and dark themes         |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
-| Tests      | Jest 30 (`@swc/jest`), React Testing Library                |
+| Tests      | Jest 30 (`@swc/jest`), React Testing Library, MSW           |
 | Hosting    | Render static site, rewriting `/api/*` to the backend       |
 
 ## Architecture
@@ -51,7 +51,8 @@ src/
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
                         exposes a "waking up the server" state for free-tier cold starts
 openapi/             the API contract, copied from the backend and committed
-test/setup/          Jest setup (jest-dom matchers)
+test/msw/            in-memory API that answers the app's requests during tests
+test/setup/          Jest environment and setup
 ```
 
 ## Getting started
