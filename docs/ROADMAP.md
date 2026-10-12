@@ -37,8 +37,9 @@ Known gaps in the done items:
       CI check that fails when they drift.
 - [x] **API client.** The client owns the CSRF token and `If-Match` headers and returns
       typed errors, so callers stop passing the token around.
-- [ ] **Server-state layer.** One place for caching, refetching and optimistic updates;
-      components never call the client directly.
+- [x] **Server-state layer.** One place for caching, refetching and optimistic updates;
+      components never call the client directly
+      ([ADR 0007](adr/0007-tanstack-query-for-server-state.md)).
 - [ ] **Feature split.** `calendars`, `tasks` and `timeline` features with their own
       components and hooks; date helpers in `lib/time` with unit tests.
 - [x] **Test network layer.** MSW handlers instead of order-based `fetch` mocks, and a
