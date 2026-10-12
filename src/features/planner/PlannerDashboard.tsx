@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type JSX, type SyntheticEvent } from 'react';
 import { apiClient, ApiError } from '../../lib/api/apiClient';
-import type { Calendar, EventBlock, Task } from '../../lib/api/types';
+import type { Calendar, EventBlock, Task } from '../../lib/api/contract';
 import { useAuth } from '../../lib/auth/AuthContext';
 import controls from '../../ui/controls.module.css';
 import styles from './PlannerDashboard.module.css';
