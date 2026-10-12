@@ -50,7 +50,8 @@ Use `@dnd-kit/core` for picking something up and dropping it on the grid.
 - Mouse, pen and touch dragging behave the same, with one preview mechanism.
 - Results of planning are announced in a live region, so they are not silent for someone who
   cannot see the block appear.
-- About 14 kB gzipped is added to the bundle.
+- It adds to the bundle. Together with the server-state layer and the API client, third-party
+  code outside React measures 27 kB gzipped in the production build.
 - A real drag cannot be simulated in jsdom, which lays nothing out. Component tests cover the
   keyboard paths and the arithmetic; the pointer paths are checked in a browser and are the
   first candidates for end-to-end tests.
