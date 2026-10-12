@@ -45,11 +45,12 @@ src/
   features/planner/    dashboard: calendars, tasks and the day's blocks
   styles/              design tokens and the global base layer
   ui/                  styles shared by more than one screen
-  lib/api/             fetch wrapper, typed endpoints and API errors
+  lib/api/             fetch wrapper, API errors, and types generated from the contract
   lib/auth/            session context: current user, CSRF token, sign-in and sign-out
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
                         exposes a "waking up the server" state for free-tier cold starts
+openapi/             the API contract, copied from the backend and committed
 test/setup/          Jest setup (jest-dom matchers)
 ```
 
@@ -74,6 +75,8 @@ pnpm run dev       # http://localhost:3000, proxies /api to http://localhost:400
 | `pnpm test` / `pnpm run test:coverage` | Jest / Jest with a coverage report in `coverage/` |
 | `pnpm run lint` / `pnpm run format`    | ESLint (type-aware) / Prettier                    |
 | `pnpm run typecheck`                   | `tsc --noEmit`                                    |
+| `pnpm run api:sync`                    | Copy the API contract from the backend repo       |
+| `pnpm run api:generate` / `api:check`  | Generate the API types / fail if they are stale   |
 
 ## Deployment
 
