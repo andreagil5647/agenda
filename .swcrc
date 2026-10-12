@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "decorators": false
+    },
+    "transform": {
+      "react": {
+        "runtime": "automatic",
+        "development": false,
+        "refresh": false
+      }
+    },
+    "target": "es2022",
+    "externalHelpers": true
+  },
+  "module": {
+    "type": "es6"
+  },
+  "sourceMaps": true
+}

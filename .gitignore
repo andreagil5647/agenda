@@ -13,6 +13,7 @@ test-results/
 .env
 .env.*
 !.env.example
+CONTEXT.md
 
 # Bundle analysis
 stats.json
@@ -20,6 +21,7 @@ stats.json
 # Logs
 *.log
 npm-debug.log*
+pnpm-debug.log*
 
 # Editors and OS
 .vscode/*

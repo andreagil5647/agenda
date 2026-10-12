@@ -1,0 +1,5 @@
+dist
+storybook-static
+coverage
+playwright-report
+CONTEXT.md

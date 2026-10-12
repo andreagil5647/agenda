@@ -1,0 +1,89 @@
+{
+  "name": "agenda",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Web app for Agenda, a calendar and task planner built around time-blocking.",
+  "license": "MIT",
+  "author": "Andrea Gil Guimerà",
+  "type": "module",
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "_webpack": "node --experimental-strip-types --disable-warning=ExperimentalWarning node_modules/webpack-cli/bin/cli.js",
+    "dev": "pnpm run -s _webpack -- serve --config config/webpack/webpack.dev.ts",
+    "build": "pnpm run -s _webpack -- build --config config/webpack/webpack.prod.ts",
+    "analyze": "pnpm run -s _webpack -- build --config config/webpack/webpack.prod.ts --env analyze",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": "prettier --write"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "core-js-pure",
+      "unrs-resolver"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@eslint/js": "^9.39.5",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.6.3",
+    "@swc/core": "^1.16.2",
+    "@swc/helpers": "^0.5.23",
+    "@swc/jest": "^0.2.39",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.20.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/webpack-bundle-analyzer": "^4.7.0",
+    "copy-webpack-plugin": "^14.0.0",
+    "dotenv": "^18.0.4",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
+    "globals": "^17.12.0",
+    "html-webpack-plugin": "^5.6.8",
+    "husky": "^9.1.7",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.9",
+    "react-refresh": "^0.19.0",
+    "swc-loader": "^0.2.7",
+    "terser-webpack-plugin": "^5.6.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.0",
+    "webpack": "^5.111.1",
+    "webpack-bundle-analyzer": "^5.4.0",
+    "webpack-cli": "^7.2.3",
+    "webpack-dev-server": "^6.0.0",
+    "webpack-merge": "^6.0.1"
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  }
+}
