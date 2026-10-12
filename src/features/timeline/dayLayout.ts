@@ -18,6 +18,8 @@ export interface TimeSpan {
 
 export interface DayBlock extends TimeSpan {
   event: PlannerEvent;
+  /** The event runs past this day, so the block shows only the part that falls on it. */
+  isClipped: boolean;
 }
 
 /** A block with its place among the blocks it overlaps: column `column` of `columns`. */
@@ -56,10 +58,13 @@ export function toDayBlocks(events: PlannerEvent[], day: string, timeZone: strin
     const end = new Date(event.endUtc);
     if (end.getTime() <= dayStart || start.getTime() >= dayEnd) continue;
 
+    const startsEarlier = start.getTime() < dayStart;
+    const endsLater = end.getTime() > dayEnd;
     blocks.push({
       event,
-      startMinutes: start.getTime() < dayStart ? 0 : minutesOfDay(start, timeZone),
+      startMinutes: startsEarlier ? 0 : minutesOfDay(start, timeZone),
       endMinutes: end.getTime() >= dayEnd ? MINUTES_PER_DAY : minutesOfDay(end, timeZone),
+      isClipped: startsEarlier || endsLater,
     });
   }
 

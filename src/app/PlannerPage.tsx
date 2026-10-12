@@ -2,11 +2,11 @@ import { DndContext, DragOverlay, pointerWithin } from '@dnd-kit/core';
 import { useCallback, useState, type JSX } from 'react';
 import { CalendarPanel } from '../features/calendars/components/CalendarPanel';
 import { useCalendars } from '../features/calendars/hooks/useCalendars';
-import { TaskDragPreview } from '../features/tasks/components/TaskDragPreview';
 import { TaskPanel } from '../features/tasks/components/TaskPanel';
 import { useTasks } from '../features/tasks/hooks/useTasks';
 import { BlockEditor } from '../features/timeline/components/BlockEditor';
 import { DayHeader } from '../features/timeline/components/DayHeader';
+import { DragPreview } from '../features/timeline/components/DragPreview';
 import {
   DayView,
   NEW_BLOCK_MINUTES,
@@ -15,12 +15,13 @@ import {
 import { firstFreeStart, spanAt, type TimeSpan } from '../features/timeline/dayLayout';
 import { useCreateBlock } from '../features/timeline/hooks/useCreateBlock';
 import { useDayPlan } from '../features/timeline/hooks/useDayPlan';
+import { useDeleteEvent, useUpdateEvent } from '../features/timeline/hooks/useEvents';
 import { useNow } from '../features/timeline/hooks/useNow';
 import { usePlanningDrag } from '../features/timeline/hooks/usePlanningDrag';
 import { useSelectedDay } from '../features/timeline/hooks/useSelectedDay';
-import type { AuthUser, Task } from '../lib/api/contract';
+import type { AuthUser, PlannerEvent, Task } from '../lib/api/contract';
 import { formatTimeRange } from '../lib/time/formatTime';
-import { minutesOfDay } from '../lib/time/zonedTime';
+import { instantAt, minutesOfDay } from '../lib/time/zonedTime';
 import controls from '../ui/controls.module.css';
 import styles from './PlannerPage.module.css';
 
@@ -42,6 +43,8 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
   const calendars = useCalendars().data ?? [];
   const tasks = useTasks().data ?? [];
   const createBlock = useCreateBlock({ day: selected.day, timeZone, calendar: calendars[0] });
+  const { mutate: updateEvent } = useUpdateEvent();
+  const { mutate: deleteEvent } = useDeleteEvent();
 
   // Selection is kept by id: the event itself is replaced each time it is saved.
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -75,7 +78,36 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
     [createBlock, hourCycle],
   );
 
-  const drag = usePlanningDrag({ onScheduleTask: scheduleTask });
+  /** Gives a block new times on the day in view, and says so for those who cannot see it move. */
+  const reschedule = useCallback(
+    (event: PlannerEvent, span: TimeSpan, verb: string): void => {
+      updateEvent({
+        event,
+        changes: {
+          startUtc: instantAt(selected.day, span.startMinutes, timeZone).toISOString(),
+          endUtc: instantAt(selected.day, span.endMinutes, timeZone).toISOString(),
+        },
+      });
+      const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle);
+      setAnnouncement(`${verb} ${event.title}: ${times}.`);
+    },
+    [updateEvent, selected.day, timeZone, hourCycle],
+  );
+  const moveBlock = useCallback(
+    (event: PlannerEvent, span: TimeSpan): void => {
+      reschedule(event, span, 'Moved');
+    },
+    [reschedule],
+  );
+  const resizeBlock = (event: PlannerEvent, span: TimeSpan): void => {
+    reschedule(event, span, 'Resized');
+  };
+  const deleteBlock = (event: PlannerEvent): void => {
+    deleteEvent(event);
+    setAnnouncement(`Deleted ${event.title}.`);
+  };
+
+  const drag = usePlanningDrag({ onScheduleTask: scheduleTask, onMoveBlock: moveBlock });
   const plannedTaskIds = new Set(plan.blocks.map((block) => block.event.taskId));
 
   return (
@@ -111,6 +143,9 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
           onSelectEvent={(event) => {
             setSelectedEventId(event.id);
           }}
+          onMoveBlock={moveBlock}
+          onResizeBlock={resizeBlock}
+          onDeleteBlock={deleteBlock}
           onCreateBlock={createUntitledBlock}
           onAddBlock={() => {
             createUntitledBlock(nextFreeSpan(NEW_BLOCK_MINUTES));
@@ -144,7 +179,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
         {announcement}
       </p>
       <DragOverlay dropAnimation={null}>
-        {drag.draggedTask && <TaskDragPreview task={drag.draggedTask} />}
+        {drag.dragged && <DragPreview item={drag.dragged} />}
       </DragOverlay>
     </DndContext>
   );
