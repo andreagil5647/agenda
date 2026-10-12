@@ -45,6 +45,8 @@ jobs:
 
       - run: pnpm run lint
       - run: pnpm run format:check
+      - name: Check the API types match the contract
+        run: pnpm run api:check
       - run: pnpm run typecheck
       - run: pnpm run test:coverage
       - run: pnpm run build

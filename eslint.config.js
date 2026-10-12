@@ -6,7 +6,16 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'storybook-static', 'coverage', 'playwright-report'] },
+  {
+    ignores: [
+      'dist',
+      'storybook-static',
+      'coverage',
+      'playwright-report',
+      // Generated from the API contract by `pnpm run api:generate`.
+      'src/lib/api/schema.d.ts',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
