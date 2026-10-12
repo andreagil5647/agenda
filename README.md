@@ -7,10 +7,9 @@ events live on the same timeline, and you plan a day by dragging tasks into time
 
 The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647/agenda-backend).
 
-> **Status:** foundation. Hand-written Webpack 5, TypeScript, linting, testing and CI/CD are
-> in place, along with a minimal page that proves the deployment shape end to end (same-origin
-> `/api/*`, a cold-start "waking up the server" state). The design system, routing, calendar
-> views and the rest of the product come next.
+> **Status:** early product. You can sign up or start a one-click demo, manage calendars
+> and tasks, and add time blocks to a day through forms. The time grid with drag-and-drop,
+> the design system and routing come next - see the [roadmap](docs/ROADMAP.md).
 
 ## Stack
 
@@ -39,8 +38,12 @@ lets a session cookie set by the API stay first-party.
 ```text
 config/webpack/     hand-written webpack config: common, dev, prod, paths, env
 src/
-  index.tsx          bootstraps React
-  app/App.tsx         current placeholder root
+  index.tsx            bootstraps React
+  app/App.tsx          server gate, auth gate and the signed-in shell
+  features/auth/       sign-up, log-in and demo screen
+  features/planner/    dashboard: calendars, tasks and the day's blocks
+  lib/api/             fetch wrapper, typed endpoints and API errors
+  lib/auth/            session context: current user, CSRF token, sign-in and sign-out
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
                         exposes a "waking up the server" state for free-tier cold starts
@@ -92,6 +95,7 @@ changing one on Render requires a redeploy.
 
 ## Documentation
 
+- [Roadmap](docs/ROADMAP.md): what is built, known gaps and the build order.
 - [Architecture decision records](docs/adr/README.md)
 - [Debugging notes](docs/debugging/README.md): bugs found during development, with the
   investigation and the regression test that now guards each one.
