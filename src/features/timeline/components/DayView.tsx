@@ -1,98 +1,62 @@
 import type { UseQueryResult } from '@tanstack/react-query';
-import { useMemo, type JSX } from 'react';
+import type { JSX } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
 import type { HourCycle } from '../../../lib/time/formatTime';
-import { instantAt, minutesOfDay } from '../../../lib/time/zonedTime';
 import controls from '../../../ui/controls.module.css';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
-import {
-  firstFreeStart,
-  layoutDayBlocks,
-  slotStart,
-  spanAt,
-  toDayBlocks,
-  type TimeSpan,
-} from '../dayLayout';
-import { useCreateEvent } from '../hooks/useEvents';
-import { useNow } from '../hooks/useNow';
-import { provisionalEvent } from '../provisionalEvent';
+import { slotStart, spanAt, type PlacedBlock, type TimeSpan } from '../dayLayout';
 import { AllDayRow } from './AllDayRow';
 import { DayGrid } from './DayGrid';
 import styles from './DayView.module.css';
 
-const NEW_BLOCK_TITLE = 'New block';
-const NEW_BLOCK_MINUTES = 30;
-const START_OF_WORKDAY_MINUTES = 9 * 60;
+export const NEW_BLOCK_MINUTES = 30;
+export const START_OF_WORKDAY_MINUTES = 9 * 60;
 /** How much of the day before the first thing of interest stays in view. */
 const LEAD_IN_MINUTES = 45;
 
 interface DayViewProps {
   day: string;
-  isToday: boolean;
-  timeZone: string;
   hourCycle: HourCycle;
   eventsQuery: UseQueryResult<PlannerEvent[]>;
+  blocks: PlacedBlock[];
+  allDayEvents: PlannerEvent[];
   calendars: Calendar[];
+  /** The current time of day when the day in view is today. */
+  nowMinutes: number | null;
+  /** Where something being dragged over the grid would land. */
+  landingSpan: TimeSpan | null;
+  onGridScroll: () => void;
   selectedEventId: string | null;
   onSelectEvent: (event: PlannerEvent) => void;
+  /** Creates an untitled block on the given span. */
+  onCreateBlock: (span: TimeSpan) => void;
+  /** Creates an untitled block at the next free time. */
+  onAddBlock: () => void;
 }
 
 /** One day of the plan: its all-day events, and its blocks on the hour grid. */
 export function DayView({
   day,
-  isToday,
-  timeZone,
   hourCycle,
   eventsQuery,
+  blocks,
+  allDayEvents,
   calendars,
+  nowMinutes,
+  landingSpan,
+  onGridScroll,
   selectedEventId,
   onSelectEvent,
+  onCreateBlock,
+  onAddBlock,
 }: DayViewProps): JSX.Element {
-  const now = useNow();
-  const createEvent = useCreateEvent();
-
-  const events = eventsQuery.data;
-  const blocks = useMemo(
-    () => layoutDayBlocks(toDayBlocks(events ?? [], day, timeZone)),
-    [events, day, timeZone],
-  );
-  const allDayEvents = useMemo(
-    () => (events ?? []).filter((event) => event.kind === 'allDay'),
-    [events],
-  );
-
-  const nowMinutes = isToday ? minutesOfDay(now, timeZone) : null;
-  const defaultCalendar = calendars[0];
+  const hasCalendar = calendars.length > 0;
   const firstBlockStart = blocks[0]?.startMinutes ?? START_OF_WORKDAY_MINUTES;
   const initialMinutes = Math.max(
     0,
     Math.min(firstBlockStart, nowMinutes ?? START_OF_WORKDAY_MINUTES) - LEAD_IN_MINUTES,
   );
-
-  const createBlock = (span: TimeSpan): void => {
-    if (!defaultCalendar) return;
-
-    const input = {
-      kind: 'timed',
-      calendarId: defaultCalendar.id,
-      title: NEW_BLOCK_TITLE,
-      startUtc: instantAt(day, span.startMinutes, timeZone).toISOString(),
-      endUtc: instantAt(day, span.endMinutes, timeZone).toISOString(),
-      timeZone,
-    } as const;
-
-    // The new block is selected once saved, so its title can be typed straight away.
-    createEvent.mutate(
-      { input, provisional: provisionalEvent(input, new Date()) },
-      { onSuccess: onSelectEvent },
-    );
-  };
-
-  const createAtNextFreeTime = (): void => {
-    const from = nowMinutes ?? START_OF_WORKDAY_MINUTES;
-    createBlock(spanAt(firstFreeStart(blocks, NEW_BLOCK_MINUTES, from) ?? from, NEW_BLOCK_MINUTES));
-  };
 
   return (
     <Panel
@@ -102,8 +66,8 @@ export function DayView({
         <button
           type="button"
           className={controls.primaryAction}
-          disabled={!defaultCalendar}
-          onClick={createAtNextFreeTime}
+          disabled={!hasCalendar}
+          onClick={onAddBlock}
         >
           Add block
         </button>
@@ -112,7 +76,7 @@ export function DayView({
       <QueryBoundary query={eventsQuery} loadingLabel="Loading the day...">
         {() => (
           <>
-            {!defaultCalendar && (
+            {!hasCalendar && (
               <p className={styles.hint}>Add a calendar first: every block belongs to one.</p>
             )}
             <AllDayRow
@@ -129,10 +93,12 @@ export function DayView({
               hourCycle={hourCycle}
               nowMinutes={nowMinutes}
               initialMinutes={initialMinutes}
+              landingSpan={landingSpan}
+              onScroll={onGridScroll}
               selectedEventId={selectedEventId}
               onSelectEvent={onSelectEvent}
               onCreateAt={(minutes) => {
-                createBlock(spanAt(slotStart(minutes), NEW_BLOCK_MINUTES));
+                onCreateBlock(spanAt(slotStart(minutes), NEW_BLOCK_MINUTES));
               }}
             />
           </>

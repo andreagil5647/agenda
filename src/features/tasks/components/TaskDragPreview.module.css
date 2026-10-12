@@ -1,0 +1,23 @@
+.preview {
+  display: grid;
+  align-content: start;
+  width: 240px;
+  /* As tall as the block will be on the grid, so its end is visible before the drop. */
+  height: max(calc(var(--duration) * var(--hour-height) / 60), 22px);
+  overflow: hidden;
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  box-shadow: var(--shadow-panel);
+  color: var(--color-accent-soft-text);
+  cursor: grabbing;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  padding: 2px var(--space-2);
+}
+
+.preview strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

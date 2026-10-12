@@ -1,11 +1,11 @@
 import type { JSX, SyntheticEvent } from 'react';
 import type { Task } from '../../../lib/api/contract';
 import { readField } from '../../../lib/forms';
-import { formatDuration } from '../../../lib/time/formatTime';
 import controls from '../../../ui/controls.module.css';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '../hooks/useTasks';
+import { TaskItem } from './TaskItem';
 import styles from './TaskPanel.module.css';
 
 const DEFAULT_ESTIMATE_MINUTES = 30;
@@ -13,9 +13,20 @@ const DEFAULT_ESTIMATE_MINUTES = 30;
 interface TaskPanelProps {
   /** The day on screen; a new task is due on it unless another date is chosen. */
   day: string;
+  /** Whether a block can be created at all, which needs a calendar to put it in. */
+  canPlan: boolean;
+  /** The tasks that already have a block on the day on screen. */
+  plannedTaskIds: ReadonlySet<string | null>;
+  /** Gives a task a block on the day on screen, at the next free time. */
+  onPlanTask: (task: Task) => void;
 }
 
-export function TaskPanel({ day }: TaskPanelProps): JSX.Element {
+export function TaskPanel({
+  day,
+  canPlan,
+  plannedTaskIds,
+  onPlanTask,
+}: TaskPanelProps): JSX.Element {
   const tasksQuery = useTasks();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -76,30 +87,15 @@ export function TaskPanel({ day }: TaskPanelProps): JSX.Element {
           ) : (
             <ul className={styles.list}>
               {tasks.map((task) => (
-                <li key={task.id} className={styles.item} data-status={task.status}>
-                  <label className={styles.title}>
-                    <input
-                      type="checkbox"
-                      className={controls.checkboxAction}
-                      checked={task.status === 'done'}
-                      onChange={() => {
-                        toggleDone(task);
-                      }}
-                    />
-                    <span>{task.title}</span>
-                  </label>
-                  <small>{formatDuration(task.estimateMinutes)}</small>
-                  <button
-                    type="button"
-                    className={controls.iconAction}
-                    aria-label={`Delete ${task.title}`}
-                    onClick={() => {
-                      deleteTask.mutate(task);
-                    }}
-                  >
-                    ×
-                  </button>
-                </li>
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  canPlan={canPlan}
+                  isPlanned={plannedTaskIds.has(task.id)}
+                  onToggleDone={toggleDone}
+                  onDelete={deleteTask.mutate}
+                  onPlan={onPlanTask}
+                />
               ))}
             </ul>
           )
