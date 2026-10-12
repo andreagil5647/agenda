@@ -1,0 +1,57 @@
+# Render Blueprint for the web app: a static site that also proxies /api/*
+# to the backend, so the browser only ever talks to one origin and the
+# session cookie set by the API is first-party (see the backend repo's
+# docs/adr/0003-same-origin-api-through-render-rewrite.md).
+services:
+  - type: web
+    runtime: static
+    name: agenda
+    branch: main
+    autoDeployTrigger: checksPass
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    buildFilter:
+      ignoredPaths:
+        - docs/**
+        - '**/*.md'
+        - test/**
+        - '**/*.test.ts'
+        - '**/*.test.tsx'
+    envVars:
+      # Baked into the bundle at BUILD time (see config/webpack/env.ts), not
+      # read at runtime. Changing it requires a rebuild.
+      - key: PUBLIC_API_BASE_URL
+        value: /api/v1
+      - key: PUBLIC_APP_VERSION
+        sync: false
+      - key: NODE_VERSION
+        value: 22.14.0
+    headers:
+      # Content-hashed assets are safe to cache forever; index.html is not,
+      # since it is what points at the current hashed bundle.
+      - path: /js/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /images/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /fonts/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+    routes:
+      # Order matters: this must be listed before the SPA fallback below, or
+      # the fallback would swallow every /api request and return index.html.
+      # Replace with the backend service's actual onrender.com URL.
+      - type: rewrite
+        source: /api/*
+        destination: https://agenda-backend.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    autoDeploy: true
