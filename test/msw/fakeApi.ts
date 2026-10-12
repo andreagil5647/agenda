@@ -294,6 +294,11 @@ export const fakeApi = {
     return openSession(user);
   },
 
+  /** Ends the session on the server only, as an expiry or a sign-out elsewhere would. */
+  endSession(): void {
+    state.user = null;
+  },
+
   seed(data: { calendars?: Calendar[]; tasks?: Task[]; events?: PlannerEvent[] }): void {
     state.calendars.push(...(data.calendars ?? []));
     state.tasks.push(...(data.tasks ?? []));

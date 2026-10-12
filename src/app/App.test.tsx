@@ -143,6 +143,9 @@ describe('App', () => {
     await user.click(checkbox);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/changed somewhere else/);
+    expect(
+      await screen.findByRole('checkbox', { name: /Renamed in another tab/ }),
+    ).not.toBeChecked();
     expect(fakeApi.tasks[0]).toMatchObject({ title: 'Renamed in another tab', status: 'todo' });
   });
 
@@ -151,5 +154,72 @@ describe('App', () => {
     render(<App />);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/Could not reach the server/);
+  });
+
+  it('takes a change back when the server refuses it', async () => {
+    seedPlanner();
+    server.use(
+      http.patch('*/api/v1/tasks/:id', () =>
+        HttpResponse.json(
+          { code: 'INTERNAL_ERROR', message: 'Something went wrong on our side', requestId: 'r' },
+          { status: 500 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('checkbox', { name: /Draft launch checklist/ }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Something went wrong/);
+    expect(screen.getByRole('checkbox', { name: /Draft launch checklist/ })).not.toBeChecked();
+  });
+
+  it('dismisses a notice', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+    fakeApi.editTaskElsewhere(fakeApi.tasks[0]!.id, { title: 'Renamed in another tab' });
+    await user.click(checkbox);
+
+    await user.click(await screen.findByRole('button', { name: 'Dismiss' }));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('offers to try again when the planner cannot be loaded', async () => {
+    seedPlanner();
+    server.use(
+      http.get(
+        '*/api/v1/tasks',
+        () =>
+          HttpResponse.json(
+            { code: 'INTERNAL_ERROR', message: 'Something went wrong on our side', requestId: 'r' },
+            { status: 500 },
+          ),
+        { once: true },
+      ),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Try again' }));
+
+    expect(await screen.findByRole('checkbox', { name: /Draft launch checklist/ })).toBeVisible();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('returns to the sign-in form when the session has ended', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+
+    fakeApi.endSession();
+    await user.click(checkbox);
+
+    expect(await screen.findByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(/session has ended/);
   });
 });

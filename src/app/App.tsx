@@ -5,7 +5,9 @@ import { PlannerDashboard } from '../features/planner/PlannerDashboard';
 import { env } from '../lib/env';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
 import controls from '../ui/controls.module.css';
+import { NoticeProvider } from '../ui/notices/NoticeProvider';
 import styles from './App.module.css';
+import { PlannerQueryProvider } from './PlannerQueryProvider';
 
 const STATUS_COPY: Record<ServerStatus, string> = {
   checking: 'Checking the API...',
@@ -70,7 +72,9 @@ function AppShell(): JSX.Element {
           </p>
         )}
 
-        <PlannerDashboard />
+        <PlannerQueryProvider>
+          <PlannerDashboard />
+        </PlannerQueryProvider>
       </section>
     </main>
   );
@@ -95,9 +99,11 @@ function AuthGate(): JSX.Element {
 export function App(): JSX.Element {
   return (
     <ServerGate>
-      <AuthProvider>
-        <AuthGate />
-      </AuthProvider>
+      <NoticeProvider>
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
+      </NoticeProvider>
     </ServerGate>
   );
 }
