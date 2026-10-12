@@ -18,12 +18,11 @@ Done:
       ([ADR 0003](adr/0003-same-origin-api-through-render-rewrite.md))
 - [x] Cold-start aware server check ("waking up the server")
 - [x] Sign up, log in, log out and a one-click demo session
-- [x] Planner dashboard: calendars, a task list and the selected day's blocks, created and
-      deleted through forms
+- [x] Day planner: calendars, a task list and the selected day on an hour grid
 
 Known gaps in the done items:
 
-- [ ] Blocks are listed, not laid out on a time grid, and nothing can be dragged yet
+- [ ] Nothing on the grid can be dragged yet
 
 ## Build order
 
@@ -50,9 +49,11 @@ Known gaps in the done items:
 
 ### 2. Time-blocking
 
-- [ ] **Day grid.** Hour grid, all-day row, current-time line, blocks positioned by time,
+- [x] **Day grid.** Hour grid, all-day row, current-time line, blocks positioned by time,
       overlapping blocks side by side. Layout maths is pure and unit-tested.
-- [ ] **Create a block** by clicking or dragging on empty grid space.
+- [x] **Create a block** by clicking empty grid space or with the Add block button, then
+      edit its title, calendar and times in the details panel.
+- [ ] **Create a block by dragging** over empty grid space to set its length.
 - [ ] **Task onto the grid.** Dragging a task creates a linked block as long as the task's
       estimate, optimistically, with rollback on failure.
 - [ ] **Move and resize** blocks with 15-minute snapping, and a clear message when the
