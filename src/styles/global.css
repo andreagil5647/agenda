@@ -51,5 +51,10 @@ select {
 input:focus,
 select:focus {
   border-color: var(--color-accent);
+}
+
+/* One visible focus style for everything reachable with the keyboard. */
+:focus-visible {
   outline: var(--focus-ring);
+  outline-offset: 2px;
 }
