@@ -16,6 +16,15 @@ export function formatTimeOfDay(minutes: number, hourCycle: HourCycle): string {
   return `${String(hour % 12 || 12)}:${minute} ${period}`;
 }
 
+/** Minutes after midnight for an "HH:MM" value, as a time input reports it. */
+export function parseTimeOfDay(value: string): number | null {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const minutes = Number(match[1]) * 60 + Number(match[2]);
+  return minutes < 24 * 60 && Number(match[2]) < 60 ? minutes : null;
+}
+
 /** A range of times of day, such as "09:30 – 11:00". */
 export function formatTimeRange(start: number, end: number, hourCycle: HourCycle): string {
   return `${formatTimeOfDay(start, hourCycle)} – ${formatTimeOfDay(end, hourCycle)}`;

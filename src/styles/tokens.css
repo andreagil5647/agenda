@@ -52,7 +52,7 @@
   --shadow-raised: 0 1px 4px light-dark(rgb(23 32 42 / 14%), rgb(0 0 0 / 50%));
   --focus-ring: 3px solid light-dark(rgb(37 99 235 / 35%), rgb(109 155 245 / 60%));
 
-  /* Calendar palette, selected by a calendar's colorKey. */
+  /* Calendar palette. A calendar stores a key; data-calendar-color selects the pair. */
   --calendar-blue-surface: light-dark(#eaf1ff, #1b2a47);
   --calendar-blue-text: light-dark(#1746a2, #a9c4ff);
   --calendar-green-surface: light-dark(#e9f8ef, #173524);
@@ -61,6 +61,30 @@
   --calendar-purple-text: light-dark(#5333a3, #c7b6ff);
   --calendar-rose-surface: light-dark(#fff0f3, #401c27);
   --calendar-rose-text: light-dark(#9f1d3d, #ffb1c3);
+
+  /* What a calendar-coloured element uses; the rules below point them at a pair. */
+  --calendar-surface: var(--color-surface-muted);
+  --calendar-text: var(--color-text-label);
+}
+
+[data-calendar-color='blue'] {
+  --calendar-surface: var(--calendar-blue-surface);
+  --calendar-text: var(--calendar-blue-text);
+}
+
+[data-calendar-color='green'] {
+  --calendar-surface: var(--calendar-green-surface);
+  --calendar-text: var(--calendar-green-text);
+}
+
+[data-calendar-color='purple'] {
+  --calendar-surface: var(--calendar-purple-surface);
+  --calendar-text: var(--calendar-purple-text);
+}
+
+[data-calendar-color='rose'] {
+  --calendar-surface: var(--calendar-rose-surface);
+  --calendar-text: var(--calendar-rose-text);
 }
 
 :root[data-theme='light'] {

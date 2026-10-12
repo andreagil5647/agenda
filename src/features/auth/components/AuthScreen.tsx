@@ -1,4 +1,5 @@
 import { useState, type JSX, type SyntheticEvent } from 'react';
+import { readField } from '../../../lib/forms';
 import controls from '../../../ui/controls.module.css';
 import { useAuth } from '../hooks/useAuth';
 import styles from './AuthScreen.module.css';
@@ -20,9 +21,9 @@ export function AuthScreen(): JSX.Element {
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const email = readFormString(form, 'email');
-    const password = readFormString(form, 'password');
-    const displayName = readFormString(form, 'displayName');
+    const email = readField(form, 'email');
+    const password = readField(form, 'password');
+    const displayName = readField(form, 'displayName');
 
     setIsSubmitting(true);
     await (isRegistering ? register({ email, password, displayName }) : logIn({ email, password }));
@@ -120,9 +121,4 @@ export function AuthScreen(): JSX.Element {
       </div>
     </section>
   );
-}
-
-function readFormString(form: FormData, name: string): string {
-  const value = form.get(name);
-  return typeof value === 'string' ? value : '';
 }

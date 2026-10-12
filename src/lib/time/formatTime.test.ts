@@ -1,4 +1,10 @@
-import { formatDayHeading, formatDuration, formatTimeOfDay, formatTimeRange } from './formatTime';
+import {
+  formatDayHeading,
+  formatDuration,
+  formatTimeOfDay,
+  formatTimeRange,
+  parseTimeOfDay,
+} from './formatTime';
 
 describe('formatTimeOfDay', () => {
   it('writes a 24-hour time with leading zeros', () => {
@@ -17,6 +23,21 @@ describe('formatTimeOfDay', () => {
   it('writes the end of the day as midnight', () => {
     expect(formatTimeOfDay(24 * 60, 'h23')).toBe('00:00');
     expect(formatTimeOfDay(24 * 60, 'h12')).toBe('12:00 AM');
+  });
+});
+
+describe('parseTimeOfDay', () => {
+  it('reads the value of a time input', () => {
+    expect(parseTimeOfDay('00:00')).toBe(0);
+    expect(parseTimeOfDay('09:30')).toBe(570);
+    expect(parseTimeOfDay('23:59')).toBe(1439);
+  });
+
+  it('rejects anything that is not a time of day', () => {
+    expect(parseTimeOfDay('')).toBeNull();
+    expect(parseTimeOfDay('9:30')).toBeNull();
+    expect(parseTimeOfDay('24:00')).toBeNull();
+    expect(parseTimeOfDay('12:60')).toBeNull();
   });
 });
 

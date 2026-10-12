@@ -1,0 +1,32 @@
+.form {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.form input[name='name'] {
+  grid-column: 1 / -1;
+}
+
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.calendar {
+  border-radius: var(--radius-pill);
+  background: var(--calendar-surface);
+  color: var(--calendar-text);
+  padding: 6px 10px;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.empty {
+  margin: 0;
+  color: var(--color-text-muted);
+}
