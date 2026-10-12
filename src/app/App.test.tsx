@@ -1,6 +1,8 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
 import { buildCalendar, buildTask, buildTimedEvent, fakeApi } from '../../test/msw/fakeApi';
+import { server } from '../../test/msw/server';
 import { App } from './App';
 
 /** A signed-in account with one calendar, one task and one block on the current day. */
@@ -61,7 +63,9 @@ describe('App', () => {
     await user.type(screen.getByLabelText('Password'), 'wrong password');
     await user.click(screen.getByRole('button', { name: 'Log in' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'That email and password do not match.',
+    );
   });
 
   it('logs out and returns to the sign-in form', async () => {
@@ -100,5 +104,52 @@ describe('App', () => {
     expect(within(tasks).getByPlaceholderText('New task')).toHaveValue('');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(fakeApi.tasks.map((task) => task.title)).toContain('Write tests');
+  });
+
+  it('completes a task', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('checkbox', { name: /Draft launch checklist/ }));
+
+    expect(await screen.findByRole('checkbox', { name: /Draft launch checklist/ })).toBeChecked();
+    expect(fakeApi.tasks[0]).toMatchObject({ status: 'done', version: 2 });
+  });
+
+  it('deletes a task', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Delete Draft launch checklist' }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('checkbox', { name: /Draft launch checklist/ }),
+      ).not.toBeInTheDocument();
+    });
+    expect(fakeApi.tasks).toHaveLength(0);
+  });
+
+  it('refuses to overwrite a task that changed somewhere else, and says so', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+    const [task] = fakeApi.tasks;
+    fakeApi.editTaskElsewhere(task!.id, { title: 'Renamed in another tab' });
+    await user.click(checkbox);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/changed somewhere else/);
+    expect(fakeApi.tasks[0]).toMatchObject({ title: 'Renamed in another tab', status: 'todo' });
+  });
+
+  it('says so when the server cannot be reached', async () => {
+    server.use(http.get('*/api/v1/auth/session', () => HttpResponse.error()));
+    render(<App />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Could not reach the server/);
   });
 });

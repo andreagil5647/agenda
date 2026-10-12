@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
-import { AuthScreen } from '../features/auth/AuthScreen';
+import { AuthScreen } from '../features/auth/components/AuthScreen';
+import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
 import { PlannerDashboard } from '../features/planner/PlannerDashboard';
-import { AuthProvider, useAuth } from '../lib/auth/AuthContext';
 import { env } from '../lib/env';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
 import controls from '../ui/controls.module.css';
@@ -35,8 +35,7 @@ function ServerGate({ children }: { children: JSX.Element }): JSX.Element {
 }
 
 function AppShell(): JSX.Element {
-  const { session, logout, error } = useAuth();
-  const user = session?.user;
+  const { user, logOut, error } = useAuth();
 
   return (
     <main className={styles.appShell}>
@@ -60,7 +59,7 @@ function AppShell(): JSX.Element {
             <p className={controls.eyebrow}>Signed in</p>
             <h1>{user?.displayName}</h1>
           </div>
-          <button type="button" className={controls.secondaryAction} onClick={() => void logout()}>
+          <button type="button" className={controls.secondaryAction} onClick={() => void logOut()}>
             Log out
           </button>
         </header>
