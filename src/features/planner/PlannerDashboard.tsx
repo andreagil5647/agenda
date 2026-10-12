@@ -398,7 +398,7 @@ export function PlannerDashboard(): JSX.Element {
             <span>{state.calendars.length}</span>
           </div>
           <form
-            className={`${styles.inlineForm} ${styles.compactForm}`}
+            className={styles.inlineForm}
             autoComplete="off"
             onSubmit={(event) => void createCalendar(event)}
           >
