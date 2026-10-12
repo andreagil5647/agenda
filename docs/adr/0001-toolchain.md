@@ -6,7 +6,8 @@
 ## Context
 
 The two repositories are developed together and should read as one project, not as two
-teams' unrelated habits. Versions below were checked on npm on 2026-09-28.
+teams' unrelated habits. Versions below were originally checked on npm on 2026-09-28;
+the frontend package manager later moved to pnpm in [ADR 0005](0005-pnpm-package-manager.md).
 
 ## Decision
 

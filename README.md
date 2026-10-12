@@ -53,21 +53,21 @@ Requirements: Node.js 22.13 or later. For the `/api/*` proxy to do anything loca
 the [backend](https://github.com/andreagil5647/agenda-backend) on port 4000 first.
 
 ```bash
-npm ci
+pnpm install --frozen-lockfile
 cp .env.example .env
-npm run dev        # http://localhost:3000, proxies /api to http://localhost:4000
+pnpm run dev       # http://localhost:3000, proxies /api to http://localhost:4000
 ```
 
 ## Scripts
 
-| Script                               | What it does                                      |
-| ------------------------------------ | ------------------------------------------------- |
-| `npm run dev`                        | Webpack dev server with HMR and the `/api` proxy  |
-| `npm run build`                      | Production build to `dist/`                       |
-| `npm run analyze`                    | Production build plus a bundle-size report        |
-| `npm test` / `npm run test:coverage` | Jest / Jest with a coverage report in `coverage/` |
-| `npm run lint` / `npm run format`    | ESLint (type-aware) / Prettier                    |
-| `npm run typecheck`                  | `tsc --noEmit`                                    |
+| Script                                 | What it does                                      |
+| -------------------------------------- | ------------------------------------------------- |
+| `pnpm run dev`                         | Webpack dev server with HMR and the `/api` proxy  |
+| `pnpm run build`                       | Production build to `dist/`                       |
+| `pnpm run analyze`                     | Production build plus a bundle-size report        |
+| `pnpm test` / `pnpm run test:coverage` | Jest / Jest with a coverage report in `coverage/` |
+| `pnpm run lint` / `pnpm run format`    | ESLint (type-aware) / Prettier                    |
+| `pnpm run typecheck`                   | `tsc --noEmit`                                    |
 
 ## Deployment
 

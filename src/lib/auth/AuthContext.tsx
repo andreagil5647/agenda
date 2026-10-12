@@ -22,6 +22,7 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   register: (input: RegisterRequest) => Promise<void>;
   login: (input: LoginRequest) => Promise<void>;
+  startDemo: () => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
   clearError: () => void;
@@ -102,6 +103,17 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     }
   }, []);
 
+  const startDemo = useCallback(async () => {
+    setState((current) => ({ ...current, error: null }));
+    try {
+      const session = await apiClient.demo();
+      setState({ status: 'authenticated', session, error: null });
+    } catch (error) {
+      setState({ status: 'anonymous', session: null, error: friendlyError(error) });
+      throw error;
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     const csrfToken = state.session?.csrfToken;
     setState((current) => ({ ...current, error: null }));
@@ -122,8 +134,8 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, register, login, logout, refreshSession, clearError }),
-    [clearError, login, logout, refreshSession, register, state],
+    () => ({ ...state, register, login, startDemo, logout, refreshSession, clearError }),
+    [clearError, login, logout, refreshSession, register, startDemo, state],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

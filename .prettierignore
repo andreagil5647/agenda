@@ -2,4 +2,4 @@ dist
 storybook-static
 coverage
 playwright-report
-package-lock.json
+CONTEXT.md

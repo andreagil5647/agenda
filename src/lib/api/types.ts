@@ -44,3 +44,71 @@ export interface LoginRequest {
   email: string;
   password: string;
 }
+
+export interface Calendar {
+  id: string;
+  name: string;
+  colorKey: string;
+  visible: boolean;
+  defaultReminderMinutes: number[];
+  order: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  dueDate: string | null;
+  priority: 'none' | 'low' | 'medium' | 'high';
+  status: 'todo' | 'done';
+  estimateMinutes: number;
+  order: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EventBlock {
+  id: string;
+  calendarId: string;
+  title: string;
+  notes: string | null;
+  taskId: string | null;
+  kind: 'timed' | 'allDay';
+  startUtc: string | null;
+  endUtc: string | null;
+  timeZone: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCalendarRequest {
+  name: string;
+  colorKey: string;
+  visible?: boolean;
+  defaultReminderMinutes?: number[];
+}
+
+export interface CreateTaskRequest {
+  title: string;
+  dueDate?: string | null;
+  priority?: Task['priority'];
+  status?: Task['status'];
+  estimateMinutes?: number;
+}
+
+export interface CreateTimedEventRequest {
+  kind: 'timed';
+  calendarId: string;
+  title: string;
+  notes?: string | null;
+  taskId?: string | null;
+  startUtc: string;
+  endUtc: string;
+  timeZone: string;
+}

@@ -6,14 +6,15 @@
   "license": "MIT",
   "author": "Andrea Gil Guimerà",
   "type": "module",
+  "packageManager": "pnpm@10.13.1",
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
     "_webpack": "node --experimental-strip-types --disable-warning=ExperimentalWarning node_modules/webpack-cli/bin/cli.js",
-    "dev": "npm run -s _webpack -- serve --config config/webpack/webpack.dev.ts",
-    "build": "npm run -s _webpack -- build --config config/webpack/webpack.prod.ts",
-    "analyze": "npm run -s _webpack -- build --config config/webpack/webpack.prod.ts --env analyze",
+    "dev": "pnpm run -s _webpack -- serve --config config/webpack/webpack.dev.ts",
+    "build": "pnpm run -s _webpack -- build --config config/webpack/webpack.prod.ts",
+    "analyze": "pnpm run -s _webpack -- build --config config/webpack/webpack.prod.ts --env analyze",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -30,6 +31,14 @@
       "prettier --write"
     ],
     "*.{json,md,yml,yaml,css}": "prettier --write"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "core-js-pure",
+      "unrs-resolver"
+    ]
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

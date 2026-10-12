@@ -28,15 +28,20 @@ export function useServerStatus(): ServerStatusState {
   useEffect(() => {
     const controller = new AbortController();
     const startedAt = Date.now();
+    let isActive = true;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    attemptRef.current = 0;
 
     const check = (): void => {
       fetch(`${env.apiBaseUrl}/health`, { signal: controller.signal })
         .then((res) => {
+          if (!isActive) return;
           if (!res.ok) throw new Error(`Unexpected status ${String(res.status)}`);
           setState({ status: 'ready', elapsedMs: Date.now() - startedAt });
         })
         .catch(() => {
+          if (!isActive) return;
+
           const elapsedMs = Date.now() - startedAt;
           if (elapsedMs >= GIVE_UP_AFTER_MS) {
             setState({ status: 'error', elapsedMs });
@@ -57,6 +62,7 @@ export function useServerStatus(): ServerStatusState {
     check();
 
     return () => {
+      isActive = false;
       controller.abort();
       clearTimeout(timeoutId);
     };
