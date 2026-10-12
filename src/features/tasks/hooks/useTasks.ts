@@ -14,7 +14,7 @@ export function useTasks(): UseQueryResult<Task[]> {
 export function useCreateTask() {
   return useOptimisticListMutation<Task, CreateTaskRequest, Task>({
     queryKey: tasksKey,
-    mutationFn: createTask,
+    mutationFn: (input) => createTask(input),
     optimistic: (tasks) => tasks,
     confirmed: withItem,
   });
@@ -29,7 +29,7 @@ interface TaskUpdate {
 export function useUpdateTask() {
   return useOptimisticListMutation<Task, TaskUpdate, Task>({
     queryKey: tasksKey,
-    mutationFn: ({ task, changes }) => updateTask(task, changes),
+    mutationFn: ({ task, changes }, atSavedVersion) => updateTask(atSavedVersion(task), changes),
     optimistic: (tasks, { task, changes }) => withChanges(tasks, task.id, changes),
     confirmed: (tasks, saved, { task }) => withReplaced(tasks, task.id, saved),
   });
@@ -38,7 +38,7 @@ export function useUpdateTask() {
 export function useDeleteTask() {
   return useOptimisticListMutation<Task, Task>({
     queryKey: tasksKey,
-    mutationFn: deleteTask,
+    mutationFn: (task, atSavedVersion) => deleteTask(atSavedVersion(task)),
     optimistic: (tasks, task) => withoutItem(tasks, task.id),
     confirmed: (tasks) => tasks,
   });

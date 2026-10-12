@@ -117,6 +117,22 @@ describe('App', () => {
     expect(fakeApi.tasks[0]).toMatchObject({ status: 'done', version: 2 });
   });
 
+  it('applies two quick changes to the same task in order', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+    await user.click(checkbox);
+    await user.click(checkbox);
+
+    await waitFor(() => {
+      expect(fakeApi.tasks[0]).toMatchObject({ status: 'todo', version: 3 });
+    });
+    expect(screen.getByRole('checkbox', { name: /Draft launch checklist/ })).not.toBeChecked();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
   it('deletes a task', async () => {
     seedPlanner();
     const user = userEvent.setup();

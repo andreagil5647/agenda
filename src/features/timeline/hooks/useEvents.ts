@@ -33,7 +33,7 @@ export function useCreateEvent() {
 export function useDeleteEvent() {
   return useOptimisticListMutation<PlannerEvent, PlannerEvent>({
     queryKey: eventsKey,
-    mutationFn: deleteEvent,
+    mutationFn: (event, atSavedVersion) => deleteEvent(atSavedVersion(event)),
     optimistic: (events, event) => withoutItem(events, event.id),
     confirmed: (events) => events,
   });

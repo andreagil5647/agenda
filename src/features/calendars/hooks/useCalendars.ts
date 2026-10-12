@@ -14,7 +14,7 @@ export function useCalendars(): UseQueryResult<Calendar[]> {
 export function useCreateCalendar() {
   return useOptimisticListMutation<Calendar, CreateCalendarRequest, Calendar>({
     queryKey: calendarsKey,
-    mutationFn: createCalendar,
+    mutationFn: (input) => createCalendar(input),
     optimistic: (calendars) => calendars,
     confirmed: withItem,
   });
