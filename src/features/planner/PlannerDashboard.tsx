@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState, type JSX, type SyntheticEven
 import { apiClient, ApiError } from '../../lib/api/apiClient';
 import type { Calendar, EventBlock, Task } from '../../lib/api/types';
 import { useAuth } from '../../lib/auth/AuthContext';
+import controls from '../../ui/controls.module.css';
+import styles from './PlannerDashboard.module.css';
 
 interface PlannerState {
   calendars: Calendar[];
@@ -208,14 +210,14 @@ export function PlannerDashboard(): JSX.Element {
   };
 
   return (
-    <div className="planner-grid">
-      <section className="timeline-panel" aria-labelledby="timeline-title">
-        <div className="panel-header">
+    <div className={styles.plannerGrid}>
+      <section className={styles.panel} aria-labelledby="timeline-title">
+        <div className={styles.panelHeader}>
           <div>
-            <p className="eyebrow">Plan</p>
+            <p className={controls.eyebrow}>Plan</p>
             <h2 id="timeline-title">Timeline</h2>
           </div>
-          <label className="date-control">
+          <label className={styles.dateControl}>
             Date
             <input
               name="selectedDate"
@@ -231,7 +233,7 @@ export function PlannerDashboard(): JSX.Element {
         </div>
 
         {state.error && (
-          <p className="form-error" role="alert">
+          <p className={controls.formError} role="alert">
             {state.error}
           </p>
         )}
@@ -241,13 +243,13 @@ export function PlannerDashboard(): JSX.Element {
             Loading planner...
           </p>
         ) : (
-          <div className="timeline-list">
+          <div className={styles.timelineList}>
             {visibleEvents.length === 0 && (
-              <p className="empty-state">No blocks on this day yet.</p>
+              <p className={styles.emptyState}>No blocks on this day yet.</p>
             )}
             {visibleEvents.map((eventBlock) => (
-              <div className="timeline-row" key={eventBlock.id}>
-                <span className="time">
+              <div className={styles.timelineRow} key={eventBlock.id}>
+                <span className={styles.time}>
                   {eventBlock.startUtc
                     ? new Date(eventBlock.startUtc).toLocaleTimeString([], {
                         hour: '2-digit',
@@ -264,7 +266,7 @@ export function PlannerDashboard(): JSX.Element {
                 </div>
                 <button
                   type="button"
-                  className="icon-action"
+                  className={controls.iconAction}
                   aria-label={`Delete ${eventBlock.title}`}
                   onClick={() => {
                     void deleteEvent(eventBlock);
@@ -278,7 +280,7 @@ export function PlannerDashboard(): JSX.Element {
         )}
 
         <form
-          className="inline-form"
+          className={styles.inlineForm}
           autoComplete="off"
           onSubmit={(event) => void createEvent(event)}
         >
@@ -320,24 +322,24 @@ export function PlannerDashboard(): JSX.Element {
             defaultValue={defaultBlockEnd}
             required
           />
-          <button type="submit" className="primary-action" disabled={!defaultCalendarId}>
+          <button type="submit" className={controls.primaryAction} disabled={!defaultCalendarId}>
             Add block
           </button>
         </form>
       </section>
 
-      <div className="side-stack">
-        <section className="task-panel" aria-labelledby="task-title">
-          <div className="panel-header">
+      <div className={styles.sideStack}>
+        <section className={styles.panel} aria-labelledby="task-title">
+          <div className={styles.panelHeader}>
             <div>
-              <p className="eyebrow">Inbox</p>
+              <p className={controls.eyebrow}>Inbox</p>
               <h2 id="task-title">Tasks</h2>
             </div>
             <span>{state.tasks.length} tasks</span>
           </div>
 
           <form
-            className="inline-form"
+            className={styles.inlineForm}
             autoComplete="off"
             onSubmit={(event) => void createTask(event)}
           >
@@ -357,17 +359,17 @@ export function PlannerDashboard(): JSX.Element {
               aria-label="Task estimate minutes"
               defaultValue="30"
             />
-            <button type="submit" className="primary-action">
+            <button type="submit" className={controls.primaryAction}>
               Add task
             </button>
           </form>
 
-          <ul className="task-list">
+          <ul className={styles.taskList}>
             {state.tasks.map((task) => (
-              <li key={task.id} className={task.status === 'done' ? 'done' : ''}>
+              <li key={task.id} data-status={task.status}>
                 <input
                   type="checkbox"
-                  className="checkbox-action"
+                  className={controls.checkboxAction}
                   checked={task.status === 'done'}
                   aria-label={`Mark ${task.title} ${task.status === 'done' ? 'todo' : 'done'}`}
                   onChange={() => void toggleTask(task)}
@@ -376,7 +378,7 @@ export function PlannerDashboard(): JSX.Element {
                 <small>{task.estimateMinutes}m</small>
                 <button
                   type="button"
-                  className="icon-action"
+                  className={controls.iconAction}
                   aria-label={`Delete ${task.title}`}
                   onClick={() => void deleteTask(task)}
                 >
@@ -387,16 +389,16 @@ export function PlannerDashboard(): JSX.Element {
           </ul>
         </section>
 
-        <section className="calendar-panel" aria-labelledby="calendar-title">
-          <div className="panel-header">
+        <section className={styles.panel} aria-labelledby="calendar-title">
+          <div className={styles.panelHeader}>
             <div>
-              <p className="eyebrow">Calendars</p>
+              <p className={controls.eyebrow}>Calendars</p>
               <h2 id="calendar-title">Sources</h2>
             </div>
             <span>{state.calendars.length}</span>
           </div>
           <form
-            className="inline-form compact"
+            className={`${styles.inlineForm} ${styles.compactForm}`}
             autoComplete="off"
             onSubmit={(event) => void createCalendar(event)}
           >
@@ -407,13 +409,17 @@ export function PlannerDashboard(): JSX.Element {
               <option value="purple">Purple</option>
               <option value="rose">Rose</option>
             </select>
-            <button type="submit" className="primary-action">
+            <button type="submit" className={controls.primaryAction}>
               Add calendar
             </button>
           </form>
-          <div className="calendar-list">
+          <div className={styles.calendarList}>
             {state.calendars.map((calendar) => (
-              <span className={`calendar-pill ${calendar.colorKey}`} key={calendar.id}>
+              <span
+                className={styles.calendarPill}
+                data-color={calendar.colorKey}
+                key={calendar.id}
+              >
                 {calendar.name}
               </span>
             ))}
