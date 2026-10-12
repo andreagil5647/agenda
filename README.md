@@ -41,12 +41,13 @@ lets a session cookie set by the API stay first-party.
 config/webpack/     hand-written webpack config: common, dev, prod, paths, env
 src/
   index.tsx            bootstraps React
-  app/App.tsx          server gate, auth gate and the signed-in shell
-  features/<name>/     api (requests), hooks (state) and components for one feature
-  features/planner/    dashboard: calendars, tasks and the day's blocks
+  app/                 providers, the server and auth gates, the signed-in shell and page
+  features/<name>/     api (requests), hooks (state) and components for one feature:
+                        auth, calendars, tasks, timeline
   styles/              design tokens and the global base layer
-  ui/                  styles shared by more than one screen
+  ui/                  shared primitives: panel, query states, notices, control styles
   lib/api/             API client typed by the contract, one error type, user-facing messages
+  lib/time/            time zone conversion and time formatting, pure and unit-tested
   lib/query/           query client and the optimistic write used by every feature
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,

@@ -23,7 +23,6 @@ Done:
 
 Known gaps in the done items:
 
-- [ ] `PlannerDashboard.tsx` mixes data fetching, state, date helpers, forms and rendering
 - [ ] Blocks are listed, not laid out on a time grid, and nothing can be dragged yet
 
 ## Build order
@@ -40,7 +39,7 @@ Known gaps in the done items:
 - [x] **Server-state layer.** One place for caching, refetching and optimistic updates;
       components never call the client directly
       ([ADR 0007](adr/0007-tanstack-query-for-server-state.md)).
-- [ ] **Feature split.** `calendars`, `tasks` and `timeline` features with their own
+- [x] **Feature split.** `calendars`, `tasks` and `timeline` features with their own
       components and hooks; date helpers in `lib/time` with unit tests.
 - [x] **Test network layer.** MSW handlers instead of order-based `fetch` mocks, and a
       coverage threshold in CI.
