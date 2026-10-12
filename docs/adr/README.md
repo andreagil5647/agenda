@@ -10,5 +10,6 @@ A superseded record stays in place with a link to the one that replaces it.
 | 0003 | [Same-origin API through the static site's rewrite](0003-same-origin-api-through-render-rewrite.md)       | Accepted |
 | 0004 | [Jest with SWC for tests, not the webpack compiler directly](0004-jest-with-swc.md)                       | Accepted |
 | 0005 | [pnpm for frontend package management](0005-pnpm-package-manager.md)                                      | Accepted |
+| 0006 | [CSS Modules on design tokens, themes with `light-dark()`](0006-css-modules-and-design-tokens.md)         | Accepted |
 
 New records copy [the template](template.md).
