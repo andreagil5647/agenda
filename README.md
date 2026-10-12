@@ -41,12 +41,11 @@ config/webpack/     hand-written webpack config: common, dev, prod, paths, env
 src/
   index.tsx            bootstraps React
   app/App.tsx          server gate, auth gate and the signed-in shell
-  features/auth/       sign-up, log-in and demo screen
+  features/<name>/     api (requests), hooks (state) and components for one feature
   features/planner/    dashboard: calendars, tasks and the day's blocks
   styles/              design tokens and the global base layer
   ui/                  styles shared by more than one screen
-  lib/api/             fetch wrapper, API errors, and types generated from the contract
-  lib/auth/            session context: current user, CSRF token, sign-in and sign-out
+  lib/api/             API client typed by the contract, one error type, user-facing messages
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
                         exposes a "waking up the server" state for free-tier cold starts
