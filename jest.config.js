@@ -43,6 +43,11 @@ const config = {
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts', '!src/index.tsx'],
   coverageDirectory: 'coverage',
+  // A floor just under the current numbers, raised as coverage grows, so a
+  // change that drops tests fails in CI instead of going unnoticed.
+  coverageThreshold: {
+    global: { statements: 70, branches: 60, functions: 65, lines: 70 },
+  },
   coverageReporters: ['text', 'html', 'lcov'],
 };
 
