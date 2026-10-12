@@ -1,11 +1,36 @@
 import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
-import type { Configuration } from 'webpack';
+import type { Configuration, RuleSetUseItem } from 'webpack';
 import { loadPublicEnv, toDefinePluginEnv } from './env.ts';
 import { paths } from './paths.ts';
 
 type Mode = 'development' | 'production';
+
+/**
+ * In development styles are injected with style-loader so they hot-reload; in
+ * production they are extracted to a content-hashed file that caches apart
+ * from the JavaScript.
+ */
+function cssLoaders({ isDev, scoped }: { isDev: boolean; scoped: boolean }): RuleSetUseItem[] {
+  return [
+    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+    {
+      loader: 'css-loader',
+      options: {
+        modules: scoped
+          ? {
+              // A default export object, so components write `styles.panel`.
+              namedExport: false,
+              // Readable class names while developing, short hashes when shipped.
+              localIdentName: isDev ? '[name]__[local]' : '[hash:base64:6]',
+            }
+          : false,
+      },
+    },
+  ];
+}
 
 /**
  * Shared between dev and prod. Each mode calls this and layers on its own
@@ -41,6 +66,10 @@ export function createCommonConfig(mode: Mode): Configuration {
             },
           },
         },
+        // Component styles: class names are scoped to the file that declares them.
+        { test: /\.module\.css$/, use: cssLoaders({ isDev, scoped: true }) },
+        // Everything else is global on purpose: design tokens and the base layer.
+        { test: /\.css$/, exclude: /\.module\.css$/, use: cssLoaders({ isDev, scoped: false }) },
         {
           test: /\.(png|jpe?g|gif|svg|webp)$/i,
           type: 'asset/resource',
