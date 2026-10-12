@@ -6,6 +6,7 @@ import {
   minutesAtOffset,
   movedBy,
   resizedBy,
+  slotStart,
   snapToGrid,
   spanAt,
   toDayBlocks,
@@ -147,6 +148,14 @@ describe('snapToGrid', () => {
     expect(snapToGrid(at(9, 7))).toBe(at(9));
     expect(snapToGrid(at(9, 8))).toBe(at(9, 15));
     expect(snapToGrid(at(9, 52))).toBe(at(9, 45));
+  });
+});
+
+describe('slotStart', () => {
+  it('answers the step a time falls in, never the next one', () => {
+    expect(slotStart(at(9))).toBe(at(9));
+    expect(slotStart(at(9, 14))).toBe(at(9));
+    expect(slotStart(at(9, 15))).toBe(at(9, 15));
   });
 });
 

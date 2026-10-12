@@ -316,4 +316,8 @@ export const fakeApi = {
   get tasks(): readonly Task[] {
     return state.tasks;
   },
+
+  get events(): readonly PlannerEvent[] {
+    return state.events;
+  },
 };

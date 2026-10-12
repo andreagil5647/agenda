@@ -1,0 +1,60 @@
+.block {
+  --minute-height: calc(var(--hour-height) / 60);
+
+  position: absolute;
+  top: calc(var(--start) * var(--minute-height));
+  left: calc(var(--column) / var(--columns) * 100%);
+  width: calc(100% / var(--columns));
+  /* A quarter-hour block is still tall enough to read and to hit. */
+  height: max(calc((var(--end) - var(--start)) * var(--minute-height)), 22px);
+  padding: 1px 2px;
+  list-style: none;
+}
+
+.body {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 0;
+  border-left: 3px solid var(--calendar-text);
+  border-radius: var(--radius-sm);
+  background: var(--calendar-surface);
+  color: var(--calendar-text);
+  cursor: pointer;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  padding: 2px var(--space-2);
+  text-align: left;
+}
+
+.body[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--calendar-text);
+}
+
+.body[aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.title {
+  display: block;
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.time {
+  opacity: 0.85;
+}
+
+/* One line: the title, then the time after it for as long as there is room. */
+.block[data-short='true'] .body {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.block[data-short='true'] .title {
+  display: inline;
+}

@@ -34,6 +34,11 @@ export function snapToGrid(minutes: number): number {
   return Math.round(minutes / GRID_STEP_MINUTES) * GRID_STEP_MINUTES;
 }
 
+/** The start of the grid step that a time of day falls in. */
+export function slotStart(minutes: number): number {
+  return Math.floor(minutes / GRID_STEP_MINUTES) * GRID_STEP_MINUTES;
+}
+
 /**
  * The timed events that fall on `day`, as blocks. An event that starts the
  * day before or ends the day after is cut at midnight, so it shows the part

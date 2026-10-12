@@ -37,6 +37,7 @@
 }
 
 .checkboxAction {
+  flex: none;
   width: 22px;
   height: 22px;
   min-height: 0;
@@ -51,6 +52,16 @@
   background: var(--color-danger-surface);
   color: var(--color-danger-text);
   padding: 10px var(--space-3);
+}
+
+/* Read by assistive technology, not shown: text that names or explains a control. */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .eyebrow {
