@@ -11,7 +11,8 @@ type ErrorCode = Schemas['ErrorResponse']['code'];
 const API = '*/api/v1';
 const CREATED_AT = '2026-10-12T08:00:00.000Z';
 const SESSION_EXPIRES_AT = '2026-11-11T08:00:00.000Z';
-export const CSRF_TOKEN = 'test-csrf-token';
+const CSRF_COOKIE = 'agenda_csrf';
+const CSRF_TOKEN = 'test-csrf-token';
 
 /**
  * An in-memory stand-in for the API, served through MSW. It follows the
@@ -108,6 +109,18 @@ function errorResponse(status: number, code: ErrorCode, message: string): Respon
 const unauthorized = (): Response => errorResponse(401, 'UNAUTHORIZED', 'Authentication required');
 const notFound = (resource: string): Response =>
   errorResponse(404, 'NOT_FOUND', `${resource} not found`);
+
+/** Opens a session: the API sets a script-readable CSRF cookie next to the session one. */
+function openSession(user: AuthUser): AuthUser {
+  state.user = user;
+  document.cookie = `${CSRF_COOKIE}=${CSRF_TOKEN}; path=/`;
+  return user;
+}
+
+function closeSession(): void {
+  state.user = null;
+  document.cookie = `${CSRF_COOKIE}=; path=/; max-age=0`;
+}
 
 function sessionBody(user: AuthUser): Schemas['AuthenticatedSession'] {
   return { user, expiresAt: SESSION_EXPIRES_AT, csrfToken: CSRF_TOKEN };
@@ -214,8 +227,8 @@ const handlers: HttpHandler[] = [
 
   http.post(`${API}/auth/register`, async ({ request }) => {
     const { email, displayName } = await jsonBody(request);
-    state.user = buildUser({ email: String(email), displayName: String(displayName) });
-    return HttpResponse.json(sessionBody(state.user), { status: 201 });
+    const user = openSession(buildUser({ email: String(email), displayName: String(displayName) }));
+    return HttpResponse.json(sessionBody(user), { status: 201 });
   }),
 
   http.post(`${API}/auth/login`, () => {
@@ -224,14 +237,14 @@ const handlers: HttpHandler[] = [
   }),
 
   http.post(`${API}/auth/demo`, () => {
-    state.user = buildUser({ displayName: 'Demo User', isDemo: true });
-    return HttpResponse.json(sessionBody(state.user), { status: 201 });
+    const user = openSession(buildUser({ displayName: 'Demo User', isDemo: true }));
+    return HttpResponse.json(sessionBody(user), { status: 201 });
   }),
 
   http.post(`${API}/auth/logout`, ({ request }) => {
     const rejected = rejectWrite(request);
     if (rejected) return rejected;
-    state.user = null;
+    closeSession();
     return new HttpResponse(null, { status: 204 });
   }),
 
@@ -272,19 +285,26 @@ export const fakeApi = {
 
   /** Back to an empty API with nobody signed in. Runs before every test. */
   reset(): void {
-    Object.assign(state, { user: null, calendars: [], tasks: [], events: [], nextId: 1 });
+    closeSession();
+    Object.assign(state, { calendars: [], tasks: [], events: [], nextId: 1 });
   },
 
   /** Starts the test with a session already open, as after a page reload. */
   signIn(user: AuthUser = buildUser()): AuthUser {
-    state.user = user;
-    return user;
+    return openSession(user);
   },
 
   seed(data: { calendars?: Calendar[]; tasks?: Task[]; events?: PlannerEvent[] }): void {
     state.calendars.push(...(data.calendars ?? []));
     state.tasks.push(...(data.tasks ?? []));
     state.events.push(...(data.events ?? []));
+  },
+
+  /** Changes a task behind the app's back, as an edit from another tab would. */
+  editTaskElsewhere(id: string, changes: Partial<Task>): void {
+    const task = state.tasks.find((candidate) => candidate.id === id);
+    if (!task) throw new Error(`No task ${id} in the fake API`);
+    Object.assign(task, changes, { version: task.version + 1 });
   },
 
   /** What the API currently holds, for asserting on the outcome of a write. */

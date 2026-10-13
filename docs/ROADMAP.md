@@ -35,7 +35,7 @@ Known gaps in the done items:
       ([ADR 0006](adr/0006-css-modules-and-design-tokens.md)).
 - [x] **Generated API types.** Types generated from the backend's `openapi.json`, with a
       CI check that fails when they drift.
-- [ ] **API client.** The client owns the CSRF token and `If-Match` headers and returns
+- [x] **API client.** The client owns the CSRF token and `If-Match` headers and returns
       typed errors, so callers stop passing the token around.
 - [ ] **Server-state layer.** One place for caching, refetching and optimistic updates;
       components never call the client directly.

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type JSX, type SyntheticEvent } from 'react';
-import { apiClient, ApiError } from '../../lib/api/apiClient';
-import type { Calendar, EventBlock, Task } from '../../lib/api/contract';
-import { useAuth } from '../../lib/auth/AuthContext';
+import type { Calendar, PlannerEvent, Task } from '../../lib/api/contract';
+import { describeError } from '../../lib/api/errorMessages';
+import * as calendarsApi from '../calendars/api/calendarsApi';
+import * as tasksApi from '../tasks/api/tasksApi';
+import * as eventsApi from '../timeline/api/eventsApi';
 import controls from '../../ui/controls.module.css';
 import styles from './PlannerDashboard.module.css';
 
 interface PlannerState {
   calendars: Calendar[];
   tasks: Task[];
-  events: EventBlock[];
+  events: PlannerEvent[];
   isLoading: boolean;
   error: string | null;
 }
@@ -53,21 +55,12 @@ function dateTimeInputValue(date: string, hour: number, minute: number): string 
   return `${date}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
 
-function friendlyError(error: unknown): string {
-  if (error instanceof ApiError) {
-    return error.message;
-  }
-  return 'The planner could not sync. Try again in a moment.';
-}
-
 function readFormString(form: FormData, name: string): string {
   const value = form.get(name);
   return typeof value === 'string' ? value : '';
 }
 
 export function PlannerDashboard(): JSX.Element {
-  const { session } = useAuth();
-  const csrfToken = session?.csrfToken ?? '';
   const [selectedDate, setSelectedDate] = useState(todayDate);
   const [state, setState] = useState<PlannerState>({
     calendars: [],
@@ -98,13 +91,13 @@ export function PlannerDashboard(): JSX.Element {
 
     try {
       const [calendars, tasks, events] = await Promise.all([
-        apiClient.listCalendars(),
-        apiClient.listTasks(),
-        apiClient.listEvents(from, to),
+        calendarsApi.listCalendars(),
+        tasksApi.listTasks(),
+        eventsApi.listEvents({ from, to }),
       ]);
       setState({ calendars, tasks, events, isLoading: false, error: null });
     } catch (error) {
-      setState((current) => ({ ...current, isLoading: false, error: friendlyError(error) }));
+      setState((current) => ({ ...current, isLoading: false, error: describeError(error) }));
     }
   }, [selectedDate]);
 
@@ -120,11 +113,11 @@ export function PlannerDashboard(): JSX.Element {
     const colorKey = readFormString(form, 'colorKey') || 'blue';
 
     try {
-      await apiClient.createCalendar({ name, colorKey, defaultReminderMinutes: [10] }, csrfToken);
+      await calendarsApi.createCalendar({ name, colorKey, defaultReminderMinutes: [10] });
       formElement.reset();
       await loadPlanner();
     } catch (error) {
-      setState((current) => ({ ...current, error: friendlyError(error) }));
+      setState((current) => ({ ...current, error: describeError(error) }));
     }
   };
 
@@ -137,14 +130,11 @@ export function PlannerDashboard(): JSX.Element {
     const estimateMinutes = Number(readFormString(form, 'estimateMinutes') || '30');
 
     try {
-      await apiClient.createTask(
-        { title, dueDate, priority: 'medium', estimateMinutes },
-        csrfToken,
-      );
+      await tasksApi.createTask({ title, dueDate, priority: 'medium', estimateMinutes });
       formElement.reset();
       await loadPlanner();
     } catch (error) {
-      setState((current) => ({ ...current, error: friendlyError(error) }));
+      setState((current) => ({ ...current, error: describeError(error) }));
     }
   };
 
@@ -159,53 +149,46 @@ export function PlannerDashboard(): JSX.Element {
     const end = readFormString(form, 'end');
 
     try {
-      await apiClient.createEvent(
-        {
-          kind: 'timed',
-          calendarId,
-          title,
-          taskId,
-          startUtc: localInputToIso(start),
-          endUtc: localInputToIso(end),
-          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        },
-        csrfToken,
-      );
+      await eventsApi.createEvent({
+        kind: 'timed',
+        calendarId,
+        title,
+        taskId,
+        startUtc: localInputToIso(start),
+        endUtc: localInputToIso(end),
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      });
       formElement.reset();
       await loadPlanner();
     } catch (error) {
-      setState((current) => ({ ...current, error: friendlyError(error) }));
+      setState((current) => ({ ...current, error: describeError(error) }));
     }
   };
 
   const toggleTask = async (task: Task): Promise<void> => {
     try {
-      await apiClient.updateTask(
-        task.id,
-        { status: task.status === 'done' ? 'todo' : 'done' },
-        csrfToken,
-      );
+      await tasksApi.updateTask(task, { status: task.status === 'done' ? 'todo' : 'done' });
       await loadPlanner();
     } catch (error) {
-      setState((current) => ({ ...current, error: friendlyError(error) }));
+      setState((current) => ({ ...current, error: describeError(error) }));
     }
   };
 
   const deleteTask = async (task: Task): Promise<void> => {
     try {
-      await apiClient.deleteTask(task.id, csrfToken);
+      await tasksApi.deleteTask(task);
       await loadPlanner();
     } catch (error) {
-      setState((current) => ({ ...current, error: friendlyError(error) }));
+      setState((current) => ({ ...current, error: describeError(error) }));
     }
   };
 
-  const deleteEvent = async (eventBlock: EventBlock): Promise<void> => {
+  const deleteEvent = async (eventBlock: PlannerEvent): Promise<void> => {
     try {
-      await apiClient.deleteEvent(eventBlock.id, csrfToken);
+      await eventsApi.deleteEvent(eventBlock);
       await loadPlanner();
     } catch (error) {
-      setState((current) => ({ ...current, error: friendlyError(error) }));
+      setState((current) => ({ ...current, error: describeError(error) }));
     }
   };
 

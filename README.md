@@ -41,12 +41,11 @@ config/webpack/     hand-written webpack config: common, dev, prod, paths, env
 src/
   index.tsx            bootstraps React
   app/App.tsx          server gate, auth gate and the signed-in shell
-  features/auth/       sign-up, log-in and demo screen
+  features/<name>/     api (requests), hooks (state) and components for one feature
   features/planner/    dashboard: calendars, tasks and the day's blocks
   styles/              design tokens and the global base layer
   ui/                  styles shared by more than one screen
-  lib/api/             fetch wrapper, API errors, and types generated from the contract
-  lib/auth/            session context: current user, CSRF token, sign-in and sign-out
+  lib/api/             API client typed by the contract, one error type, user-facing messages
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
                         exposes a "waking up the server" state for free-tier cold starts
@@ -85,10 +84,9 @@ pnpm run dev       # http://localhost:3000, proxies /api to http://localhost:400
 passes, that rewrites `/api/*` to the backend before falling back to `index.html` for
 client-side routing.
 
-| Variable              | Required | Default   | Notes                              |
-| --------------------- | -------- | --------- | ---------------------------------- |
-| `PUBLIC_API_BASE_URL` |          | `/api/v1` | Relative on purpose - see ADR 0003 |
-| `PUBLIC_APP_VERSION`  |          | `dev`     | Shown in the footer for debugging  |
+| Variable             | Required | Default | Notes                             |
+| -------------------- | -------- | ------- | --------------------------------- |
+| `PUBLIC_APP_VERSION` |          | `dev`   | Shown in the footer for debugging |
 
 `PUBLIC_` variables are read at **build** time (baked into the bundle), not at runtime;
 changing one on Render requires a redeploy.

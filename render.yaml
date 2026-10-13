@@ -20,8 +20,6 @@ services:
     envVars:
       # Baked into the bundle at BUILD time (see config/webpack/env.ts), not
       # read at runtime. Changing it requires a rebuild.
-      - key: PUBLIC_API_BASE_URL
-        value: /api/v1
       - key: PUBLIC_APP_VERSION
         sync: false
       - key: NODE_VERSION

@@ -1,12 +1,12 @@
 import { useState, type JSX, type SyntheticEvent } from 'react';
-import { useAuth } from '../../lib/auth/AuthContext';
-import controls from '../../ui/controls.module.css';
+import controls from '../../../ui/controls.module.css';
+import { useAuth } from '../hooks/useAuth';
 import styles from './AuthScreen.module.css';
 
 type AuthMode = 'login' | 'register';
 
 export function AuthScreen(): JSX.Element {
-  const { login, register, startDemo, error, clearError } = useAuth();
+  const { logIn, register, startDemo, error, clearError } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,28 +25,14 @@ export function AuthScreen(): JSX.Element {
     const displayName = readFormString(form, 'displayName');
 
     setIsSubmitting(true);
-    try {
-      if (isRegistering) {
-        await register({ email, password, displayName });
-      } else {
-        await login({ email, password });
-      }
-    } catch {
-      // The provider stores the user-facing error.
-    } finally {
-      setIsSubmitting(false);
-    }
+    await (isRegistering ? register({ email, password, displayName }) : logIn({ email, password }));
+    setIsSubmitting(false);
   };
 
   const handleDemo = async (): Promise<void> => {
     setIsSubmitting(true);
-    try {
-      await startDemo();
-    } catch {
-      // The provider stores the user-facing error.
-    } finally {
-      setIsSubmitting(false);
-    }
+    await startDemo();
+    setIsSubmitting(false);
   };
 
   return (
