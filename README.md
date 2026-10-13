@@ -17,6 +17,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | ---------- | ----------------------------------------------------------- |
 | Runtime    | React 19, TypeScript 6 (strict)                             |
 | Build      | Webpack 5, hand-written dev/prod config, SWC (`swc-loader`) |
+| Styles     | CSS Modules on design tokens, light and dark themes         |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
 | Tests      | Jest 30 (`@swc/jest`), React Testing Library                |
 | Hosting    | Render static site, rewriting `/api/*` to the backend       |
@@ -42,6 +43,8 @@ src/
   app/App.tsx          server gate, auth gate and the signed-in shell
   features/auth/       sign-up, log-in and demo screen
   features/planner/    dashboard: calendars, tasks and the day's blocks
+  styles/              design tokens and the global base layer
+  ui/                  styles shared by more than one screen
   lib/api/             fetch wrapper, typed endpoints and API errors
   lib/auth/            session context: current user, CSRF token, sign-in and sign-out
   lib/env.ts           typed access to PUBLIC_ build-time variables

@@ -1,5 +1,7 @@
 import { useState, type JSX, type SyntheticEvent } from 'react';
 import { useAuth } from '../../lib/auth/AuthContext';
+import controls from '../../ui/controls.module.css';
+import styles from './AuthScreen.module.css';
 
 type AuthMode = 'login' | 'register';
 
@@ -48,9 +50,9 @@ export function AuthScreen(): JSX.Element {
   };
 
   return (
-    <section className="auth-layout" aria-labelledby="auth-title">
-      <div className="auth-copy">
-        <p className="eyebrow">Agenda</p>
+    <section className={styles.authLayout} aria-labelledby="auth-title">
+      <div className={styles.authCopy}>
+        <p className={controls.eyebrow}>Agenda</p>
         <h1 id="auth-title">Plan work on one honest timeline.</h1>
         <p>
           Tasks and events share the day, so the plan you make is the plan your calendar can
@@ -58,11 +60,10 @@ export function AuthScreen(): JSX.Element {
         </p>
       </div>
 
-      <div className="auth-panel">
-        <div className="segmented" role="tablist" aria-label="Authentication mode">
+      <div className={styles.authPanel}>
+        <div className={styles.segmented} role="tablist" aria-label="Authentication mode">
           <button
             type="button"
-            className={mode === 'login' ? 'active' : ''}
             aria-selected={mode === 'login'}
             role="tab"
             onClick={() => {
@@ -73,7 +74,6 @@ export function AuthScreen(): JSX.Element {
           </button>
           <button
             type="button"
-            className={isRegistering ? 'active' : ''}
             aria-selected={isRegistering}
             role="tab"
             onClick={() => {
@@ -112,16 +112,16 @@ export function AuthScreen(): JSX.Element {
           </label>
 
           {error && (
-            <p className="form-error" role="alert">
+            <p className={controls.formError} role="alert">
               {error}
             </p>
           )}
 
-          <button className="primary-action" type="submit" disabled={isSubmitting}>
+          <button className={controls.primaryAction} type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Working...' : isRegistering ? 'Create account' : 'Log in'}
           </button>
           <button
-            className="secondary-action"
+            className={controls.secondaryAction}
             type="button"
             disabled={isSubmitting}
             onClick={() => {

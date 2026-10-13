@@ -24,6 +24,10 @@ const config = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Styles are not under test. A CSS Module resolves every class to its own
+    // name, so markup keeps readable class attributes; global sheets are empty.
+    '\\.module\\.css$': '<rootDir>/test/setup/cssModuleStub.cjs',
+    '\\.css$': '<rootDir>/test/setup/styleStub.cjs',
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup/jest.setup.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
