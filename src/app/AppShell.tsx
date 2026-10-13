@@ -2,6 +2,7 @@ import type { JSX, ReactNode } from 'react';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import type { AuthUser } from '../lib/api/contract';
 import { env } from '../lib/env';
+import { useI18n } from '../lib/i18n/I18nProvider';
 import controls from '../ui/controls.module.css';
 import { Logo } from '../ui/Logo';
 import styles from './AppShell.module.css';
@@ -19,6 +20,7 @@ function initialOf(name: string): string {
 /** The frame around every signed-in screen: who is signed in, and the way out. */
 export function AppShell({ user, children }: AppShellProps): JSX.Element {
   const { logOut, error } = useAuth();
+  const { t } = useI18n();
 
   return (
     <div className={styles.shell}>
@@ -29,7 +31,7 @@ export function AppShell({ user, children }: AppShellProps): JSX.Element {
       <aside className={styles.sidebar} aria-label="Account">
         <div className={styles.brand}>
           <Logo size={36} />
-          <span>Agenda</span>
+          <span>{t('brand.name')}</span>
         </div>
 
         <div className={styles.account}>

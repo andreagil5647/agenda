@@ -1,5 +1,6 @@
 import { useState, type JSX, type SyntheticEvent } from 'react';
 import { readField } from '../../../lib/forms';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import controls from '../../../ui/controls.module.css';
 import { Icon, type IconName } from '../../../ui/Icon';
 import { Logo } from '../../../ui/Logo';
@@ -20,6 +21,7 @@ const POINTS: readonly { icon: IconName; text: string }[] = [
 
 export function AuthScreen(): JSX.Element {
   const { logIn, register, startDemo, error, clearError } = useAuth();
+  const { t } = useI18n();
   const [mode, setMode] = useState<AuthMode>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -53,7 +55,7 @@ export function AuthScreen(): JSX.Element {
       <div className={styles.intro}>
         <div className={styles.brand}>
           <Logo size={48} />
-          <span>Agenda</span>
+          <span>{t('brand.name')}</span>
         </div>
         <h1>Give every task a time.</h1>
         <p className={styles.lead}>
