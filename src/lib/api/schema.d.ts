@@ -343,6 +343,12 @@ export interface components {
             /** @description Human-readable English description, for logs and debugging */
             message: string;
             details?: {
+                /**
+                 * @description Why the request failed, where the code alone is too coarse to say
+                 * @enum {string}
+                 */
+                reason?: "stale_version" | "email_taken" | "demo_full" | "end_not_after_start" | "fields_of_other_kind";
+            } & {
                 [key: string]: unknown;
             };
             /** @description Also returned in the X-Request-Id header */
@@ -375,7 +381,11 @@ export interface components {
             weekStartsOn: 0 | 1 | 6;
             /** @enum {string} */
             hourCycle: "h12" | "h23";
-            locale: string;
+            /**
+             * @description The language of the interface and of the content a new account starts with
+             * @enum {string}
+             */
+            locale: "en" | "es";
             /** @enum {string} */
             theme: "system" | "light" | "dark";
             accentColor: string;
@@ -384,6 +394,11 @@ export interface components {
         DemoRequest: {
             /** @description IANA zone the demo day is laid out in. Defaults to UTC */
             timeZone?: string;
+            /**
+             * @description Language the demo day is written in, usually the browser language. Defaults to en
+             * @enum {string}
+             */
+            locale?: "en" | "es";
         };
         RegisterRequest: {
             /** Format: email */
@@ -393,6 +408,11 @@ export interface components {
             displayName: string;
             /** @description IANA zone the account starts in, usually the browser zone. Defaults to UTC */
             timeZone?: string;
+            /**
+             * @description Language the account starts in, usually the browser language. Defaults to en
+             * @enum {string}
+             */
+            locale?: "en" | "es";
         };
         LoginRequest: {
             /** Format: email */
@@ -417,7 +437,11 @@ export interface components {
             weekStartsOn?: 0 | 1 | 6;
             /** @enum {string} */
             hourCycle?: "h12" | "h23";
-            locale?: string;
+            /**
+             * @description The language of the interface and of the content a new account starts with
+             * @enum {string}
+             */
+            locale?: "en" | "es";
             /** @enum {string} */
             theme?: "system" | "light" | "dark";
             accentColor?: string;
