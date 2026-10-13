@@ -77,6 +77,10 @@ The look is a paper planner: warm cream paper, plum-black ink, a pine green for 
 and pastel inks for calendars, with a soft serif for the day and a rounded sans-serif for the
 interface ([ADR 0009](docs/adr/0009-visual-identity.md)).
 
+<p align="center">
+  <img src="docs/images/sign-in.webp" width="80%" alt="The sign-in screen: a smiling calendar logo, the headline 'Give every task a time', and a card with a one-click demo above the log-in form.">
+</p>
+
 - Every colour, size and shadow is a custom property in `src/styles/tokens.css`. Components use
   them and never name a value, so changing the look is a change to that file.
 - Light and dark come from the same tokens, with each colour written once as
