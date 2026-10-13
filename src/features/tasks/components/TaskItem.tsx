@@ -66,8 +66,8 @@ export function TaskItem({
         <span>{task.title}</span>
       </label>
       <small className={styles.meta}>
-        {formatDuration(task.estimateMinutes, locale)}
-        {isPlanned && <span className={styles.planned}> · {t('tasks.item.planned')}</span>}
+        <span className={styles.duration}>{formatDuration(task.estimateMinutes, locale)}</span>
+        {isPlanned && <span className={styles.planned}>· {t('tasks.item.planned')}</span>}
       </small>
       {isOpen && canPlan && (
         <button

@@ -73,10 +73,19 @@
 
 .meta {
   grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-1);
   padding-left: calc(26px + var(--space-3));
   color: var(--color-text-muted);
   font-size: var(--text-xs);
   font-weight: 700;
+}
+
+/* The line breaks between a length and its mark, never inside one. */
+.duration,
+.planned {
+  white-space: nowrap;
 }
 
 .planned {
