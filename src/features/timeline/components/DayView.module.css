@@ -2,3 +2,7 @@
   margin: 0 0 var(--space-3);
   color: var(--color-text-muted);
 }
+
+.empty {
+  margin-bottom: var(--space-4);
+}

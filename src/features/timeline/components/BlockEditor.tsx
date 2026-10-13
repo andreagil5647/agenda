@@ -92,8 +92,8 @@ export function BlockEditor({
 
   return (
     <Panel
-      eyebrow={isTimed ? 'Block' : 'All day'}
       title="Details"
+      icon="sparkle"
       aside={
         <button type="button" className={controls.secondaryAction} onClick={onClose}>
           Close

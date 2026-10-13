@@ -1,0 +1,29 @@
+.logo {
+  flex: none;
+}
+
+.tile {
+  fill: var(--color-accent);
+}
+
+.page {
+  fill: var(--color-on-accent);
+}
+
+.rings {
+  fill: none;
+  stroke: var(--color-on-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.face {
+  fill: var(--color-accent-lip);
+}
+
+.smile {
+  fill: none;
+  stroke: var(--color-accent-lip);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}

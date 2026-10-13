@@ -92,6 +92,8 @@ select:focus {
 @media (pointer: coarse) {
   :root {
     --control-height: 48px;
+    /* A block is as tall as it is long, so a taller hour keeps a half-hour one big enough to hit. */
+    --hour-height: 84px;
   }
 }
 

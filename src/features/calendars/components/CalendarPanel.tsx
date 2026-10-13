@@ -1,6 +1,7 @@
 import type { JSX, SyntheticEvent } from 'react';
 import { readField } from '../../../lib/forms';
 import controls from '../../../ui/controls.module.css';
+import { EmptyState } from '../../../ui/EmptyState';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { CALENDAR_COLORS, DEFAULT_CALENDAR_COLOR } from '../calendarColors';
@@ -30,7 +31,7 @@ export function CalendarPanel(): JSX.Element {
   };
 
   return (
-    <Panel eyebrow="Sources" title="Calendars">
+    <Panel title="Calendars" icon="calendar">
       <form className={styles.form} autoComplete="off" onSubmit={submitCalendar}>
         <input
           name="name"
@@ -58,7 +59,9 @@ export function CalendarPanel(): JSX.Element {
       <QueryBoundary query={calendarsQuery} loadingLabel="Loading calendars...">
         {(calendars) =>
           calendars.length === 0 ? (
-            <p className={styles.empty}>No calendars yet. Blocks need one to live in.</p>
+            <EmptyState icon="calendar" title="No calendars yet">
+              Every block lives in a calendar, so add one first.
+            </EmptyState>
           ) : (
             <ul className={styles.list}>
               {calendars.map((calendar) => (
