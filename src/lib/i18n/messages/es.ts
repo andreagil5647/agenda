@@ -39,6 +39,10 @@ export const es: Translation<typeof en> = {
     'Esto se cambió en otro sitio mientras tanto. Ahora ves la última versión; inténtalo de nuevo.',
   'error.VALIDATION_ERROR': 'Algo de eso no era válido. Revisa los campos e inténtalo de nuevo.',
   'error.PAYLOAD_TOO_LARGE': 'Es demasiado para guardarlo de una vez.',
+  'error.RATE_LIMITED': 'Demasiados intentos. Espera un momento e inténtalo de nuevo.',
+  'error.reason.email_taken': 'Ese correo ya está registrado. Prueba a iniciar sesión.',
+  'error.reason.demo_full': 'La demo está llena ahora mismo. Inténtalo de nuevo en unos minutos.',
+  'error.reason.end_not_after_start': 'El final tiene que ser posterior al inicio.',
   'auth.invalidCredentials': 'Ese correo y esa contraseña no coinciden.',
 
   // The corner of the screen where preferences are changed

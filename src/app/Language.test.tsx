@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
 import {
   buildCalendar,
   buildTask,
@@ -7,6 +8,7 @@ import {
   buildUser,
   fakeApi,
 } from '../../test/msw/fakeApi';
+import { server } from '../../test/msw/server';
 import { App } from './App';
 
 const PREFERENCES_KEY = 'agenda.preferences';
@@ -210,5 +212,86 @@ describe('the planner in Spanish', () => {
     await user.click(await screen.findByRole('button', { name: 'Añadir bloque' }));
 
     expect(await screen.findByRole('textbox', { name: 'Título' })).toHaveValue('Nuevo bloque');
+  });
+});
+
+describe('signing up and trying the demo', () => {
+  const ENGLISH_SENTENCE_FROM_THE_API = 'Written in English, for logs';
+
+  function refuse(path: string, status: number, code: string, reason: string): void {
+    server.use(
+      http.post(`*/api/v1/auth/${path}`, () =>
+        HttpResponse.json(
+          { code, message: ENGLISH_SENTENCE_FROM_THE_API, details: { reason }, requestId: 'r' },
+          { status },
+        ),
+      ),
+    );
+  }
+
+  async function fillInAndCreateAccount(user: ReturnType<typeof userEvent.setup>): Promise<void> {
+    await user.click(await screen.findByRole('button', { name: 'Crear una cuenta' }));
+    await user.type(screen.getByLabelText('Nombre'), 'Andrea');
+    await user.type(screen.getByLabelText('Correo electrónico'), 'andrea@example.com');
+    await user.type(screen.getByLabelText('Contraseña'), 'correct horse battery staple');
+    await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+  }
+
+  it('starts the demo in the language of the screen', async () => {
+    saveLanguage('es');
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Probar la demo' }));
+
+    await screen.findByRole('button', { name: 'Cerrar sesión' });
+    expect(fakeApi.user?.settings.locale).toBe('es');
+  });
+
+  it('starts a new account in the language of the screen', async () => {
+    saveLanguage('es');
+    const user = userEvent.setup();
+    render(<App />);
+
+    await fillInAndCreateAccount(user);
+
+    await screen.findByRole('button', { name: 'Cerrar sesión' });
+    expect(fakeApi.user?.settings.locale).toBe('es');
+  });
+
+  it('starts in English when that is the language of the screen', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Try the demo' }));
+
+    await screen.findByRole('button', { name: 'Log out' });
+    expect(fakeApi.user?.settings.locale).toBe('en');
+  });
+
+  it('explains in Spanish that an email is already registered', async () => {
+    saveLanguage('es');
+    refuse('register', 409, 'CONFLICT', 'email_taken');
+    const user = userEvent.setup();
+    render(<App />);
+
+    await fillInAndCreateAccount(user);
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent('Ese correo ya está registrado. Prueba a iniciar sesión.');
+    expect(alert).not.toHaveTextContent(ENGLISH_SENTENCE_FROM_THE_API);
+  });
+
+  it('explains in Spanish that the demo is full', async () => {
+    saveLanguage('es');
+    refuse('demo', 429, 'RATE_LIMITED', 'demo_full');
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Probar la demo' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'La demo está llena ahora mismo. Inténtalo de nuevo en unos minutos.',
+    );
   });
 });

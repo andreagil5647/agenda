@@ -38,7 +38,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   /** The failure as a sentence in the current language, or null. */
   error: string | null;
-  register: (input: Omit<RegisterRequest, 'timeZone'>) => Promise<void>;
+  register: (input: Omit<RegisterRequest, 'timeZone' | 'locale'>) => Promise<void>;
   logIn: (input: LoginRequest) => Promise<void>;
   startDemo: () => Promise<void>;
   logOut: () => Promise<void>;
@@ -67,7 +67,7 @@ function describeFailure(failure: AuthFailure, t: AppTranslate): string {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }): JSX.Element {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [state, setState] = useState<AuthState>({ status: 'loading', user: null, failure: null });
 
   useEffect(() => {
@@ -99,8 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   }, []);
 
   const register = useCallback<AuthContextValue['register']>(
-    (input) => signInWith(() => authApi.register(input)),
-    [signInWith],
+    (input) => signInWith(() => authApi.register(input, language)),
+    [signInWith, language],
   );
 
   const logIn = useCallback<AuthContextValue['logIn']>(
@@ -108,7 +108,10 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     [signInWith],
   );
 
-  const startDemo = useCallback(() => signInWith(authApi.startDemo), [signInWith]);
+  const startDemo = useCallback(
+    () => signInWith(() => authApi.startDemo(language)),
+    [signInWith, language],
+  );
 
   const logOut = useCallback(async () => {
     try {

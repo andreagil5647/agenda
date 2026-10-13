@@ -26,6 +26,16 @@ export class ApiError extends Error {
     if (details) this.details = details;
     if (requestId) this.requestId = requestId;
   }
+
+  /**
+   * Why the request failed, where the code does not say. Read as text and not
+   * as the contract's list: an API newer than this app may send a reason it
+   * has never heard of.
+   */
+  get reason(): string | undefined {
+    const reason = this.details?.reason;
+    return typeof reason === 'string' ? reason : undefined;
+  }
 }
 
 // The shape is checked; the set of codes is trusted to be the one in the
