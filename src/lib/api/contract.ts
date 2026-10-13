@@ -24,3 +24,4 @@ export type PatchTaskRequest = Schemas['PatchTaskRequest'];
 /** A timed or all-day entry on the timeline. Named apart from the DOM's `Event`. */
 export type PlannerEvent = Schemas['Event'];
 export type CreateEventRequest = Schemas['CreateEventRequest'];
+export type PatchEventRequest = Schemas['PatchEventRequest'];

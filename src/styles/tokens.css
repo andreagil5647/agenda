@@ -26,6 +26,8 @@
   --radius-pill: 999px;
 
   --control-height: 42px;
+  /* The height of one hour on the day grid; every block position derives from it. */
+  --hour-height: 56px;
   --sidebar-width: 220px;
 
   --color-bg: light-dark(#f6f7f9, #0f1318);

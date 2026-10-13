@@ -1,8 +1,18 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { CreateEventRequest, PlannerEvent } from '../../../lib/api/contract';
-import { withItem, withReplaced, withoutItem } from '../../../lib/query/listEdits';
+import type {
+  CreateEventRequest,
+  PatchEventRequest,
+  PlannerEvent,
+} from '../../../lib/api/contract';
+import { withChanges, withItem, withReplaced, withoutItem } from '../../../lib/query/listEdits';
 import { useOptimisticListMutation } from '../../../lib/query/useOptimisticListMutation';
-import { createEvent, deleteEvent, listEvents, type InstantRange } from '../api/eventsApi';
+import {
+  createEvent,
+  deleteEvent,
+  listEvents,
+  updateEvent,
+  type InstantRange,
+} from '../api/eventsApi';
 
 // Events are cached per range. Writes edit every cached range at once, since
 // the same event can be on screen in more than one of them.
@@ -27,6 +37,21 @@ export function useCreateEvent() {
     mutationFn: ({ input }) => createEvent(input),
     optimistic: (events, { provisional }) => withItem(events, provisional),
     confirmed: (events, saved, { provisional }) => withReplaced(events, provisional.id, saved),
+  });
+}
+
+interface EventUpdate {
+  event: PlannerEvent;
+  changes: PatchEventRequest;
+}
+
+/** Shows the change at once; the saved event then replaces it, carrying its new version. */
+export function useUpdateEvent() {
+  return useOptimisticListMutation<PlannerEvent, EventUpdate, PlannerEvent>({
+    queryKey: eventsKey,
+    mutationFn: ({ event, changes }, atSavedVersion) => updateEvent(atSavedVersion(event), changes),
+    optimistic: (events, { event, changes }) => withChanges(events, event.id, changes),
+    confirmed: (events, saved, { event }) => withReplaced(events, event.id, saved),
   });
 }
 

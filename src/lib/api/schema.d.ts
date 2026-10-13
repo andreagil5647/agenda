@@ -446,11 +446,8 @@ export interface components {
         };
         PatchCalendarRequest: {
             name?: string;
-            /** @default blue */
             colorKey?: string;
-            /** @default true */
             visible?: boolean;
-            /** @default [] */
             defaultReminderMinutes?: number[];
         };
         CalendarOrderRequest: {
@@ -494,17 +491,10 @@ export interface components {
             title?: string;
             /** Format: date */
             dueDate?: string | null;
-            /**
-             * @default none
-             * @enum {string}
-             */
+            /** @enum {string} */
             priority?: "none" | "low" | "medium" | "high";
-            /**
-             * @default todo
-             * @enum {string}
-             */
+            /** @enum {string} */
             status?: "todo" | "done";
-            /** @default 30 */
             estimateMinutes?: number;
         };
         MoveTaskRequest: {
