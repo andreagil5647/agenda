@@ -1,6 +1,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { JSX, ReactNode } from 'react';
 import { describeError } from '../lib/api/errorMessages';
+import { useI18n } from '../lib/i18n/I18nProvider';
 import controls from './controls.module.css';
 import styles from './QueryBoundary.module.css';
 
@@ -21,6 +22,7 @@ export function QueryBoundary<TData>({
   loadingLabel,
   children,
 }: QueryBoundaryProps<TData>): JSX.Element {
+  const { t } = useI18n();
   const retry = (): void => {
     void query.refetch();
   };
@@ -28,9 +30,9 @@ export function QueryBoundary<TData>({
   if (query.data === undefined) {
     return query.isError ? (
       <div className={controls.formError} role="alert">
-        <p className={styles.message}>{describeError(query.error)}</p>
+        <p className={styles.message}>{describeError(query.error, t)}</p>
         <button type="button" className={controls.secondaryAction} onClick={retry}>
-          Try again
+          {t('query.retry')}
         </button>
       </div>
     ) : (
@@ -44,9 +46,9 @@ export function QueryBoundary<TData>({
     <>
       {query.isError && (
         <p className={styles.stale} role="status">
-          This could not be refreshed and may be out of date.{' '}
+          {t('query.stale')}{' '}
           <button type="button" className={styles.inlineAction} onClick={retry}>
-            Try again
+            {t('query.retry')}
           </button>
         </p>
       )}

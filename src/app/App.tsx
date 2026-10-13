@@ -1,7 +1,8 @@
 import type { JSX, ReactNode } from 'react';
 import { AuthScreen } from '../features/auth/components/AuthScreen';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
-import { I18nProvider } from '../lib/i18n/I18nProvider';
+import type { PlainMessageKey } from '../lib/i18n/catalogues';
+import { I18nProvider, useI18n } from '../lib/i18n/I18nProvider';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
 import { Logo } from '../ui/Logo';
 import { NoticeProvider } from '../ui/notices/NoticeProvider';
@@ -10,25 +11,29 @@ import { AppShell } from './AppShell';
 import { PlannerPage } from './PlannerPage';
 import { PlannerQueryProvider } from './PlannerQueryProvider';
 
-const STATUS_COPY: Record<ServerStatus, string> = {
-  checking: 'Checking the API...',
-  ready: 'API is up.',
-  waking: 'Waking up the server. Free hosting sleeps when idle; this usually takes under a minute.',
-  error: 'Could not reach the API. Try reloading in a moment.',
-};
+const STATUS_MESSAGES = {
+  checking: 'app.status.checking',
+  ready: 'app.status.ready',
+  waking: 'app.status.waking',
+  error: 'app.status.error',
+} as const satisfies Record<ServerStatus, PlainMessageKey>;
 
 /** Holds the app back until the API answers, which on free hosting can take a minute. */
 function ServerGate({ children }: { children: JSX.Element }): JSX.Element {
   const { status, elapsedMs } = useServerStatus();
+  const { t } = useI18n();
 
   if (status === 'ready') {
     return children;
   }
 
   return (
-    <StatusScreen title="Getting your planner ready.">
+    <StatusScreen title={t('app.loading.title')}>
       <p role="status" aria-live="polite">
-        {STATUS_COPY[status]} ({String(Math.round(elapsedMs / 1000))}s)
+        {t('app.status.elapsed', {
+          message: t(STATUS_MESSAGES[status]),
+          seconds: Math.round(elapsedMs / 1000),
+        })}
       </p>
     </StatusScreen>
   );
@@ -55,12 +60,13 @@ function StatusScreen({ title, children }: { title: string; children: ReactNode 
 /** Shows the planner to a signed-in user and the sign-in screen to everyone else. */
 function AuthGate(): JSX.Element {
   const { status, user } = useAuth();
+  const { t } = useI18n();
 
   if (status === 'loading') {
     return (
-      <StatusScreen title="Welcome back.">
+      <StatusScreen title={t('app.session.title')}>
         <p role="status" aria-live="polite">
-          Loading your session...
+          {t('app.session.loading')}
         </p>
       </StatusScreen>
     );
