@@ -24,7 +24,6 @@ Done:
 Known gaps in the done items:
 
 - [ ] `PlannerDashboard.tsx` mixes data fetching, state, date helpers, forms and rendering
-- [ ] API types are written by hand instead of generated from the backend contract
 - [ ] Tests mock `fetch` by call order
 - [ ] Blocks are listed, not laid out on a time grid, and nothing can be dragged yet
 
@@ -35,7 +34,7 @@ Known gaps in the done items:
 - [x] **CSS pipeline.** CSS Modules in the Webpack config, design tokens as custom
       properties, light and dark themes from the same tokens, all styles out of `App.tsx`
       ([ADR 0006](adr/0006-css-modules-and-design-tokens.md)).
-- [ ] **Generated API types.** Types generated from the backend's `openapi.json`, with a
+- [x] **Generated API types.** Types generated from the backend's `openapi.json`, with a
       CI check that fails when they drift.
 - [ ] **API client.** The client owns the CSRF token and `If-Match` headers and returns
       typed errors, so callers stop passing the token around.

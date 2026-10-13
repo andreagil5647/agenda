@@ -11,7 +11,7 @@ import type {
   RegisterRequest,
   SessionResponse,
   Task,
-} from './types';
+} from './contract';
 
 type JsonBody = object;
 

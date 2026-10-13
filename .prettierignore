@@ -3,3 +3,5 @@ storybook-static
 coverage
 playwright-report
 CONTEXT.md
+openapi
+src/lib/api/schema.d.ts

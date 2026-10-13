@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { apiClient, ApiError } from '../api/apiClient';
-import type { AuthenticatedSession, LoginRequest, RegisterRequest } from '../api/types';
+import type { AuthenticatedSession, LoginRequest, RegisterRequest } from '../api/contract';
 
 type AuthStatus = 'loading' | 'anonymous' | 'authenticated';
 
