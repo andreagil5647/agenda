@@ -1,19 +1,11 @@
-import { useCallback, useEffect, useMemo, useState, type JSX, type SyntheticEvent } from 'react';
-import type { Calendar, PlannerEvent, Task } from '../../lib/api/contract';
+import { useMemo, useState, type JSX, type SyntheticEvent } from 'react';
 import { describeError } from '../../lib/api/errorMessages';
-import * as calendarsApi from '../calendars/api/calendarsApi';
-import * as tasksApi from '../tasks/api/tasksApi';
-import * as eventsApi from '../timeline/api/eventsApi';
 import controls from '../../ui/controls.module.css';
+import { useCalendars, useCreateCalendar } from '../calendars/hooks/useCalendars';
+import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '../tasks/hooks/useTasks';
+import { useCreateEvent, useDeleteEvent, useEvents } from '../timeline/hooks/useEvents';
+import { isProvisional, provisionalEvent } from '../timeline/provisionalEvent';
 import styles from './PlannerDashboard.module.css';
-
-interface PlannerState {
-  calendars: Calendar[];
-  tasks: Task[];
-  events: PlannerEvent[];
-  isLoading: boolean;
-  error: string | null;
-}
 
 function todayDate(): string {
   return toDateInputValue(new Date());
@@ -62,134 +54,104 @@ function readFormString(form: FormData, name: string): string {
 
 export function PlannerDashboard(): JSX.Element {
   const [selectedDate, setSelectedDate] = useState(todayDate);
-  const [state, setState] = useState<PlannerState>({
-    calendars: [],
-    tasks: [],
-    events: [],
-    isLoading: true,
-    error: null,
-  });
+  const range = useMemo(() => dayRange(selectedDate), [selectedDate]);
 
-  const defaultCalendarId = state.calendars[0]?.id ?? '';
-  const defaultBlockStart = dateTimeInputValue(selectedDate, 9, 0);
-  const defaultBlockEnd = dateTimeInputValue(selectedDate, 9, 30);
+  const calendarsQuery = useCalendars();
+  const tasksQuery = useTasks();
+  const eventsQuery = useEvents(range);
+  const createCalendar = useCreateCalendar();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+  const createEvent = useCreateEvent();
+  const deleteEvent = useDeleteEvent();
+
+  const queries = [calendarsQuery, tasksQuery, eventsQuery];
+  const isLoading = queries.some((query) => query.isPending);
+  const loadError = queries.find((query) => query.isError)?.error;
+
+  const calendars = calendarsQuery.data ?? [];
+  const tasks = tasksQuery.data ?? [];
+  const defaultCalendarId = calendars[0]?.id ?? '';
   const visibleEvents = useMemo(
     () =>
-      state.events
+      (eventsQuery.data ?? [])
         .slice()
         .sort((left, right) =>
           (left.startUtc ?? left.startDate ?? '').localeCompare(
             right.startUtc ?? right.startDate ?? '',
           ),
         ),
-    [state.events],
+    [eventsQuery.data],
   );
 
-  const loadPlanner = useCallback(async () => {
-    setState((current) => ({ ...current, isLoading: true, error: null }));
-    const { from, to } = dayRange(selectedDate);
-
-    try {
-      const [calendars, tasks, events] = await Promise.all([
-        calendarsApi.listCalendars(),
-        tasksApi.listTasks(),
-        eventsApi.listEvents({ from, to }),
-      ]);
-      setState({ calendars, tasks, events, isLoading: false, error: null });
-    } catch (error) {
-      setState((current) => ({ ...current, isLoading: false, error: describeError(error) }));
+  const retryLoading = (): void => {
+    for (const query of queries) {
+      if (query.isError) void query.refetch();
     }
-  }, [selectedDate]);
+  };
 
-  useEffect(() => {
-    void loadPlanner();
-  }, [loadPlanner]);
-
-  const createCalendar = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
+  const submitCalendar = (event: SyntheticEvent<HTMLFormElement>): void => {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    const name = readFormString(form, 'name');
-    const colorKey = readFormString(form, 'colorKey') || 'blue';
 
-    try {
-      await calendarsApi.createCalendar({ name, colorKey, defaultReminderMinutes: [10] });
-      formElement.reset();
-      await loadPlanner();
-    } catch (error) {
-      setState((current) => ({ ...current, error: describeError(error) }));
-    }
+    createCalendar.mutate(
+      {
+        name: readFormString(form, 'name'),
+        colorKey: readFormString(form, 'colorKey') || 'blue',
+        defaultReminderMinutes: [10],
+      },
+      {
+        onSuccess: () => {
+          formElement.reset();
+        },
+      },
+    );
   };
 
-  const createTask = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
+  const submitTask = (event: SyntheticEvent<HTMLFormElement>): void => {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    const title = readFormString(form, 'title');
-    const dueDate = readFormString(form, 'dueDate') || selectedDate;
-    const estimateMinutes = Number(readFormString(form, 'estimateMinutes') || '30');
 
-    try {
-      await tasksApi.createTask({ title, dueDate, priority: 'medium', estimateMinutes });
-      formElement.reset();
-      await loadPlanner();
-    } catch (error) {
-      setState((current) => ({ ...current, error: describeError(error) }));
-    }
+    createTask.mutate(
+      {
+        title: readFormString(form, 'title'),
+        dueDate: readFormString(form, 'dueDate') || selectedDate,
+        priority: 'medium',
+        estimateMinutes: Number(readFormString(form, 'estimateMinutes') || '30'),
+      },
+      {
+        onSuccess: () => {
+          formElement.reset();
+        },
+      },
+    );
   };
 
-  const createEvent = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
+  const submitBlock = (event: SyntheticEvent<HTMLFormElement>): void => {
     event.preventDefault();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
-    const title = readFormString(form, 'title');
-    const calendarId = readFormString(form, 'calendarId') || defaultCalendarId;
-    const taskId = readFormString(form, 'taskId') || null;
-    const start = readFormString(form, 'start');
-    const end = readFormString(form, 'end');
+    const input = {
+      kind: 'timed',
+      calendarId: readFormString(form, 'calendarId') || defaultCalendarId,
+      title: readFormString(form, 'title'),
+      taskId: readFormString(form, 'taskId') || null,
+      startUtc: localInputToIso(readFormString(form, 'start')),
+      endUtc: localInputToIso(readFormString(form, 'end')),
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    } as const;
 
-    try {
-      await eventsApi.createEvent({
-        kind: 'timed',
-        calendarId,
-        title,
-        taskId,
-        startUtc: localInputToIso(start),
-        endUtc: localInputToIso(end),
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      });
-      formElement.reset();
-      await loadPlanner();
-    } catch (error) {
-      setState((current) => ({ ...current, error: describeError(error) }));
-    }
-  };
-
-  const toggleTask = async (task: Task): Promise<void> => {
-    try {
-      await tasksApi.updateTask(task, { status: task.status === 'done' ? 'todo' : 'done' });
-      await loadPlanner();
-    } catch (error) {
-      setState((current) => ({ ...current, error: describeError(error) }));
-    }
-  };
-
-  const deleteTask = async (task: Task): Promise<void> => {
-    try {
-      await tasksApi.deleteTask(task);
-      await loadPlanner();
-    } catch (error) {
-      setState((current) => ({ ...current, error: describeError(error) }));
-    }
-  };
-
-  const deleteEvent = async (eventBlock: PlannerEvent): Promise<void> => {
-    try {
-      await eventsApi.deleteEvent(eventBlock);
-      await loadPlanner();
-    } catch (error) {
-      setState((current) => ({ ...current, error: describeError(error) }));
-    }
+    createEvent.mutate(
+      { input, provisional: provisionalEvent(input, new Date()) },
+      {
+        onSuccess: () => {
+          formElement.reset();
+        },
+      },
+    );
   };
 
   return (
@@ -215,23 +177,30 @@ export function PlannerDashboard(): JSX.Element {
           </label>
         </div>
 
-        {state.error && (
-          <p className={controls.formError} role="alert">
-            {state.error}
-          </p>
+        {loadError && (
+          <div className={controls.formError} role="alert">
+            <p>{describeError(loadError)}</p>
+            <button type="button" className={controls.secondaryAction} onClick={retryLoading}>
+              Try again
+            </button>
+          </div>
         )}
 
-        {state.isLoading ? (
+        {isLoading ? (
           <p role="status" aria-live="polite">
             Loading planner...
           </p>
         ) : (
           <div className={styles.timelineList}>
-            {visibleEvents.length === 0 && (
+            {visibleEvents.length === 0 && !loadError && (
               <p className={styles.emptyState}>No blocks on this day yet.</p>
             )}
             {visibleEvents.map((eventBlock) => (
-              <div className={styles.timelineRow} key={eventBlock.id}>
+              <div
+                className={styles.timelineRow}
+                key={eventBlock.id}
+                aria-busy={isProvisional(eventBlock)}
+              >
                 <span className={styles.time}>
                   {eventBlock.startUtc
                     ? new Date(eventBlock.startUtc).toLocaleTimeString([], {
@@ -243,16 +212,17 @@ export function PlannerDashboard(): JSX.Element {
                 <div>
                   <strong>{eventBlock.title}</strong>
                   <span>
-                    {state.calendars.find((calendar) => calendar.id === eventBlock.calendarId)
-                      ?.name ?? 'Calendar'}
+                    {calendars.find((calendar) => calendar.id === eventBlock.calendarId)?.name ??
+                      'Calendar'}
                   </span>
                 </div>
                 <button
                   type="button"
                   className={controls.iconAction}
                   aria-label={`Delete ${eventBlock.title}`}
+                  disabled={isProvisional(eventBlock)}
                   onClick={() => {
-                    void deleteEvent(eventBlock);
+                    deleteEvent.mutate(eventBlock);
                   }}
                 >
                   X
@@ -262,11 +232,7 @@ export function PlannerDashboard(): JSX.Element {
           </div>
         )}
 
-        <form
-          className={styles.inlineForm}
-          autoComplete="off"
-          onSubmit={(event) => void createEvent(event)}
-        >
+        <form className={styles.inlineForm} autoComplete="off" onSubmit={submitBlock}>
           <input name="title" placeholder="Block title" autoComplete="off" required />
           <select
             key={defaultCalendarId}
@@ -275,7 +241,7 @@ export function PlannerDashboard(): JSX.Element {
             required
             defaultValue={defaultCalendarId}
           >
-            {state.calendars.map((calendar) => (
+            {calendars.map((calendar) => (
               <option value={calendar.id} key={calendar.id}>
                 {calendar.name}
               </option>
@@ -283,7 +249,7 @@ export function PlannerDashboard(): JSX.Element {
           </select>
           <select name="taskId" aria-label="Linked task" defaultValue="">
             <option value="">No linked task</option>
-            {state.tasks.map((task) => (
+            {tasks.map((task) => (
               <option value={task.id} key={task.id}>
                 {task.title}
               </option>
@@ -294,7 +260,7 @@ export function PlannerDashboard(): JSX.Element {
             name="start"
             type="datetime-local"
             aria-label="Block start"
-            defaultValue={defaultBlockStart}
+            defaultValue={dateTimeInputValue(selectedDate, 9, 0)}
             required
           />
           <input
@@ -302,7 +268,7 @@ export function PlannerDashboard(): JSX.Element {
             name="end"
             type="datetime-local"
             aria-label="Block end"
-            defaultValue={defaultBlockEnd}
+            defaultValue={dateTimeInputValue(selectedDate, 9, 30)}
             required
           />
           <button type="submit" className={controls.primaryAction} disabled={!defaultCalendarId}>
@@ -318,14 +284,10 @@ export function PlannerDashboard(): JSX.Element {
               <p className={controls.eyebrow}>Inbox</p>
               <h2 id="task-title">Tasks</h2>
             </div>
-            <span>{state.tasks.length} tasks</span>
+            <span>{tasks.length} tasks</span>
           </div>
 
-          <form
-            className={styles.inlineForm}
-            autoComplete="off"
-            onSubmit={(event) => void createTask(event)}
-          >
+          <form className={styles.inlineForm} autoComplete="off" onSubmit={submitTask}>
             <input name="title" placeholder="New task" autoComplete="off" required />
             <input
               key={selectedDate}
@@ -348,14 +310,19 @@ export function PlannerDashboard(): JSX.Element {
           </form>
 
           <ul className={styles.taskList}>
-            {state.tasks.map((task) => (
+            {tasks.map((task) => (
               <li key={task.id} data-status={task.status}>
                 <input
                   type="checkbox"
                   className={controls.checkboxAction}
                   checked={task.status === 'done'}
                   aria-label={`Mark ${task.title} ${task.status === 'done' ? 'todo' : 'done'}`}
-                  onChange={() => void toggleTask(task)}
+                  onChange={() => {
+                    updateTask.mutate({
+                      task,
+                      changes: { status: task.status === 'done' ? 'todo' : 'done' },
+                    });
+                  }}
                 />
                 <span>{task.title}</span>
                 <small>{task.estimateMinutes}m</small>
@@ -363,7 +330,9 @@ export function PlannerDashboard(): JSX.Element {
                   type="button"
                   className={controls.iconAction}
                   aria-label={`Delete ${task.title}`}
-                  onClick={() => void deleteTask(task)}
+                  onClick={() => {
+                    deleteTask.mutate(task);
+                  }}
                 >
                   X
                 </button>
@@ -378,13 +347,9 @@ export function PlannerDashboard(): JSX.Element {
               <p className={controls.eyebrow}>Calendars</p>
               <h2 id="calendar-title">Sources</h2>
             </div>
-            <span>{state.calendars.length}</span>
+            <span>{calendars.length}</span>
           </div>
-          <form
-            className={styles.inlineForm}
-            autoComplete="off"
-            onSubmit={(event) => void createCalendar(event)}
-          >
+          <form className={styles.inlineForm} autoComplete="off" onSubmit={submitCalendar}>
             <input name="name" placeholder="Calendar name" autoComplete="off" required />
             <select name="colorKey" aria-label="Calendar color" defaultValue="blue">
               <option value="blue">Blue</option>
@@ -397,7 +362,7 @@ export function PlannerDashboard(): JSX.Element {
             </button>
           </form>
           <div className={styles.calendarList}>
-            {state.calendars.map((calendar) => (
+            {calendars.map((calendar) => (
               <span
                 className={styles.calendarPill}
                 data-color={calendar.colorKey}

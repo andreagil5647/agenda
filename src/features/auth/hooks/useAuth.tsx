@@ -25,6 +25,8 @@ interface AuthContextValue extends AuthState {
   logIn: (input: LoginRequest) => Promise<void>;
   startDemo: () => Promise<void>;
   logOut: () => Promise<void>;
+  /** The API stopped recognising the session while the app was in use. */
+  expireSession: () => void;
   clearError: () => void;
 }
 
@@ -34,6 +36,7 @@ const ANONYMOUS: AuthState = { status: 'anonymous', user: null, error: null };
 
 // On the sign-in form a 401 means the credentials, not an expired session.
 const SIGN_IN_MESSAGES = { UNAUTHORIZED: 'That email and password do not match.' };
+const SESSION_ENDED = 'Your session has ended. Log in again to continue.';
 
 function signedIn(user: AuthUser): AuthState {
   return { status: 'authenticated', user, error: null };
@@ -91,13 +94,17 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
     }
   }, []);
 
+  const expireSession = useCallback(() => {
+    setState({ ...ANONYMOUS, error: SESSION_ENDED });
+  }, []);
+
   const clearError = useCallback(() => {
     setState((current) => ({ ...current, error: null }));
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ ...state, register, logIn, startDemo, logOut, clearError }),
-    [state, register, logIn, startDemo, logOut, clearError],
+    () => ({ ...state, register, logIn, startDemo, logOut, expireSession, clearError }),
+    [state, register, logIn, startDemo, logOut, expireSession, clearError],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

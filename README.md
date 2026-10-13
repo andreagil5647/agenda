@@ -17,6 +17,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | ---------- | ----------------------------------------------------------- |
 | Runtime    | React 19, TypeScript 6 (strict)                             |
 | Build      | Webpack 5, hand-written dev/prod config, SWC (`swc-loader`) |
+| Data       | TanStack Query, API client typed by the OpenAPI contract    |
 | Styles     | CSS Modules on design tokens, light and dark themes         |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
 | Tests      | Jest 30 (`@swc/jest`), React Testing Library, MSW           |
@@ -46,6 +47,7 @@ src/
   styles/              design tokens and the global base layer
   ui/                  styles shared by more than one screen
   lib/api/             API client typed by the contract, one error type, user-facing messages
+  lib/query/           query client and the optimistic write used by every feature
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
                         exposes a "waking up the server" state for free-tier cold starts
