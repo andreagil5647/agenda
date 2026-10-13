@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { buildCalendar, buildTimedEvent, fakeApi } from '../../../test/msw/fakeApi';
+import { buildCalendar, buildTask, buildTimedEvent, fakeApi } from '../../../test/msw/fakeApi';
 import { App } from '../../app/App';
 import { addDays } from '../../lib/time/zonedTime';
 
@@ -190,5 +190,31 @@ describe('planning a day', () => {
 
     expect(screen.getByRole('button', { name: 'Add block' })).toBeDisabled();
     expect(screen.getByText(/Add a calendar first/)).toBeInTheDocument();
+  });
+
+  it('plans a task at the next free time, for as long as its estimate', async () => {
+    seedDay();
+    fakeApi.seed({ tasks: [buildTask({ title: 'Write release notes', estimateMinutes: 45 })] });
+    const user = await renderDay();
+
+    await user.click(await screen.findByRole('button', { name: 'Plan Write release notes' }));
+
+    const planned = await block(/Write release notes/);
+    const saved = fakeApi.events.find((event) => event.title === 'Write release notes');
+    const minutes = (Date.parse(saved!.endUtc!) - Date.parse(saved!.startUtc!)) / 60_000;
+    expect(planned).toBeInTheDocument();
+    expect(minutes).toBe(45);
+    expect(saved).toMatchObject({ taskId: fakeApi.tasks[0]!.id });
+    expect(screen.getByText(/Planned Write release notes for/)).toHaveAttribute('role', 'status');
+    expect(await screen.findByText(/planned/)).toBeInTheDocument();
+  });
+
+  it('does not offer to plan a finished task, or any task without a calendar', async () => {
+    fakeApi.signIn();
+    fakeApi.seed({ tasks: [buildTask({ title: 'Open task' })] });
+    await renderDay();
+
+    expect(await screen.findByRole('checkbox', { name: 'Open task' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Plan Open task' })).not.toBeInTheDocument();
   });
 });

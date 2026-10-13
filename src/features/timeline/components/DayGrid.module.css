@@ -44,6 +44,23 @@
   cursor: cell;
 }
 
+/* Where a dragged item would land, drawn at the snapped time. */
+.landing {
+  position: absolute;
+  top: calc(var(--start) * var(--hour-height) / 60);
+  right: 2px;
+  left: 2px;
+  height: calc((var(--end) - var(--start)) * var(--hour-height) / 60);
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0 var(--space-1);
+  pointer-events: none;
+}
+
 .now {
   position: absolute;
   top: calc(var(--at) * var(--hour-height) / 60);

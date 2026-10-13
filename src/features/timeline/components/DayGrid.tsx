@@ -1,8 +1,10 @@
-import { useEffect, useRef, type JSX, type MouseEvent } from 'react';
+import { useDroppable } from '@dnd-kit/core';
+import { useCallback, useEffect, useMemo, useRef, type JSX, type MouseEvent } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
 import { formatTimeOfDay, type HourCycle } from '../../../lib/time/formatTime';
 import { MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
-import { minutesAtOffset, type PlacedBlock } from '../dayLayout';
+import { minutesAtOffset, type PlacedBlock, type TimeSpan } from '../dayLayout';
+import { DAY_GRID_DROP_ID, type DayGridTarget } from '../planningDrag';
 import styles from './DayGrid.module.css';
 import { TimeBlock } from './TimeBlock';
 
@@ -16,6 +18,10 @@ interface DayGridProps {
   nowMinutes: number | null;
   /** The time of day to bring into view when the grid first appears. */
   initialMinutes: number;
+  /** Where something being dragged over the grid would land. */
+  landingSpan: TimeSpan | null;
+  /** Called when the grid scrolls, which moves the time under a held pointer. */
+  onScroll: () => void;
   selectedEventId: string | null;
   onSelectEvent: (event: PlannerEvent) => void;
   /** Called with the time of day at the point of the grid that was clicked. */
@@ -29,11 +35,35 @@ export function DayGrid({
   hourCycle,
   nowMinutes,
   initialMinutes,
+  landingSpan,
+  onScroll,
   selectedEventId,
   onSelectEvent,
   onCreateAt,
 }: DayGridProps): JSX.Element {
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+
+  // The drop target is the part of the day that is scrolled into view, so the
+  // time under a screen position depends on how far the grid is scrolled.
+  const dropTarget = useMemo<DayGridTarget>(
+    () => ({
+      minutesAt: (clientY) => {
+        const scroller = scrollerRef.current;
+        if (!scroller) return 0;
+        const offset = clientY - scroller.getBoundingClientRect().top + scroller.scrollTop;
+        return minutesAtOffset(offset, scroller.scrollHeight);
+      },
+    }),
+    [],
+  );
+  const { setNodeRef } = useDroppable({ id: DAY_GRID_DROP_ID, data: dropTarget });
+  const setScroller = useCallback(
+    (node: HTMLDivElement | null) => {
+      scrollerRef.current = node;
+      setNodeRef(node);
+    },
+    [setNodeRef],
+  );
 
   // Only on mount: after that the scroll position belongs to the user.
   useEffect(() => {
@@ -52,7 +82,7 @@ export function DayGrid({
   };
 
   return (
-    <div className={styles.scroller} ref={scrollerRef}>
+    <div className={styles.scroller} ref={setScroller} onScroll={onScroll}>
       <div className={styles.grid}>
         <ol className={styles.hours} aria-hidden="true">
           {HOURS.map((hour) => (
@@ -74,6 +104,15 @@ export function DayGrid({
               onSelect={onSelectEvent}
             />
           ))}
+          {landingSpan && (
+            <li
+              className={styles.landing}
+              style={{ '--start': landingSpan.startMinutes, '--end': landingSpan.endMinutes }}
+              aria-hidden="true"
+            >
+              {formatTimeOfDay(landingSpan.startMinutes, hourCycle)}
+            </li>
+          )}
           {nowMinutes !== null && (
             <li className={styles.now} style={{ '--at': nowMinutes }} aria-hidden="true" />
           )}

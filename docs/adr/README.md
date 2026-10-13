@@ -12,5 +12,6 @@ A superseded record stays in place with a link to the one that replaces it.
 | 0005 | [pnpm for frontend package management](0005-pnpm-package-manager.md)                                      | Accepted |
 | 0006 | [CSS Modules on design tokens, themes with `light-dark()`](0006-css-modules-and-design-tokens.md)         | Accepted |
 | 0007 | [TanStack Query for server state](0007-tanstack-query-for-server-state.md)                                | Accepted |
+| 0008 | [Drag and drop with dnd-kit, and explicit controls for the keyboard](0008-drag-and-drop-with-dnd-kit.md)  | Accepted |
 
 New records copy [the template](template.md).

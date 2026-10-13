@@ -1,0 +1,93 @@
+import { useDraggable } from '@dnd-kit/core';
+import type { JSX } from 'react';
+import type { Task } from '../../../lib/api/contract';
+import { formatDuration } from '../../../lib/time/formatTime';
+import controls from '../../../ui/controls.module.css';
+import { draggedTask } from '../../timeline/planningDrag';
+import styles from './TaskItem.module.css';
+
+interface TaskItemProps {
+  task: Task;
+  /** Whether there is a calendar to plan into; without one a task cannot be given time. */
+  canPlan: boolean;
+  /** Whether a block on the day in view is already set aside for this task. */
+  isPlanned: boolean;
+  onToggleDone: (task: Task) => void;
+  onDelete: (task: Task) => void;
+  /** Gives the task a block on the day in view, at the next free time. */
+  onPlan: (task: Task) => void;
+}
+
+/**
+ * A task in the list. An open task can be given time in two ways: dragged by
+ * its grip onto the timeline, or with the Plan button, which works from the
+ * keyboard and places it at the next free time.
+ */
+export function TaskItem({
+  task,
+  canPlan,
+  isPlanned,
+  onToggleDone,
+  onDelete,
+  onPlan,
+}: TaskItemProps): JSX.Element {
+  const isOpen = task.status === 'todo';
+  const { setNodeRef, listeners, isDragging } = useDraggable({
+    id: `task:${task.id}`,
+    data: draggedTask(task),
+    disabled: !isOpen || !canPlan,
+  });
+
+  return (
+    <li className={styles.item} data-status={task.status} data-dragging={isDragging}>
+      {/* A pointer-only shortcut, so it is hidden from assistive technology; Plan is the
+          equivalent control. */}
+      <span
+        ref={setNodeRef}
+        className={styles.grip}
+        aria-hidden="true"
+        title={isOpen ? 'Drag onto the timeline' : undefined}
+        {...listeners}
+      >
+        ⠿
+      </span>
+      <label className={styles.title}>
+        <input
+          type="checkbox"
+          className={controls.checkboxAction}
+          checked={!isOpen}
+          onChange={() => {
+            onToggleDone(task);
+          }}
+        />
+        <span>{task.title}</span>
+      </label>
+      <small className={styles.meta}>
+        {formatDuration(task.estimateMinutes)}
+        {isPlanned && <span className={styles.planned}> · planned</span>}
+      </small>
+      {isOpen && canPlan && (
+        <button
+          type="button"
+          className={styles.plan}
+          aria-label={`Plan ${task.title}`}
+          onClick={() => {
+            onPlan(task);
+          }}
+        >
+          Plan
+        </button>
+      )}
+      <button
+        type="button"
+        className={controls.iconAction}
+        aria-label={`Delete ${task.title}`}
+        onClick={() => {
+          onDelete(task);
+        }}
+      >
+        ×
+      </button>
+    </li>
+  );
+}

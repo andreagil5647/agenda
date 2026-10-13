@@ -22,7 +22,7 @@ Done:
 
 Known gaps in the done items:
 
-- [ ] Nothing on the grid can be dragged yet
+- [ ] Blocks on the grid cannot be moved or resized by dragging yet
 
 ## Build order
 
@@ -54,8 +54,9 @@ Known gaps in the done items:
 - [x] **Create a block** by clicking empty grid space or with the Add block button, then
       edit its title, calendar and times in the details panel.
 - [ ] **Create a block by dragging** over empty grid space to set its length.
-- [ ] **Task onto the grid.** Dragging a task creates a linked block as long as the task's
-      estimate, optimistically, with rollback on failure.
+- [x] **Task onto the grid.** Dragging a task creates a linked block as long as the task's
+      estimate, optimistically, with rollback on failure. The Plan button does the same from
+      the keyboard ([ADR 0008](adr/0008-drag-and-drop-with-dnd-kit.md)).
 - [ ] **Move and resize** blocks with 15-minute snapping, and a clear message when the
       server reports a newer version.
 - [ ] **Reorder tasks** by dragging in the list.
