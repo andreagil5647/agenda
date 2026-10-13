@@ -43,7 +43,8 @@ describe('App', () => {
     await user.type(screen.getByLabelText('Password'), 'correct horse battery staple');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(await screen.findByRole('heading', { name: 'Andrea' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Log out' })).toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'Account' })).toHaveTextContent('Andrea');
   });
 
   it('starts a demo session in one click', async () => {
@@ -52,7 +53,7 @@ describe('App', () => {
 
     await user.click(await screen.findByRole('button', { name: 'Try demo' }));
 
-    expect(await screen.findByRole('heading', { name: 'Demo User' })).toBeInTheDocument();
+    expect(await screen.findByText(/Demo account/)).toBeInTheDocument();
   });
 
   it('shows why a sign-in failed', async () => {
@@ -87,7 +88,7 @@ describe('App', () => {
     expect(
       within(screen.getByRole('region', { name: 'Tasks' })).getByRole('list'),
     ).toHaveTextContent('Draft launch checklist');
-    expect(screen.getByRole('region', { name: 'Sources' })).toHaveTextContent('Work');
+    expect(await screen.findByRole('region', { name: 'Calendars' })).toHaveTextContent('Work');
   });
 
   it('adds a task to the list', async () => {

@@ -1,12 +1,12 @@
 import type { JSX } from 'react';
 import { AuthScreen } from '../features/auth/components/AuthScreen';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
-import { PlannerDashboard } from '../features/planner/PlannerDashboard';
-import { env } from '../lib/env';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
 import controls from '../ui/controls.module.css';
 import { NoticeProvider } from '../ui/notices/NoticeProvider';
 import styles from './App.module.css';
+import { AppShell } from './AppShell';
+import { PlannerPage } from './PlannerPage';
 import { PlannerQueryProvider } from './PlannerQueryProvider';
 
 const STATUS_COPY: Record<ServerStatus, string> = {
@@ -16,6 +16,7 @@ const STATUS_COPY: Record<ServerStatus, string> = {
   error: 'Could not reach the API. Try reloading in a moment.',
 };
 
+/** Holds the app back until the API answers, which on free hosting can take a minute. */
 function ServerGate({ children }: { children: JSX.Element }): JSX.Element {
   const { status, elapsedMs } = useServerStatus();
 
@@ -36,52 +37,9 @@ function ServerGate({ children }: { children: JSX.Element }): JSX.Element {
   );
 }
 
-function AppShell(): JSX.Element {
-  const { user, logOut, error } = useAuth();
-
-  return (
-    <main className={styles.appShell}>
-      <aside className={styles.sidebar} aria-label="Workspace navigation">
-        <div>
-          <p className={styles.brand}>Agenda</p>
-          <nav className={styles.nav}>
-            <a href="#today" aria-current="page">
-              Today
-            </a>
-            <a href="#tasks">Tasks</a>
-            <a href="#calendars">Calendars</a>
-          </nav>
-        </div>
-        <p className={styles.version}>web {env.appVersion}</p>
-      </aside>
-
-      <section className={styles.workspace} id="today">
-        <header className={styles.topbar}>
-          <div>
-            <p className={controls.eyebrow}>Signed in</p>
-            <h1>{user?.displayName}</h1>
-          </div>
-          <button type="button" className={controls.secondaryAction} onClick={() => void logOut()}>
-            Log out
-          </button>
-        </header>
-
-        {error && (
-          <p className={controls.formError} role="alert">
-            {error}
-          </p>
-        )}
-
-        <PlannerQueryProvider>
-          <PlannerDashboard />
-        </PlannerQueryProvider>
-      </section>
-    </main>
-  );
-}
-
+/** Shows the planner to a signed-in user and the sign-in screen to everyone else. */
 function AuthGate(): JSX.Element {
-  const { status } = useAuth();
+  const { status, user } = useAuth();
 
   if (status === 'loading') {
     return (
@@ -93,7 +51,17 @@ function AuthGate(): JSX.Element {
     );
   }
 
-  return status === 'authenticated' ? <AppShell /> : <AuthScreen />;
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  return (
+    <AppShell user={user}>
+      <PlannerQueryProvider>
+        <PlannerPage settings={user.settings} />
+      </PlannerQueryProvider>
+    </AppShell>
+  );
 }
 
 export function App(): JSX.Element {
