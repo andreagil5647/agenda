@@ -80,7 +80,8 @@
 }
 
 .version {
-  margin: auto 0 0;
+  /* Above the dock, which floats over the bottom-left corner of the screen. */
+  margin: auto 0 var(--space-12);
   color: var(--color-text-subtle);
   font-size: var(--text-xs);
 }
@@ -144,6 +145,7 @@
   }
 
   .workspace {
-    padding: var(--space-5) var(--space-4);
+    /* Room to scroll the last of the page clear of the dock. */
+    padding: var(--space-5) var(--space-4) calc(var(--space-12) + var(--space-8));
   }
 }

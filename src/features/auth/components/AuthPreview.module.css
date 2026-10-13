@@ -2,7 +2,7 @@
 .preview {
   position: relative;
   width: min(100%, 360px);
-  margin-top: var(--space-8);
+  margin-top: var(--space-6);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -20,7 +20,7 @@
 
 .blocks {
   display: grid;
-  grid-template-rows: repeat(5, 30px);
+  grid-template-rows: repeat(5, 26px);
   gap: var(--space-1);
   margin: 0;
   padding: 0;
