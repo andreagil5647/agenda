@@ -1,4 +1,13 @@
-import { detectLanguage, intlLocale, LANGUAGES, LANGUAGE_NAMES } from './languages';
+import { detectLanguage, intlLocale, isLanguage, LANGUAGES, LANGUAGE_NAMES } from './languages';
+
+describe('isLanguage', () => {
+  it('accepts the languages the app has, and nothing else', () => {
+    expect(LANGUAGES.every(isLanguage)).toBe(true);
+    for (const other of ['fr', 'EN', 'en-GB', '', 7, null, undefined, {}]) {
+      expect(isLanguage(other)).toBe(false);
+    }
+  });
+});
 
 describe('detectLanguage', () => {
   it('prefers a saved choice over everything else', () => {
