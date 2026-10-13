@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import { formatDayHeading } from '../../../lib/time/formatTime';
 import controls from '../../../ui/controls.module.css';
 import { Icon } from '../../../ui/Icon';
@@ -24,17 +25,19 @@ export function DayHeader({
   onShowPrevious,
   onShowNext,
 }: DayHeaderProps): JSX.Element {
+  const { t } = useI18n();
+
   return (
     <header className={styles.header}>
       <div className={styles.title}>
         <h1 className={styles.heading}>{formatDayHeading(day, locale)}</h1>
-        {isToday && <p className={styles.today}>Today</p>}
+        {isToday && <p className={styles.today}>{t('timeline.date.today')}</p>}
       </div>
       <div className={styles.controls}>
         <button
           type="button"
           className={`${controls.iconAction} ${controls.navAction}`}
-          aria-label="Previous day"
+          aria-label={t('timeline.date.previous')}
           onClick={onShowPrevious}
         >
           <Icon name="chevron-left" />
@@ -45,12 +48,12 @@ export function DayHeader({
           disabled={isToday}
           onClick={onShowToday}
         >
-          Today
+          {t('timeline.date.today')}
         </button>
         <button
           type="button"
           className={`${controls.iconAction} ${controls.navAction}`}
-          aria-label="Next day"
+          aria-label={t('timeline.date.next')}
           onClick={onShowNext}
         >
           <Icon name="chevron-right" />
@@ -58,7 +61,7 @@ export function DayHeader({
         <input
           type="date"
           className={styles.datePicker}
-          aria-label="Go to date"
+          aria-label={t('timeline.date.goTo')}
           value={day}
           onChange={(event) => {
             if (event.target.value) onShowDay(event.target.value);

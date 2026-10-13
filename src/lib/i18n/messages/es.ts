@@ -68,4 +68,69 @@ export const es: Translation<typeof en> = {
   'auth.preview.checklist': 'Preparar la lista del lanzamiento',
   'auth.preview.lunch': 'Comida con Marta',
   'auth.preview.task': 'Redactar las notas de la versión',
+
+  // The day on screen
+  'timeline.title': 'Línea de tiempo',
+  'timeline.addBlock': 'Añadir bloque',
+  'timeline.loading': 'Cargando el día...',
+  'timeline.needCalendar': 'Añade primero un calendario: cada bloque pertenece a uno.',
+  'timeline.empty.title': 'Un día despejado',
+  'timeline.empty.hint':
+    'Todavía no hay nada planificado. Haz clic en la cuadrícula, pulsa {addBlock} o arrastra una tarea aquí.',
+  'timeline.allDay': 'Todo el día',
+  'timeline.blocks': 'Bloques',
+  'timeline.shortcuts':
+    'Pulsa la flecha arriba o abajo para mover el bloque 15 minutos. Mantén Mayús con una flecha para acortarlo o alargarlo. Pulsa Suprimir para eliminarlo.',
+  'timeline.date.today': 'Hoy',
+  'timeline.date.previous': 'Día anterior',
+  'timeline.date.next': 'Día siguiente',
+  'timeline.date.goTo': 'Ir a la fecha',
+
+  // The details of one block
+  'block.new': 'Nuevo bloque',
+  'block.details': 'Detalles',
+  'block.close': 'Cerrar',
+  'block.title': 'Título',
+  'block.calendar': 'Calendario',
+  'block.start': 'Inicio',
+  'block.end': 'Fin',
+  'block.linkedTask': 'Tiempo reservado para «{title}».',
+  'block.save': 'Guardar',
+  'block.delete': 'Eliminar bloque',
+  'block.endAfterStart': 'El final tiene que ser posterior al inicio.',
+
+  // Tasks
+  'tasks.title': 'Tareas',
+  'tasks.openCount': { one: '{count} abierta', other: '{count} abiertas' },
+  'tasks.new': 'Nueva tarea',
+  'tasks.dueDate': 'Fecha límite',
+  'tasks.estimate': 'Estimación en minutos',
+  'tasks.add': 'Añadir tarea',
+  'tasks.loading': 'Cargando tareas...',
+  'tasks.empty.title': 'Aún no hay tareas',
+  'tasks.empty.hint': 'Añade la primera arriba y luego dale una hora en el día.',
+  'tasks.item.drag': 'Arrastra al día',
+  'tasks.item.planned': 'planificada',
+  'tasks.item.plan': 'Planificar',
+  'tasks.item.planLabel': 'Planificar {title}',
+  'tasks.item.deleteLabel': 'Eliminar {title}',
+
+  // Calendars
+  'calendars.title': 'Calendarios',
+  'calendars.new': 'Nuevo calendario',
+  'calendars.color': 'Color',
+  'calendars.add': 'Añadir calendario',
+  'calendars.loading': 'Cargando calendarios...',
+  'calendars.empty.title': 'Aún no hay calendarios',
+  'calendars.empty.hint': 'Cada bloque vive en un calendario, así que añade uno primero.',
+  'calendars.colors.blue': 'Azul',
+  'calendars.colors.green': 'Verde',
+  'calendars.colors.purple': 'Morado',
+  'calendars.colors.rose': 'Rosa',
+
+  // Read out for those who cannot see a block move
+  'announce.planned': 'Planificada {title} para {time}.',
+  'announce.moved': 'Movido {title}: {time}.',
+  'announce.resized': 'Cambiada la duración de {title}: {time}.',
+  'announce.deleted': 'Eliminado {title}.',
 };

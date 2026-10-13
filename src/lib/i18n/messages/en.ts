@@ -70,4 +70,69 @@ export const en = {
   'auth.preview.checklist': 'Draft the launch checklist',
   'auth.preview.lunch': 'Lunch with Marta',
   'auth.preview.task': 'Write release notes',
+
+  // The day on screen
+  'timeline.title': 'Timeline',
+  'timeline.addBlock': 'Add block',
+  'timeline.loading': 'Loading the day...',
+  'timeline.needCalendar': 'Add a calendar first: every block belongs to one.',
+  'timeline.empty.title': 'A clear day',
+  'timeline.empty.hint':
+    'Nothing is planned yet. Click the grid, press {addBlock}, or drag a task here.',
+  'timeline.allDay': 'All day',
+  'timeline.blocks': 'Blocks',
+  'timeline.shortcuts':
+    'Press the up or down arrow key to move the block by 15 minutes. Hold Shift with an arrow key to make it shorter or longer. Press Delete to remove it.',
+  'timeline.date.today': 'Today',
+  'timeline.date.previous': 'Previous day',
+  'timeline.date.next': 'Next day',
+  'timeline.date.goTo': 'Go to date',
+
+  // The details of one block
+  'block.new': 'New block',
+  'block.details': 'Details',
+  'block.close': 'Close',
+  'block.title': 'Title',
+  'block.calendar': 'Calendar',
+  'block.start': 'Start',
+  'block.end': 'End',
+  'block.linkedTask': 'Time set aside for “{title}”.',
+  'block.save': 'Save',
+  'block.delete': 'Delete block',
+  'block.endAfterStart': 'The end has to be after the start.',
+
+  // Tasks
+  'tasks.title': 'Tasks',
+  'tasks.openCount': { one: '{count} open', other: '{count} open' },
+  'tasks.new': 'New task',
+  'tasks.dueDate': 'Due date',
+  'tasks.estimate': 'Estimate in minutes',
+  'tasks.add': 'Add task',
+  'tasks.loading': 'Loading tasks...',
+  'tasks.empty.title': 'No tasks yet',
+  'tasks.empty.hint': 'Add the first one above, then give it a time on the day.',
+  'tasks.item.drag': 'Drag onto the timeline',
+  'tasks.item.planned': 'planned',
+  'tasks.item.plan': 'Plan',
+  'tasks.item.planLabel': 'Plan {title}',
+  'tasks.item.deleteLabel': 'Delete {title}',
+
+  // Calendars
+  'calendars.title': 'Calendars',
+  'calendars.new': 'New calendar',
+  'calendars.color': 'Colour',
+  'calendars.add': 'Add calendar',
+  'calendars.loading': 'Loading calendars...',
+  'calendars.empty.title': 'No calendars yet',
+  'calendars.empty.hint': 'Every block lives in a calendar, so add one first.',
+  'calendars.colors.blue': 'Blue',
+  'calendars.colors.green': 'Green',
+  'calendars.colors.purple': 'Purple',
+  'calendars.colors.rose': 'Rose',
+
+  // Read out for those who cannot see a block move
+  'announce.planned': 'Planned {title} for {time}.',
+  'announce.moved': 'Moved {title}: {time}.',
+  'announce.resized': 'Resized {title}: {time}.',
+  'announce.deleted': 'Deleted {title}.',
 } as const satisfies Catalogue;

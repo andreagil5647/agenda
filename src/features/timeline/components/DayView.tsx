@@ -1,6 +1,7 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import type { JSX } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import type { HourCycle } from '../../../lib/time/formatTime';
 import controls from '../../../ui/controls.module.css';
 import { EmptyState } from '../../../ui/EmptyState';
@@ -59,6 +60,7 @@ export function DayView({
   onCreateBlock,
   onAddBlock,
 }: DayViewProps): JSX.Element {
+  const { t } = useI18n();
   const hasCalendar = calendars.length > 0;
   const isEmptyDay = blocks.length === 0 && allDayEvents.length === 0;
   const firstBlockStart = blocks[0]?.startMinutes ?? START_OF_WORKDAY_MINUTES;
@@ -69,7 +71,7 @@ export function DayView({
 
   return (
     <Panel
-      title="Timeline"
+      title={t('timeline.title')}
       icon="clock"
       aside={
         <button
@@ -79,20 +81,18 @@ export function DayView({
           onClick={onAddBlock}
         >
           <Icon name="plus" />
-          Add block
+          {t('timeline.addBlock')}
         </button>
       }
     >
-      <QueryBoundary query={eventsQuery} loadingLabel="Loading the day...">
+      <QueryBoundary query={eventsQuery} loadingLabel={t('timeline.loading')}>
         {() => (
           <>
-            {!hasCalendar && (
-              <p className={styles.hint}>Add a calendar first: every block belongs to one.</p>
-            )}
+            {!hasCalendar && <p className={styles.hint}>{t('timeline.needCalendar')}</p>}
             {hasCalendar && isEmptyDay && (
               <div className={styles.empty}>
-                <EmptyState icon="sparkle" title="A clear day">
-                  Nothing is planned yet. Click the grid, press Add block, or drag a task here.
+                <EmptyState icon="sparkle" title={t('timeline.empty.title')}>
+                  {t('timeline.empty.hint', { addBlock: t('timeline.addBlock') })}
                 </EmptyState>
               </div>
             )}

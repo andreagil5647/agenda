@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import styles from './AllDayRow.module.css';
 
 interface AllDayRowProps {
@@ -16,6 +17,8 @@ export function AllDayRow({
   selectedEventId,
   onSelectEvent,
 }: AllDayRowProps): JSX.Element | null {
+  const { t } = useI18n();
+
   if (events.length === 0) {
     return null;
   }
@@ -23,7 +26,7 @@ export function AllDayRow({
   return (
     <div className={styles.row}>
       <span className={styles.label} id="all-day-label">
-        All day
+        {t('timeline.allDay')}
       </span>
       <ul className={styles.events} aria-labelledby="all-day-label">
         {events.map((event) => (
