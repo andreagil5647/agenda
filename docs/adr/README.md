@@ -14,5 +14,6 @@ A superseded record stays in place with a link to the one that replaces it.
 | 0007 | [TanStack Query for server state](0007-tanstack-query-for-server-state.md)                                | Accepted |
 | 0008 | [Drag and drop with dnd-kit, and explicit controls for the keyboard](0008-drag-and-drop-with-dnd-kit.md)  | Accepted |
 | 0009 | [A paper planner look, with self-hosted fonts and checked contrast](0009-visual-identity.md)              | Accepted |
+| 0010 | [A typed message catalogue for translations](0010-typed-message-catalogue.md)                             | Accepted |
 
 New records copy [the template](template.md).
