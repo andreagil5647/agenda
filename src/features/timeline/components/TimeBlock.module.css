@@ -12,6 +12,8 @@
 }
 
 .body {
+  /* Positioned so that the hidden part of its name is clipped with the rest of it. */
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
@@ -21,8 +23,10 @@
   border-radius: var(--radius-sm);
   background: var(--calendar-surface);
   color: var(--calendar-text);
-  cursor: pointer;
+  cursor: grab;
   font-size: 0.82rem;
+  /* Without this a touch drag would scroll the grid instead of moving the block. */
+  touch-action: none;
   line-height: 1.25;
   padding: 2px var(--space-2);
   text-align: left;
@@ -30,6 +34,22 @@
 
 .body[aria-pressed='true'] {
   box-shadow: 0 0 0 2px var(--calendar-text);
+}
+
+.block[data-dragging='true'] {
+  opacity: 0.4;
+}
+
+/* The bottom edge of the block, pulled to change when it ends. */
+.resizeHandle {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  left: 2px;
+  height: 8px;
+  cursor: ns-resize;
+  /* Without this a touch pull would scroll the grid instead of resizing the block. */
+  touch-action: none;
 }
 
 .body[aria-busy='true'] {

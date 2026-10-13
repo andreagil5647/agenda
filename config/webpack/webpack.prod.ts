@@ -28,12 +28,20 @@ export default (env: Record<string, boolean>): Configuration =>
         new CssMinimizerPlugin(),
       ],
       // One runtime chunk so module ids don't shift every app chunk's hash
-      // on unrelated changes; a vendor chunk so third-party code, which
-      // changes far less often than app code, caches independently.
+      // on unrelated changes. Third-party code is split in two by how often
+      // it changes: React is upgraded rarely and is the largest part, so it
+      // gets a chunk of its own that survives upgrades of everything else.
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
         cacheGroups: {
+          react: {
+            // The optional middle part is pnpm's layout: .pnpm/<name>@<version>/node_modules/.
+            test: /[\\/]node_modules[\\/](\.pnpm[\\/][^\\/]+[\\/]node_modules[\\/])?(react|react-dom|scheduler)[\\/]/,
+            name: 'react',
+            chunks: 'all',
+            priority: 10,
+          },
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendor',
@@ -44,9 +52,11 @@ export default (env: Record<string, boolean>): Configuration =>
     },
     performance: {
       hints: 'warning',
-      // Calibrated once the design system and real routes exist; a bare
-      // health-check page should stay far under this.
-      maxEntrypointSize: 250_000,
+      // Sizes before compression. The whole app is one entry of about 355 kB
+      // (111 kB gzipped), 219 kB of it React. The entry limit leaves a little
+      // room above that, so growth shows up as a warning; no single file may
+      // pass the per-asset limit, which is what keeps the chunks split.
+      maxEntrypointSize: 380_000,
       maxAssetSize: 250_000,
     },
     plugins: [

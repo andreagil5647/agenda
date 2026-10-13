@@ -46,7 +46,7 @@ const config = {
   // A floor just under the current numbers, raised as coverage grows, so a
   // change that drops tests fails in CI instead of going unnoticed.
   coverageThreshold: {
-    global: { statements: 70, branches: 60, functions: 65, lines: 70 },
+    global: { statements: 85, branches: 68, functions: 82, lines: 85 },
   },
   coverageReporters: ['text', 'html', 'lcov'],
 };

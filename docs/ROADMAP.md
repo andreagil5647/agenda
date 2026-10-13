@@ -22,7 +22,10 @@ Done:
 
 Known gaps in the done items:
 
-- [ ] Blocks on the grid cannot be moved or resized by dragging yet
+- [ ] The pointer paths of dragging are checked by hand; only the keyboard paths and the
+      arithmetic have automated tests
+- [ ] The app has one screen: no routes, and no settings screen for the time zone, hour
+      cycle or theme, which are fixed when the account is created
 
 ## Build order
 
@@ -57,11 +60,14 @@ Known gaps in the done items:
 - [x] **Task onto the grid.** Dragging a task creates a linked block as long as the task's
       estimate, optimistically, with rollback on failure. The Plan button does the same from
       the keyboard ([ADR 0008](adr/0008-drag-and-drop-with-dnd-kit.md)).
-- [ ] **Move and resize** blocks with 15-minute snapping, and a clear message when the
+- [x] **Move and resize** blocks with 15-minute snapping, and a clear message when the
       server reports a newer version.
+- [x] **Keyboard planning.** Every drag action has a keyboard equivalent and is announced
+      to screen readers: Plan on a task, arrow keys and Shift with arrow keys on a block.
+- [ ] **Touch dragging.** A block is picked up as soon as it is touched, so the grid only
+      scrolls from empty space. Pick it up on a long press instead.
 - [ ] **Reorder tasks** by dragging in the list.
-- [ ] **Keyboard planning.** Every drag action has a keyboard equivalent and is announced
-      to screen readers.
+- [ ] **Edit and delete calendars**, and hide a calendar's blocks.
 - [ ] **Week grid** reusing the day column.
 
 ### 3. Release quality

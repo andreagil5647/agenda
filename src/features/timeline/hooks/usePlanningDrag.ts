@@ -9,21 +9,22 @@ import {
   type SensorOptions,
 } from '@dnd-kit/core';
 import { useCallback, useRef, useState } from 'react';
-import type { Task } from '../../../lib/api/contract';
+import type { PlannerEvent, Task } from '../../../lib/api/contract';
 import { spanAt, type TimeSpan } from '../dayLayout';
-import { isDayGridTarget, isDraggedTask } from '../planningDrag';
+import { draggedMinutes, isDayGridTarget, isDraggedItem, type DraggedItem } from '../planningDrag';
 
 /** A press only becomes a drag after this much movement, so clicks still click. */
 const DRAG_START_DISTANCE_PX = 6;
 
 interface PlanningDragOptions {
   onScheduleTask: (task: Task, span: TimeSpan) => void;
+  onMoveBlock: (event: PlannerEvent, span: TimeSpan) => void;
 }
 
 interface PlanningDrag {
   sensors: SensorDescriptor<SensorOptions>[];
-  /** The task being dragged, for drawing what follows the pointer. */
-  draggedTask: Task | null;
+  /** What is being dragged, for drawing what follows the pointer. */
+  dragged: DraggedItem | null;
   /** Where the dragged item would land if released now, snapped to the grid. */
   landingSpan: TimeSpan | null;
   onDragStart: (event: DragStartEvent) => void;
@@ -38,15 +39,20 @@ interface PlanningDrag {
   onGridScroll: () => void;
 }
 
+function draggedItemOf({ active }: DragStartEvent | DragMoveEvent): DraggedItem | null {
+  const data: unknown = active.data.current;
+  return isDraggedItem(data) ? data : null;
+}
+
 /** The span a drag would produce over the grid right now, or null away from it. */
-function landingSpanOf({ active, over }: DragMoveEvent | DragEndEvent): TimeSpan | null {
-  const top = active.rect.current.translated?.top;
-  const dragged: unknown = active.data.current;
-  const target: unknown = over?.data.current;
-  if (top === undefined || !isDraggedTask(dragged) || !isDayGridTarget(target)) {
+function landingSpanOf(event: DragMoveEvent | DragEndEvent): TimeSpan | null {
+  const top = event.active.rect.current.translated?.top;
+  const item = draggedItemOf(event);
+  const target: unknown = event.over?.data.current;
+  if (top === undefined || !item || !isDayGridTarget(target)) {
     return null;
   }
-  return spanAt(target.minutesAt(top), dragged.task.estimateMinutes);
+  return spanAt(target.minutesAt(top), draggedMinutes(item));
 }
 
 function sameSpan(left: TimeSpan | null, right: TimeSpan | null): boolean {
@@ -54,27 +60,30 @@ function sameSpan(left: TimeSpan | null, right: TimeSpan | null): boolean {
 }
 
 /**
- * Dragging onto the day grid: a task dropped on it becomes a block as long as
- * the task's estimate, starting where its top edge was released.
+ * Dragging onto the day grid. A task dropped on it becomes a block as long as
+ * the task's estimate; a block dropped on it moves there. Either way the top
+ * edge of what is dragged decides the start time.
  */
-export function usePlanningDrag({ onScheduleTask }: PlanningDragOptions): PlanningDrag {
+export function usePlanningDrag({
+  onScheduleTask,
+  onMoveBlock,
+}: PlanningDragOptions): PlanningDrag {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: DRAG_START_DISTANCE_PX } }),
   );
-  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+  const [dragged, setDragged] = useState<DraggedItem | null>(null);
   const [landingSpan, setLandingSpan] = useState<TimeSpan | null>(null);
   // The positions inside a drag event are live, so the last one can be read again later.
   const lastMove = useRef<DragMoveEvent | null>(null);
 
   const reset = useCallback(() => {
     lastMove.current = null;
-    setDraggedTask(null);
+    setDragged(null);
     setLandingSpan(null);
   }, []);
 
-  const onDragStart = useCallback(({ active }: DragStartEvent) => {
-    const dragged: unknown = active.data.current;
-    setDraggedTask(isDraggedTask(dragged) ? dragged.task : null);
+  const onDragStart = useCallback((event: DragStartEvent) => {
+    setDragged(draggedItemOf(event));
   }, []);
 
   const showLanding = useCallback((event: DragMoveEvent) => {
@@ -98,18 +107,23 @@ export function usePlanningDrag({ onScheduleTask }: PlanningDragOptions): Planni
   const onDragEnd = useCallback(
     (event: DragEndEvent) => {
       const span = landingSpanOf(event);
-      const dragged: unknown = event.active.data.current;
-      if (span && isDraggedTask(dragged)) {
-        onScheduleTask(dragged.task, span);
-      }
+      const item = draggedItemOf(event);
       reset();
+      // Released away from the grid: nothing is planned and nothing moves.
+      if (!span || !item) return;
+
+      if (item.kind === 'task') {
+        onScheduleTask(item.task, span);
+      } else if (!sameSpan(span, item.span)) {
+        onMoveBlock(item.event, span);
+      }
     },
-    [onScheduleTask, reset],
+    [onScheduleTask, onMoveBlock, reset],
   );
 
   return {
     sensors,
-    draggedTask,
+    dragged,
     landingSpan,
     onDragStart,
     onDragMove,

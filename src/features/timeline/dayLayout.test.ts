@@ -16,7 +16,7 @@ import {
 const at = (hours: number, minutes = 0): number => hours * 60 + minutes;
 
 function block(id: string, startMinutes: number, endMinutes: number): DayBlock {
-  return { event: buildTimedEvent({ id }), startMinutes, endMinutes };
+  return { event: buildTimedEvent({ id }), startMinutes, endMinutes, isClipped: false };
 }
 
 function columnsById(blocks: DayBlock[]): Record<string, string> {
@@ -64,17 +64,21 @@ describe('toDayBlocks', () => {
     expect(toDayBlocks([overnight], '2026-10-12', 'UTC')[0]).toMatchObject({
       startMinutes: at(22),
       endMinutes: at(24),
+      isClipped: true,
     });
     expect(toDayBlocks([overnight], '2026-10-13', 'UTC')[0]).toMatchObject({
       startMinutes: 0,
       endMinutes: at(2),
+      isClipped: true,
     });
   });
 
   it('treats an event ending exactly at midnight as part of the day it started on only', () => {
     const untilMidnight = timed('2026-10-12T23:00:00.000Z', '2026-10-13T00:00:00.000Z');
 
-    expect(toDayBlocks([untilMidnight], '2026-10-12', 'UTC')).toHaveLength(1);
+    expect(toDayBlocks([untilMidnight], '2026-10-12', 'UTC')).toEqual([
+      expect.objectContaining({ endMinutes: at(24), isClipped: false }),
+    ]);
     expect(toDayBlocks([untilMidnight], '2026-10-13', 'UTC')).toHaveLength(0);
   });
 });

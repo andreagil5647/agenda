@@ -3,10 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, type JSX, type MouseEvent } fr
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
 import { formatTimeOfDay, type HourCycle } from '../../../lib/time/formatTime';
 import { MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
+import controls from '../../../ui/controls.module.css';
 import { minutesAtOffset, type PlacedBlock, type TimeSpan } from '../dayLayout';
 import { DAY_GRID_DROP_ID, type DayGridTarget } from '../planningDrag';
 import styles from './DayGrid.module.css';
-import { TimeBlock } from './TimeBlock';
+import { BLOCK_SHORTCUTS_ID, TimeBlock } from './TimeBlock';
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 
@@ -24,6 +25,9 @@ interface DayGridProps {
   onScroll: () => void;
   selectedEventId: string | null;
   onSelectEvent: (event: PlannerEvent) => void;
+  onMoveBlock: (event: PlannerEvent, span: TimeSpan) => void;
+  onResizeBlock: (event: PlannerEvent, span: TimeSpan) => void;
+  onDeleteBlock: (event: PlannerEvent) => void;
   /** Called with the time of day at the point of the grid that was clicked. */
   onCreateAt: (minutes: number) => void;
 }
@@ -39,6 +43,9 @@ export function DayGrid({
   onScroll,
   selectedEventId,
   onSelectEvent,
+  onMoveBlock,
+  onResizeBlock,
+  onDeleteBlock,
   onCreateAt,
 }: DayGridProps): JSX.Element {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -83,6 +90,10 @@ export function DayGrid({
 
   return (
     <div className={styles.scroller} ref={setScroller} onScroll={onScroll}>
+      <p id={BLOCK_SHORTCUTS_ID} className={controls.visuallyHidden}>
+        Press the up or down arrow key to move the block by 15 minutes. Hold Shift with an arrow key
+        to make it shorter or longer. Press Delete to remove it.
+      </p>
       <div className={styles.grid}>
         <ol className={styles.hours} aria-hidden="true">
           {HOURS.map((hour) => (
@@ -102,6 +113,9 @@ export function DayGrid({
               hourCycle={hourCycle}
               isSelected={block.event.id === selectedEventId}
               onSelect={onSelectEvent}
+              onMove={onMoveBlock}
+              onResize={onResizeBlock}
+              onDelete={onDeleteBlock}
             />
           ))}
           {landingSpan && (

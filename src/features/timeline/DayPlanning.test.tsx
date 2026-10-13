@@ -217,4 +217,82 @@ describe('planning a day', () => {
     expect(await screen.findByRole('checkbox', { name: 'Open task' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Plan Open task' })).not.toBeInTheDocument();
   });
+
+  it('moves a block with the arrow keys and says where it went', async () => {
+    seedDay();
+    const user = await renderDay();
+    const standUp = await block(/Stand-up/);
+
+    standUp.focus();
+    await user.keyboard('{ArrowDown}{ArrowDown}');
+
+    expect(await block(/Stand-up 09:30 – 10:00/)).toHaveFocus();
+    await waitFor(() => {
+      expect(fakeApi.events.find((event) => event.title === 'Stand-up')).toMatchObject({
+        startUtc: on(TODAY, '09:30'),
+        endUtc: on(TODAY, '10:00'),
+        version: 3,
+      });
+    });
+    expect(screen.getByText('Moved Stand-up: 09:30 – 10:00.')).toHaveAttribute('role', 'status');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('makes a block longer and shorter with Shift and the arrow keys', async () => {
+    seedDay();
+    const user = await renderDay();
+    const standUp = await block(/Stand-up/);
+
+    standUp.focus();
+    await user.keyboard('{Shift>}{ArrowDown}{ArrowDown}{/Shift}');
+    expect(await block(/Stand-up 09:00 – 10:00/)).toBeInTheDocument();
+
+    await user.keyboard('{Shift>}{ArrowUp}{/Shift}');
+    expect(await block(/Stand-up 09:00 – 09:45/)).toBeInTheDocument();
+  });
+
+  it('never makes a block shorter than a quarter of an hour', async () => {
+    seedDay();
+    const user = await renderDay();
+    const standUp = await block(/Stand-up/);
+
+    standUp.focus();
+    await user.keyboard('{Shift>}{ArrowUp}{ArrowUp}{ArrowUp}{/Shift}');
+
+    expect(await block(/Stand-up 09:00 – 09:15/)).toBeInTheDocument();
+  });
+
+  it('deletes the focused block with the Delete key', async () => {
+    seedDay();
+    const user = await renderDay();
+    const standUp = await block(/Stand-up/);
+
+    standUp.focus();
+    await user.keyboard('{Delete}');
+
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /Stand-up/ })).not.toBeInTheDocument();
+    });
+    expect(fakeApi.events.map((event) => event.title)).not.toContain('Stand-up');
+  });
+
+  it('puts a block back when the server refuses the move', async () => {
+    seedDay();
+    const user = await renderDay();
+    const standUp = await block(/Stand-up/);
+    fakeApi.editEventElsewhere(fakeApi.events[0]!.id, { title: 'Daily sync' });
+
+    standUp.focus();
+    await user.keyboard('{ArrowDown}');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/changed somewhere else/);
+    expect(await block(/Daily sync 09:00 – 09:30/)).toBeInTheDocument();
+  });
+
+  it('explains the keyboard shortcuts of a block to assistive technology', async () => {
+    seedDay();
+    await renderDay();
+
+    expect(await block(/Stand-up/)).toHaveAccessibleDescription(/arrow key to move the block/);
+  });
 });

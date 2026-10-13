@@ -312,6 +312,13 @@ export const fakeApi = {
     Object.assign(task, changes, { version: task.version + 1 });
   },
 
+  /** Changes an event behind the app's back, as an edit from another tab would. */
+  editEventElsewhere(id: string, changes: Partial<PlannerEvent>): void {
+    const event = state.events.find((candidate) => candidate.id === id);
+    if (!event) throw new Error(`No event ${id} in the fake API`);
+    Object.assign(event, changes, { version: event.version + 1 });
+  },
+
   /** What the API currently holds, for asserting on the outcome of a write. */
   get tasks(): readonly Task[] {
     return state.tasks;

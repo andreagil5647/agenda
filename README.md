@@ -7,9 +7,11 @@ events live on the same timeline, and you plan a day by dragging tasks into time
 
 The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647/agenda-backend).
 
-> **Status:** early product. You can sign up or start a one-click demo, manage calendars
-> and tasks, and add time blocks to a day through forms. The time grid with drag-and-drop,
-> the design system and routing come next - see the [roadmap](docs/ROADMAP.md).
+> **Status:** the day planner works. Sign up or start a one-click demo, then plan a day on
+> an hour grid: drag a task onto it to give it time, drag a block to move it, pull its edge
+> to resize it, or do all three from the keyboard. Changes show at once and are taken back
+> if the API refuses them. A week view, settings and end-to-end tests come next - see the
+> [roadmap](docs/ROADMAP.md).
 
 ## Stack
 
@@ -18,6 +20,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | Runtime    | React 19, TypeScript 6 (strict)                             |
 | Build      | Webpack 5, hand-written dev/prod config, SWC (`swc-loader`) |
 | Data       | TanStack Query, API client typed by the OpenAPI contract    |
+| Drag       | dnd-kit for pick-up and drop, pointer events for resizing   |
 | Styles     | CSS Modules on design tokens, light and dark themes         |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
 | Tests      | Jest 30 (`@swc/jest`), React Testing Library, MSW           |

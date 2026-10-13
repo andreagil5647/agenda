@@ -53,7 +53,8 @@ Use TanStack Query as the only place server data lives.
   written once.
 - Client-only state (the selected day, an open dialog) stays in components and hooks. There is
   no global store, and adding one would need its own reason.
-- About 13 kB gzipped is added to the bundle.
+- It adds to the bundle. With the other libraries the planner needs (drag and drop, the typed
+  API client), third-party code outside React measures 27 kB gzipped in the production build.
 - Query keys are a convention, not a type: a mistyped key is a cache miss, not a build error.
   Each feature keeps its keys next to its hooks to keep them in one place.
 - The cache is in memory only. A reload starts empty, which is right for data that other

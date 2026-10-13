@@ -29,6 +29,9 @@ interface DayViewProps {
   onGridScroll: () => void;
   selectedEventId: string | null;
   onSelectEvent: (event: PlannerEvent) => void;
+  onMoveBlock: (event: PlannerEvent, span: TimeSpan) => void;
+  onResizeBlock: (event: PlannerEvent, span: TimeSpan) => void;
+  onDeleteBlock: (event: PlannerEvent) => void;
   /** Creates an untitled block on the given span. */
   onCreateBlock: (span: TimeSpan) => void;
   /** Creates an untitled block at the next free time. */
@@ -48,6 +51,9 @@ export function DayView({
   onGridScroll,
   selectedEventId,
   onSelectEvent,
+  onMoveBlock,
+  onResizeBlock,
+  onDeleteBlock,
   onCreateBlock,
   onAddBlock,
 }: DayViewProps): JSX.Element {
@@ -97,6 +103,9 @@ export function DayView({
               onScroll={onGridScroll}
               selectedEventId={selectedEventId}
               onSelectEvent={onSelectEvent}
+              onMoveBlock={onMoveBlock}
+              onResizeBlock={onResizeBlock}
+              onDeleteBlock={onDeleteBlock}
               onCreateAt={(minutes) => {
                 onCreateBlock(spanAt(slotStart(minutes), NEW_BLOCK_MINUTES));
               }}
