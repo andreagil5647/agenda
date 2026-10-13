@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type JSX, type SyntheticEvent } from 'reac
 import type { Calendar, PatchEventRequest, PlannerEvent, Task } from '../../../lib/api/contract';
 import { readField } from '../../../lib/forms';
 import { useI18n } from '../../../lib/i18n/I18nProvider';
-import { formatTimeOfDay, parseTimeOfDay } from '../../../lib/time/formatTime';
+import { formatTimeInputValue, parseTimeOfDay } from '../../../lib/time/formatTime';
 import { instantAt, localDateOf, minutesOfDay, MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
 import controls from '../../../ui/controls.module.css';
 import { Panel } from '../../../ui/Panel';
@@ -20,7 +20,7 @@ interface BlockEditorProps {
 
 /** The value a time input shows for an instant, on the wall clock of `timeZone`. */
 function timeInputValue(instant: string | null, timeZone: string): string {
-  return instant ? formatTimeOfDay(minutesOfDay(new Date(instant), timeZone), 'h23') : '';
+  return instant ? formatTimeInputValue(minutesOfDay(new Date(instant), timeZone)) : '';
 }
 
 /**

@@ -8,7 +8,6 @@ import styles from './DayHeader.module.css';
 interface DayHeaderProps {
   day: string;
   isToday: boolean;
-  locale: string;
   onShowDay: (day: string) => void;
   onShowToday: () => void;
   onShowPrevious: () => void;
@@ -19,13 +18,12 @@ interface DayHeaderProps {
 export function DayHeader({
   day,
   isToday,
-  locale,
   onShowDay,
   onShowToday,
   onShowPrevious,
   onShowNext,
 }: DayHeaderProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   return (
     <header className={styles.header}>
