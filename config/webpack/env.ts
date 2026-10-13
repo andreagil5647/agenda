@@ -8,7 +8,6 @@ import { z } from 'zod';
  * out, even if a future .env file happens to define it.
  */
 const publicEnvSchema = z.object({
-  PUBLIC_API_BASE_URL: z.string().default('/api/v1'),
   PUBLIC_APP_VERSION: z.string().default('dev'),
 });
 

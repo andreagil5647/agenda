@@ -6,7 +6,16 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'storybook-static', 'coverage', 'playwright-report'] },
+  {
+    ignores: [
+      'dist',
+      'storybook-static',
+      'coverage',
+      'playwright-report',
+      // Generated from the API contract by `pnpm run api:generate`.
+      'src/lib/api/schema.d.ts',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
@@ -17,7 +26,7 @@ export default tseslint.config(
       globals: { ...globals.browser, ...globals.node },
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['*.js'],
+          allowDefaultProject: ['*.js', 'test/setup/*.cjs'],
         },
         tsconfigRootDir: import.meta.dirname,
       },
@@ -34,8 +43,12 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.js'],
+    files: ['**/*.{js,cjs}'],
     extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
+    files: ['**/*.cjs'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   {
     files: ['**/*.test.{ts,tsx}', 'test/**/*.{ts,tsx}'],

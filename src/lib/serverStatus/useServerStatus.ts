@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { env } from '../env';
+import type { paths } from '../api/schema';
 
 export type ServerStatus = 'checking' | 'ready' | 'waking' | 'error';
 
@@ -9,6 +9,8 @@ export interface ServerStatusState {
   elapsedMs: number;
 }
 
+// The liveness endpoint never touches the database, so it answers as soon as the process is up.
+const HEALTH_PATH: keyof paths = '/api/v1/health';
 const RETRY_DELAYS_MS = [500, 1000, 1500, 2500, 4000, 6000, 8000];
 const WAKING_AFTER_MS = 2500;
 const GIVE_UP_AFTER_MS = 90_000;
@@ -33,7 +35,7 @@ export function useServerStatus(): ServerStatusState {
     attemptRef.current = 0;
 
     const check = (): void => {
-      fetch(`${env.apiBaseUrl}/health`, { signal: controller.signal })
+      fetch(HEALTH_PATH, { signal: controller.signal })
         .then((res) => {
           if (!isActive) return;
           if (!res.ok) throw new Error(`Unexpected status ${String(res.status)}`);

@@ -1,0 +1,73 @@
+/* Buttons and small text styles shared by more than one screen. */
+.primaryAction,
+.secondaryAction {
+  min-height: var(--control-height);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  padding: 0 var(--space-4);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryAction {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.primaryAction:disabled {
+  cursor: progress;
+  opacity: 0.68;
+}
+
+.secondaryAction {
+  border-color: var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.iconAction {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.checkboxAction {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  min-height: 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.formError {
+  margin: 0;
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger-surface);
+  color: var(--color-danger-text);
+  padding: 10px var(--space-3);
+}
+
+/* Read by assistive technology, not shown: text that names or explains a control. */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-2);
+  color: var(--color-accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}

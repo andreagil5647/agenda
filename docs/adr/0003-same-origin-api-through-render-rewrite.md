@@ -35,3 +35,10 @@ frontend-specific half of the decision.
 - If the rewrite were removed, no code change would be needed to fail _loudly_: relative
   `/api/*` requests would simply 404 against the static site instead of silently hitting
   the wrong origin.
+
+## Update, 2026-10-12: no base URL setting
+
+The API client is now typed by the generated contract, whose paths already start with
+`/api/v1`, and it always calls the page's own origin. `PUBLIC_API_BASE_URL` had only one valid
+value under this decision, so it was removed instead of being kept as a setting nothing can
+change safely.

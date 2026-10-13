@@ -20,8 +20,6 @@ services:
     envVars:
       # Baked into the bundle at BUILD time (see config/webpack/env.ts), not
       # read at runtime. Changing it requires a rebuild.
-      - key: PUBLIC_API_BASE_URL
-        value: /api/v1
       - key: PUBLIC_APP_VERSION
         sync: false
       - key: NODE_VERSION
@@ -30,6 +28,9 @@ services:
       # Content-hashed assets are safe to cache forever; index.html is not,
       # since it is what points at the current hashed bundle.
       - path: /js/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /css/*
         name: Cache-Control
         value: public, max-age=31536000, immutable
       - path: /images/*

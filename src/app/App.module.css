@@ -1,0 +1,26 @@
+.statusScreen {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.statusScreen h1 {
+  margin: 0;
+  font-size: 4rem;
+  line-height: 0.96;
+}
+
+.statusScreen p:not([class]) {
+  max-width: 620px;
+  color: var(--color-text-muted);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 760px) {
+  .statusScreen h1 {
+    font-size: 2.4rem;
+  }
+}

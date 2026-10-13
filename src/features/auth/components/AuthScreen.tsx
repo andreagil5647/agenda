@@ -1,10 +1,13 @@
 import { useState, type JSX, type SyntheticEvent } from 'react';
-import { useAuth } from '../../lib/auth/AuthContext';
+import { readField } from '../../../lib/forms';
+import controls from '../../../ui/controls.module.css';
+import { useAuth } from '../hooks/useAuth';
+import styles from './AuthScreen.module.css';
 
 type AuthMode = 'login' | 'register';
 
 export function AuthScreen(): JSX.Element {
-  const { login, register, startDemo, error, clearError } = useAuth();
+  const { logIn, register, startDemo, error, clearError } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -18,39 +21,25 @@ export function AuthScreen(): JSX.Element {
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const email = readFormString(form, 'email');
-    const password = readFormString(form, 'password');
-    const displayName = readFormString(form, 'displayName');
+    const email = readField(form, 'email');
+    const password = readField(form, 'password');
+    const displayName = readField(form, 'displayName');
 
     setIsSubmitting(true);
-    try {
-      if (isRegistering) {
-        await register({ email, password, displayName });
-      } else {
-        await login({ email, password });
-      }
-    } catch {
-      // The provider stores the user-facing error.
-    } finally {
-      setIsSubmitting(false);
-    }
+    await (isRegistering ? register({ email, password, displayName }) : logIn({ email, password }));
+    setIsSubmitting(false);
   };
 
   const handleDemo = async (): Promise<void> => {
     setIsSubmitting(true);
-    try {
-      await startDemo();
-    } catch {
-      // The provider stores the user-facing error.
-    } finally {
-      setIsSubmitting(false);
-    }
+    await startDemo();
+    setIsSubmitting(false);
   };
 
   return (
-    <section className="auth-layout" aria-labelledby="auth-title">
-      <div className="auth-copy">
-        <p className="eyebrow">Agenda</p>
+    <section className={styles.authLayout} aria-labelledby="auth-title">
+      <div className={styles.authCopy}>
+        <p className={controls.eyebrow}>Agenda</p>
         <h1 id="auth-title">Plan work on one honest timeline.</h1>
         <p>
           Tasks and events share the day, so the plan you make is the plan your calendar can
@@ -58,11 +47,10 @@ export function AuthScreen(): JSX.Element {
         </p>
       </div>
 
-      <div className="auth-panel">
-        <div className="segmented" role="tablist" aria-label="Authentication mode">
+      <div className={styles.authPanel}>
+        <div className={styles.segmented} role="tablist" aria-label="Authentication mode">
           <button
             type="button"
-            className={mode === 'login' ? 'active' : ''}
             aria-selected={mode === 'login'}
             role="tab"
             onClick={() => {
@@ -73,7 +61,6 @@ export function AuthScreen(): JSX.Element {
           </button>
           <button
             type="button"
-            className={isRegistering ? 'active' : ''}
             aria-selected={isRegistering}
             role="tab"
             onClick={() => {
@@ -112,16 +99,16 @@ export function AuthScreen(): JSX.Element {
           </label>
 
           {error && (
-            <p className="form-error" role="alert">
+            <p className={controls.formError} role="alert">
               {error}
             </p>
           )}
 
-          <button className="primary-action" type="submit" disabled={isSubmitting}>
+          <button className={controls.primaryAction} type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Working...' : isRegistering ? 'Create account' : 'Log in'}
           </button>
           <button
-            className="secondary-action"
+            className={controls.secondaryAction}
             type="button"
             disabled={isSubmitting}
             onClick={() => {
@@ -134,9 +121,4 @@ export function AuthScreen(): JSX.Element {
       </div>
     </section>
   );
-}
-
-function readFormString(form: FormData, name: string): string {
-  const value = form.get(name);
-  return typeof value === 'string' ? value : '';
 }

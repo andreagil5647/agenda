@@ -1,187 +1,40 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http, HttpResponse } from 'msw';
+import { buildCalendar, buildTask, buildTimedEvent, fakeApi } from '../../test/msw/fakeApi';
+import { server } from '../../test/msw/server';
 import { App } from './App';
 
-const authSession = {
-  user: {
-    id: 'user_1',
-    email: 'andrea@example.com',
-    displayName: 'Andrea',
-    settings: {
-      timeZone: 'UTC',
-      weekStartsOn: 1,
-      hourCycle: 'h23',
-      locale: 'en',
-      theme: 'system',
-      accentColor: 'blue',
-    },
-    isDemo: false,
-  },
-  expiresAt: '2026-11-06T10:00:00.000Z',
-  csrfToken: 'csrf-token',
-} as const;
+/** A signed-in account with one calendar, one task and one block on the current day. */
+function seedPlanner(): void {
+  const calendar = buildCalendar({ name: 'Work' });
+  const today = new Date().toISOString().slice(0, 10);
 
-const calendar = {
-  id: '507f1f77bcf86cd799439011',
-  name: 'Work',
-  colorKey: 'blue',
-  visible: true,
-  defaultReminderMinutes: [10],
-  order: 1,
-  version: 1,
-  createdAt: '2026-10-08T08:00:00.000Z',
-  updatedAt: '2026-10-08T08:00:00.000Z',
-} as const;
-
-const task = {
-  id: '507f1f77bcf86cd799439012',
-  title: 'Draft launch checklist',
-  dueDate: '2026-10-08',
-  priority: 'high',
-  status: 'todo',
-  estimateMinutes: 60,
-  order: 'a0',
-  version: 1,
-  createdAt: '2026-10-08T08:00:00.000Z',
-  updatedAt: '2026-10-08T08:00:00.000Z',
-} as const;
-
-const eventBlock = {
-  id: '507f1f77bcf86cd799439013',
-  calendarId: calendar.id,
-  title: 'Focus block',
-  notes: null,
-  taskId: task.id,
-  kind: 'timed',
-  startUtc: '2026-10-08T09:00:00.000Z',
-  endUtc: '2026-10-08T10:00:00.000Z',
-  timeZone: 'Europe/Madrid',
-  startDate: null,
-  endDate: null,
-  version: 1,
-  createdAt: '2026-10-08T08:00:00.000Z',
-  updatedAt: '2026-10-08T08:00:00.000Z',
-} as const;
-
-interface PlannerPayload {
-  calendars: readonly unknown[];
-  tasks: readonly unknown[];
-  events: readonly unknown[];
-}
-
-function plannerResponses({
-  calendars = [calendar],
-  tasks = [task],
-  events = [eventBlock],
-}: Partial<PlannerPayload> = {}): Response[] {
-  return [jsonResponse(calendars), jsonResponse(tasks), jsonResponse(events)];
-}
-
-function jsonResponse(body: unknown, status = 200): Response {
-  return createResponse({
-    body,
-    status,
-    contentType: 'application/json',
+  fakeApi.signIn();
+  fakeApi.seed({
+    calendars: [calendar],
+    tasks: [buildTask({ title: 'Draft launch checklist', estimateMinutes: 60 })],
+    events: [
+      buildTimedEvent({
+        calendarId: calendar.id,
+        title: 'Focus block',
+        startUtc: `${today}T09:00:00.000Z`,
+        endUtc: `${today}T10:00:00.000Z`,
+      }),
+    ],
   });
-}
-
-function emptyResponse(status = 204): Response {
-  return createResponse({ status });
-}
-
-function createResponse({
-  body,
-  status,
-  contentType,
-}: {
-  body?: unknown;
-  status: number;
-  contentType?: string;
-}): Response {
-  return {
-    ok: status >= 200 && status < 300,
-    status,
-    headers: {
-      get: (name: string) =>
-        name.toLowerCase() === 'content-type' && contentType ? contentType : null,
-    },
-    json: () => Promise.resolve(body),
-  } as Response;
-}
-
-function mockFetch(...responses: Response[]): jest.MockedFunction<typeof fetch> {
-  const fetchMock = jest.fn() as jest.MockedFunction<typeof fetch>;
-  for (const response of responses) {
-    fetchMock.mockResolvedValueOnce(response);
-  }
-  global.fetch = fetchMock;
-  return fetchMock;
-}
-
-function fetchCall(fetchMock: jest.MockedFunction<typeof fetch>, index: number) {
-  const call = fetchMock.mock.calls[index];
-  if (!call) {
-    throw new Error(`Fetch call ${String(index)} was not made`);
-  }
-
-  return call;
-}
-
-function findFetchCall(
-  fetchMock: jest.MockedFunction<typeof fetch>,
-  predicate: (url: string, init: RequestInit | undefined) => boolean,
-) {
-  const call = fetchMock.mock.calls.find(([input, init]) => predicate(requestUrl(input), init));
-  if (!call) {
-    throw new Error('Expected fetch call was not made');
-  }
-
-  return call;
-}
-
-function requestUrl(input: Parameters<typeof fetch>[0]): string {
-  return typeof input === 'string' || input instanceof URL ? input.toString() : input.url;
-}
-
-function requestBody(init: RequestInit | undefined): unknown {
-  return JSON.parse(typeof init?.body === 'string' ? init.body : '{}') as unknown;
 }
 
 describe('App', () => {
-  const originalFetch = global.fetch;
-
-  afterEach(() => {
-    global.fetch = originalFetch;
-    jest.restoreAllMocks();
-  });
-
-  it('checks the API before bootstrapping the auth session', async () => {
-    const fetchMock = mockFetch(jsonResponse({ status: 'ok' }), jsonResponse({ user: null }));
-
+  it('shows the sign-in form to a visitor without a session', async () => {
     render(<App />);
 
     expect(await screen.findByLabelText('Email')).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
-      expect.stringMatching(/\/health$/),
-      expect.objectContaining({ signal: expect.any(AbortSignal) as AbortSignal }),
-    );
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
-      expect.stringMatching(/\/auth\/session$/),
-      expect.objectContaining({ credentials: 'include' }),
-    );
+    expect(screen.getByRole('button', { name: 'Try demo' })).toBeInTheDocument();
   });
 
-  it('registers a user and enters the app shell', async () => {
-    const fetchMock = mockFetch(
-      jsonResponse({ status: 'ok' }),
-      jsonResponse({ user: null }),
-      jsonResponse(authSession, 201),
-      ...plannerResponses(),
-    );
+  it('registers a user and enters the planner', async () => {
     const user = userEvent.setup();
-
     render(<App />);
 
     await user.click(await screen.findByRole('tab', { name: 'Create account' }));
@@ -190,124 +43,200 @@ describe('App', () => {
     await user.type(screen.getByLabelText('Password'), 'correct horse battery staple');
     await user.click(screen.getByRole('button', { name: 'Create account' }));
 
-    expect(await screen.findByRole('heading', { name: 'Andrea' })).toBeInTheDocument();
-
-    const [url, init] = fetchCall(fetchMock, 2);
-    expect(requestUrl(url)).toMatch(/\/auth\/register$/);
-    expect(init).toMatchObject({ method: 'POST', credentials: 'include' });
-    expect(requestBody(init)).toEqual({
-      displayName: 'Andrea',
-      email: 'andrea@example.com',
-      password: 'correct horse battery staple',
-    });
+    expect(await screen.findByRole('button', { name: 'Log out' })).toBeInTheDocument();
+    expect(screen.getByRole('complementary', { name: 'Account' })).toHaveTextContent('Andrea');
   });
 
-  it('sends the CSRF token when logging out', async () => {
-    const fetchMock = mockFetch(
-      jsonResponse({ status: 'ok' }),
-      jsonResponse(authSession),
-      ...plannerResponses(),
-      emptyResponse(),
-    );
+  it('starts a demo session in one click', async () => {
     const user = userEvent.setup();
-
     render(<App />);
 
-    await screen.findByRole('heading', { name: 'Andrea' });
-    await user.click(screen.getByRole('button', { name: 'Log out' }));
+    await user.click(await screen.findByRole('button', { name: 'Try demo' }));
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('Email')).toBeInTheDocument();
-    });
-
-    const [url, init] = findFetchCall(
-      fetchMock,
-      (requestUrl, requestInit) =>
-        requestUrl.endsWith('/auth/logout') && requestInit?.method === 'POST',
-    );
-    expect(requestUrl(url)).toMatch(/\/auth\/logout$/);
-    expect(init).toMatchObject({ method: 'POST', credentials: 'include' });
-    expect(init?.headers).toMatchObject({ 'X-CSRF-Token': 'csrf-token' });
+    expect(await screen.findByText(/Demo account/)).toBeInTheDocument();
   });
 
-  it('loads planner resources for an authenticated session', async () => {
-    const fetchMock = mockFetch(
-      jsonResponse({ status: 'ok' }),
-      jsonResponse(authSession),
-      ...plannerResponses(),
-    );
-
-    render(<App />);
-
-    expect(await screen.findByText('Focus block')).toBeInTheDocument();
-    expect(screen.getAllByText('Draft launch checklist').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Work').length).toBeGreaterThan(0);
-
-    expect(findFetchCall(fetchMock, (url) => url.endsWith('/calendars'))).toBeDefined();
-    expect(findFetchCall(fetchMock, (url) => url.endsWith('/tasks'))).toBeDefined();
-    expect(findFetchCall(fetchMock, (url) => url.includes('/events?from='))).toBeDefined();
-  });
-
-  it('sends the CSRF token when creating planner tasks', async () => {
-    const createdTask = { ...task, id: '507f1f77bcf86cd799439014', title: 'Write tests' };
-    const fetchMock = mockFetch(
-      jsonResponse({ status: 'ok' }),
-      jsonResponse(authSession),
-      ...plannerResponses(),
-      jsonResponse(createdTask, 201),
-      ...plannerResponses({ tasks: [task, createdTask] }),
-    );
+  it('shows why a sign-in failed', async () => {
     const user = userEvent.setup();
-
-    render(<App />);
-
-    await screen.findAllByText('Draft launch checklist');
-    await user.type(screen.getByPlaceholderText('New task'), 'Write tests');
-    await user.click(screen.getByRole('button', { name: 'Add task' }));
-
-    await waitFor(() => {
-      expect(
-        findFetchCall(fetchMock, (url, init) => url.endsWith('/tasks') && init?.method === 'POST'),
-      ).toBeDefined();
-    });
-
-    const [, init] = findFetchCall(
-      fetchMock,
-      (url, requestInit) => url.endsWith('/tasks') && requestInit?.method === 'POST',
-    );
-    expect(init).toMatchObject({ method: 'POST', credentials: 'include' });
-    expect(init?.headers).toMatchObject({ 'X-CSRF-Token': 'csrf-token' });
-    expect(requestBody(init)).toMatchObject({
-      title: 'Write tests',
-      priority: 'medium',
-      estimateMinutes: 30,
-    });
-    expect(await screen.findAllByText('Write tests')).toHaveLength(2);
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-    expect(screen.getByPlaceholderText('New task')).toHaveValue('');
-  });
-
-  it('shows API errors on the auth form', async () => {
-    mockFetch(
-      jsonResponse({ status: 'ok' }),
-      jsonResponse({ user: null }),
-      jsonResponse(
-        {
-          code: 'UNAUTHORIZED',
-          message: 'Invalid email or password',
-          requestId: 'req_1',
-        },
-        401,
-      ),
-    );
-    const user = userEvent.setup();
-
     render(<App />);
 
     await user.type(await screen.findByLabelText('Email'), 'andrea@example.com');
     await user.type(screen.getByLabelText('Password'), 'wrong password');
     await user.click(screen.getByRole('button', { name: 'Log in' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid email or password');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'That email and password do not match.',
+    );
+  });
+
+  it('logs out and returns to the sign-in form', async () => {
+    fakeApi.signIn();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Log out' }));
+
+    expect(await screen.findByLabelText('Email')).toBeInTheDocument();
+  });
+
+  it('shows the calendars, tasks and blocks of a signed-in user', async () => {
+    seedPlanner();
+    render(<App />);
+
+    const timeline = await screen.findByRole('region', { name: 'Timeline' });
+    expect(await within(timeline).findByText('Focus block')).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('region', { name: 'Tasks' })).getByRole('list'),
+    ).toHaveTextContent('Draft launch checklist');
+    expect(await screen.findByRole('region', { name: 'Calendars' })).toHaveTextContent('Work');
+  });
+
+  it('adds a task to the list', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const tasks = await screen.findByRole('region', { name: 'Tasks' });
+    await within(tasks).findByText('Draft launch checklist');
+    await user.type(within(tasks).getByPlaceholderText('New task'), 'Write tests');
+    await user.click(within(tasks).getByRole('button', { name: 'Add task' }));
+
+    expect(await within(tasks).findByRole('checkbox', { name: /Write tests/ })).not.toBeChecked();
+    expect(within(tasks).getByPlaceholderText('New task')).toHaveValue('');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(fakeApi.tasks.map((task) => task.title)).toContain('Write tests');
+  });
+
+  it('completes a task', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('checkbox', { name: /Draft launch checklist/ }));
+
+    expect(await screen.findByRole('checkbox', { name: /Draft launch checklist/ })).toBeChecked();
+    expect(fakeApi.tasks[0]).toMatchObject({ status: 'done', version: 2 });
+  });
+
+  it('applies two quick changes to the same task in order', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+    await user.click(checkbox);
+    await user.click(checkbox);
+
+    await waitFor(() => {
+      expect(fakeApi.tasks[0]).toMatchObject({ status: 'todo', version: 3 });
+    });
+    expect(screen.getByRole('checkbox', { name: /Draft launch checklist/ })).not.toBeChecked();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('deletes a task', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Delete Draft launch checklist' }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole('checkbox', { name: /Draft launch checklist/ }),
+      ).not.toBeInTheDocument();
+    });
+    expect(fakeApi.tasks).toHaveLength(0);
+  });
+
+  it('refuses to overwrite a task that changed somewhere else, and says so', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+    const [task] = fakeApi.tasks;
+    fakeApi.editTaskElsewhere(task!.id, { title: 'Renamed in another tab' });
+    await user.click(checkbox);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/changed somewhere else/);
+    expect(
+      await screen.findByRole('checkbox', { name: /Renamed in another tab/ }),
+    ).not.toBeChecked();
+    expect(fakeApi.tasks[0]).toMatchObject({ title: 'Renamed in another tab', status: 'todo' });
+  });
+
+  it('says so when the server cannot be reached', async () => {
+    server.use(http.get('*/api/v1/auth/session', () => HttpResponse.error()));
+    render(<App />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Could not reach the server/);
+  });
+
+  it('takes a change back when the server refuses it', async () => {
+    seedPlanner();
+    server.use(
+      http.patch('*/api/v1/tasks/:id', () =>
+        HttpResponse.json(
+          { code: 'INTERNAL_ERROR', message: 'Something went wrong on our side', requestId: 'r' },
+          { status: 500 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('checkbox', { name: /Draft launch checklist/ }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Something went wrong/);
+    expect(screen.getByRole('checkbox', { name: /Draft launch checklist/ })).not.toBeChecked();
+  });
+
+  it('dismisses a notice', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+    fakeApi.editTaskElsewhere(fakeApi.tasks[0]!.id, { title: 'Renamed in another tab' });
+    await user.click(checkbox);
+
+    await user.click(await screen.findByRole('button', { name: 'Dismiss' }));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('offers to try again when the planner cannot be loaded', async () => {
+    seedPlanner();
+    server.use(
+      http.get(
+        '*/api/v1/tasks',
+        () =>
+          HttpResponse.json(
+            { code: 'INTERNAL_ERROR', message: 'Something went wrong on our side', requestId: 'r' },
+            { status: 500 },
+          ),
+        { once: true },
+      ),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Try again' }));
+
+    expect(await screen.findByRole('checkbox', { name: /Draft launch checklist/ })).toBeVisible();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('returns to the sign-in form when the session has ended', async () => {
+    seedPlanner();
+    const user = userEvent.setup();
+    render(<App />);
+    const checkbox = await screen.findByRole('checkbox', { name: /Draft launch checklist/ });
+
+    fakeApi.endSession();
+    await user.click(checkbox);
+
+    expect(await screen.findByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toHaveTextContent(/session has ended/);
   });
 });

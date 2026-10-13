@@ -1,0 +1,68 @@
+.authLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 440px);
+  gap: var(--space-12);
+  align-items: center;
+  max-width: 1120px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: var(--space-12) var(--space-6);
+}
+
+.authCopy h1 {
+  margin: 0;
+  font-size: 4rem;
+  line-height: 0.96;
+}
+
+.authCopy p:not([class]) {
+  max-width: 620px;
+  color: var(--color-text-muted);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.authPanel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-panel);
+  padding: var(--space-6);
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  padding: var(--space-1);
+}
+
+.segmented button {
+  min-height: 40px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.segmented button[aria-selected='true'] {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-raised);
+}
+
+@media (max-width: 760px) {
+  .authLayout {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .authCopy h1 {
+    font-size: 2.4rem;
+  }
+}

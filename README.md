@@ -7,9 +7,11 @@ events live on the same timeline, and you plan a day by dragging tasks into time
 
 The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647/agenda-backend).
 
-> **Status:** early product. You can sign up or start a one-click demo, manage calendars
-> and tasks, and add time blocks to a day through forms. The time grid with drag-and-drop,
-> the design system and routing come next - see the [roadmap](docs/ROADMAP.md).
+> **Status:** the day planner works. Sign up or start a one-click demo, then plan a day on
+> an hour grid: drag a task onto it to give it time, drag a block to move it, pull its edge
+> to resize it, or do all three from the keyboard. Changes show at once and are taken back
+> if the API refuses them. A week view, settings and end-to-end tests come next - see the
+> [roadmap](docs/ROADMAP.md).
 
 ## Stack
 
@@ -17,8 +19,11 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | ---------- | ----------------------------------------------------------- |
 | Runtime    | React 19, TypeScript 6 (strict)                             |
 | Build      | Webpack 5, hand-written dev/prod config, SWC (`swc-loader`) |
+| Data       | TanStack Query, API client typed by the OpenAPI contract    |
+| Drag       | dnd-kit for pick-up and drop, pointer events for resizing   |
+| Styles     | CSS Modules on design tokens, light and dark themes         |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
-| Tests      | Jest 30 (`@swc/jest`), React Testing Library                |
+| Tests      | Jest 30 (`@swc/jest`), React Testing Library, MSW           |
 | Hosting    | Render static site, rewriting `/api/*` to the backend       |
 
 ## Architecture
@@ -39,15 +44,20 @@ lets a session cookie set by the API stay first-party.
 config/webpack/     hand-written webpack config: common, dev, prod, paths, env
 src/
   index.tsx            bootstraps React
-  app/App.tsx          server gate, auth gate and the signed-in shell
-  features/auth/       sign-up, log-in and demo screen
-  features/planner/    dashboard: calendars, tasks and the day's blocks
-  lib/api/             fetch wrapper, typed endpoints and API errors
-  lib/auth/            session context: current user, CSRF token, sign-in and sign-out
+  app/                 providers, the server and auth gates, the signed-in shell and page
+  features/<name>/     api (requests), hooks (state) and components for one feature:
+                        auth, calendars, tasks, timeline
+  styles/              design tokens and the global base layer
+  ui/                  shared primitives: panel, query states, notices, control styles
+  lib/api/             API client typed by the contract, one error type, user-facing messages
+  lib/time/            time zone conversion and time formatting, pure and unit-tested
+  lib/query/           query client and the optimistic write used by every feature
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
                         exposes a "waking up the server" state for free-tier cold starts
-test/setup/          Jest setup (jest-dom matchers)
+openapi/             the API contract, copied from the backend and committed
+test/msw/            in-memory API that answers the app's requests during tests
+test/setup/          Jest environment and setup
 ```
 
 ## Getting started
@@ -71,6 +81,8 @@ pnpm run dev       # http://localhost:3000, proxies /api to http://localhost:400
 | `pnpm test` / `pnpm run test:coverage` | Jest / Jest with a coverage report in `coverage/` |
 | `pnpm run lint` / `pnpm run format`    | ESLint (type-aware) / Prettier                    |
 | `pnpm run typecheck`                   | `tsc --noEmit`                                    |
+| `pnpm run api:sync`                    | Copy the API contract from the backend repo       |
+| `pnpm run api:generate` / `api:check`  | Generate the API types / fail if they are stale   |
 
 ## Deployment
 
@@ -78,10 +90,9 @@ pnpm run dev       # http://localhost:3000, proxies /api to http://localhost:400
 passes, that rewrites `/api/*` to the backend before falling back to `index.html` for
 client-side routing.
 
-| Variable              | Required | Default   | Notes                              |
-| --------------------- | -------- | --------- | ---------------------------------- |
-| `PUBLIC_API_BASE_URL` |          | `/api/v1` | Relative on purpose - see ADR 0003 |
-| `PUBLIC_APP_VERSION`  |          | `dev`     | Shown in the footer for debugging  |
+| Variable             | Required | Default | Notes                             |
+| -------------------- | -------- | ------- | --------------------------------- |
+| `PUBLIC_APP_VERSION` |          | `dev`   | Shown in the footer for debugging |
 
 `PUBLIC_` variables are read at **build** time (baked into the bundle), not at runtime;
 changing one on Render requires a redeploy.

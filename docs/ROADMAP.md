@@ -18,32 +18,32 @@ Done:
       ([ADR 0003](adr/0003-same-origin-api-through-render-rewrite.md))
 - [x] Cold-start aware server check ("waking up the server")
 - [x] Sign up, log in, log out and a one-click demo session
-- [x] Planner dashboard: calendars, a task list and the selected day's blocks, created and
-      deleted through forms
+- [x] Day planner: calendars, a task list and the selected day on an hour grid
 
 Known gaps in the done items:
 
-- [ ] Styles live in a template string in `App.tsx`; the build has no CSS pipeline yet
-- [ ] `PlannerDashboard.tsx` mixes data fetching, state, date helpers, forms and rendering
-- [ ] API types are written by hand instead of generated from the backend contract
-- [ ] Tests mock `fetch` by call order
-- [ ] Blocks are listed, not laid out on a time grid, and nothing can be dragged yet
+- [ ] The pointer paths of dragging are checked by hand; only the keyboard paths and the
+      arithmetic have automated tests
+- [ ] The app has one screen: no routes, and no settings screen for the time zone, hour
+      cycle or theme, which are fixed when the account is created
 
 ## Build order
 
 ### 1. Foundations
 
-- [ ] **CSS pipeline.** CSS Modules in the Webpack config, design tokens as custom
-      properties, light and dark themes from the same tokens, all styles out of `App.tsx`.
-- [ ] **Generated API types.** Types generated from the backend's `openapi.json`, with a
+- [x] **CSS pipeline.** CSS Modules in the Webpack config, design tokens as custom
+      properties, light and dark themes from the same tokens, all styles out of `App.tsx`
+      ([ADR 0006](adr/0006-css-modules-and-design-tokens.md)).
+- [x] **Generated API types.** Types generated from the backend's `openapi.json`, with a
       CI check that fails when they drift.
-- [ ] **API client.** The client owns the CSRF token and `If-Match` headers and returns
+- [x] **API client.** The client owns the CSRF token and `If-Match` headers and returns
       typed errors, so callers stop passing the token around.
-- [ ] **Server-state layer.** One place for caching, refetching and optimistic updates;
-      components never call the client directly.
-- [ ] **Feature split.** `calendars`, `tasks` and `timeline` features with their own
+- [x] **Server-state layer.** One place for caching, refetching and optimistic updates;
+      components never call the client directly
+      ([ADR 0007](adr/0007-tanstack-query-for-server-state.md)).
+- [x] **Feature split.** `calendars`, `tasks` and `timeline` features with their own
       components and hooks; date helpers in `lib/time` with unit tests.
-- [ ] **Test network layer.** MSW handlers instead of order-based `fetch` mocks, and a
+- [x] **Test network layer.** MSW handlers instead of order-based `fetch` mocks, and a
       coverage threshold in CI.
 - [ ] **Routing and settings.** Day, Week, Tasks and Settings routes; a settings screen for
       time zone, week start, hour cycle and theme.
@@ -52,16 +52,22 @@ Known gaps in the done items:
 
 ### 2. Time-blocking
 
-- [ ] **Day grid.** Hour grid, all-day row, current-time line, blocks positioned by time,
+- [x] **Day grid.** Hour grid, all-day row, current-time line, blocks positioned by time,
       overlapping blocks side by side. Layout maths is pure and unit-tested.
-- [ ] **Create a block** by clicking or dragging on empty grid space.
-- [ ] **Task onto the grid.** Dragging a task creates a linked block as long as the task's
-      estimate, optimistically, with rollback on failure.
-- [ ] **Move and resize** blocks with 15-minute snapping, and a clear message when the
+- [x] **Create a block** by clicking empty grid space or with the Add block button, then
+      edit its title, calendar and times in the details panel.
+- [ ] **Create a block by dragging** over empty grid space to set its length.
+- [x] **Task onto the grid.** Dragging a task creates a linked block as long as the task's
+      estimate, optimistically, with rollback on failure. The Plan button does the same from
+      the keyboard ([ADR 0008](adr/0008-drag-and-drop-with-dnd-kit.md)).
+- [x] **Move and resize** blocks with 15-minute snapping, and a clear message when the
       server reports a newer version.
+- [x] **Keyboard planning.** Every drag action has a keyboard equivalent and is announced
+      to screen readers: Plan on a task, arrow keys and Shift with arrow keys on a block.
+- [ ] **Touch dragging.** A block is picked up as soon as it is touched, so the grid only
+      scrolls from empty space. Pick it up on a long press instead.
 - [ ] **Reorder tasks** by dragging in the list.
-- [ ] **Keyboard planning.** Every drag action has a keyboard equivalent and is announced
-      to screen readers.
+- [ ] **Edit and delete calendars**, and hide a calendar's blocks.
 - [ ] **Week grid** reusing the day column.
 
 ### 3. Release quality
