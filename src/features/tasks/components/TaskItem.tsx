@@ -3,6 +3,7 @@ import type { JSX } from 'react';
 import type { Task } from '../../../lib/api/contract';
 import { formatDuration } from '../../../lib/time/formatTime';
 import controls from '../../../ui/controls.module.css';
+import { Icon } from '../../../ui/Icon';
 import { draggedTask } from '../../timeline/planningDrag';
 import styles from './TaskItem.module.css';
 
@@ -49,7 +50,7 @@ export function TaskItem({
         title={isOpen ? 'Drag onto the timeline' : undefined}
         {...listeners}
       >
-        ⠿
+        <Icon name="grip" />
       </span>
       <label className={styles.title}>
         <input
@@ -86,7 +87,7 @@ export function TaskItem({
           onDelete(task);
         }}
       >
-        ×
+        <Icon name="close" />
       </button>
     </li>
   );

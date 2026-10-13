@@ -2,6 +2,7 @@ import type { JSX, SyntheticEvent } from 'react';
 import type { Task } from '../../../lib/api/contract';
 import { readField } from '../../../lib/forms';
 import controls from '../../../ui/controls.module.css';
+import { EmptyState } from '../../../ui/EmptyState';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '../hooks/useTasks';
@@ -59,8 +60,8 @@ export function TaskPanel({
 
   return (
     <Panel
-      eyebrow="Inbox"
       title="Tasks"
+      icon="check-circle"
       aside={openCount === undefined ? null : <span>{openCount} open</span>}
     >
       <form className={styles.form} autoComplete="off" onSubmit={submitTask}>
@@ -83,7 +84,9 @@ export function TaskPanel({
       <QueryBoundary query={tasksQuery} loadingLabel="Loading tasks...">
         {(tasks) =>
           tasks.length === 0 ? (
-            <p className={styles.empty}>No tasks yet. Add the first one above.</p>
+            <EmptyState icon="leaf" title="No tasks yet">
+              Add the first one above, then give it a time on the day.
+            </EmptyState>
           ) : (
             <ul className={styles.list}>
               {tasks.map((task) => (

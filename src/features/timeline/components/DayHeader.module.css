@@ -1,34 +1,45 @@
 .header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--space-4);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 
 .heading {
   margin: 0;
-  font-size: 1.8rem;
-  line-height: 1.1;
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+}
+
+/* A small butter-yellow tag: the one place the page marks "now" in words. */
+.today {
+  margin: 0;
+  border: 2px solid var(--calendar-butter-stroke);
+  border-radius: var(--radius-pill);
+  background: var(--calendar-butter-surface);
+  color: var(--calendar-butter-text);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  padding: 2px var(--space-3);
 }
 
 .controls {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
-}
-
-.controls button {
-  height: var(--control-height);
-}
-
-.controls button:disabled {
-  cursor: default;
-  opacity: 0.55;
 }
 
 .datePicker {
   width: auto;
-  min-height: var(--control-height);
+  border-radius: var(--radius-pill);
+  padding: 0 var(--space-4);
 }

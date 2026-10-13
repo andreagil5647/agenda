@@ -6,11 +6,16 @@
   left: calc(var(--column) / var(--columns) * 100%);
   width: calc(100% / var(--columns));
   /* A quarter-hour block is still tall enough to read and to hit. */
-  height: max(calc((var(--end) - var(--start)) * var(--minute-height)), 22px);
-  padding: 1px 2px;
+  height: max(calc((var(--end) - var(--start)) * var(--minute-height)), 24px);
+  padding: 1px 3px;
   list-style: none;
 }
 
+.block[data-dragging='true'] {
+  opacity: 0.4;
+}
+
+/* A sticker: a pastel fill with an edge in the calendar's own colour. */
 .body {
   /* Positioned so that the hidden part of its name is clipped with the rest of it. */
   position: relative;
@@ -18,38 +23,33 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 0;
-  border-left: 3px solid var(--calendar-text);
+  border: 2px solid var(--calendar-stroke);
   border-radius: var(--radius-sm);
   background: var(--calendar-surface);
   color: var(--calendar-text);
   cursor: grab;
-  font-size: 0.82rem;
-  /* Without this a touch drag would scroll the grid instead of moving the block. */
-  touch-action: none;
-  line-height: 1.25;
+  font-size: var(--text-xs);
+  line-height: 1.3;
   padding: 2px var(--space-2);
   text-align: left;
-}
-
-.body[aria-pressed='true'] {
-  box-shadow: 0 0 0 2px var(--calendar-text);
-}
-
-.block[data-dragging='true'] {
-  opacity: 0.4;
-}
-
-/* The bottom edge of the block, pulled to change when it ends. */
-.resizeHandle {
-  position: absolute;
-  right: 2px;
-  bottom: 0;
-  left: 2px;
-  height: 8px;
-  cursor: ns-resize;
-  /* Without this a touch pull would scroll the grid instead of resizing the block. */
+  /* Without this a touch drag would scroll the grid instead of moving the block. */
   touch-action: none;
+  transition: transform var(--motion-fast) var(--motion-ease);
+}
+
+@media (hover: hover) {
+  .body:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+}
+
+.body:active:not(:disabled) {
+  cursor: grabbing;
+}
+
+/* Selected: the edge thickens inwards, so nothing around it moves. */
+.body[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px var(--calendar-text);
 }
 
 .body[aria-busy='true'] {
@@ -60,13 +60,14 @@
 .title {
   display: block;
   overflow: hidden;
-  font-weight: 700;
+  font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .time {
-  opacity: 0.85;
+  font-weight: 600;
+  opacity: 0.9;
 }
 
 /* One line: the title, then the time after it for as long as there is room. */
@@ -77,4 +78,45 @@
 
 .block[data-short='true'] .title {
   display: inline;
+}
+
+/* The bottom edge of the block, pulled to change when it ends. */
+.resizeHandle {
+  position: absolute;
+  right: 6px;
+  bottom: 1px;
+  left: 6px;
+  height: 10px;
+  cursor: ns-resize;
+  /* Without this a touch pull would scroll the grid instead of resizing the block. */
+  touch-action: none;
+}
+
+/* A short grip mark, so the edge can be found without hovering over it. */
+.resizeHandle::after {
+  position: absolute;
+  right: 50%;
+  bottom: 2px;
+  width: 22px;
+  height: 3px;
+  margin-right: -11px;
+  border-radius: var(--radius-pill);
+  background: var(--calendar-stroke);
+  content: '';
+}
+
+@media (pointer: coarse) {
+  .resizeHandle {
+    height: 18px;
+  }
+}
+
+@media (forced-colors: active) {
+  .body {
+    border-color: ButtonText;
+  }
+
+  .body[aria-pressed='true'] {
+    outline: 2px solid Highlight;
+  }
 }

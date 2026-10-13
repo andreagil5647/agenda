@@ -3,6 +3,8 @@ import type { JSX } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
 import type { HourCycle } from '../../../lib/time/formatTime';
 import controls from '../../../ui/controls.module.css';
+import { EmptyState } from '../../../ui/EmptyState';
+import { Icon } from '../../../ui/Icon';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { slotStart, spanAt, type PlacedBlock, type TimeSpan } from '../dayLayout';
@@ -58,6 +60,7 @@ export function DayView({
   onAddBlock,
 }: DayViewProps): JSX.Element {
   const hasCalendar = calendars.length > 0;
+  const isEmptyDay = blocks.length === 0 && allDayEvents.length === 0;
   const firstBlockStart = blocks[0]?.startMinutes ?? START_OF_WORKDAY_MINUTES;
   const initialMinutes = Math.max(
     0,
@@ -66,8 +69,8 @@ export function DayView({
 
   return (
     <Panel
-      eyebrow="Plan"
       title="Timeline"
+      icon="clock"
       aside={
         <button
           type="button"
@@ -75,6 +78,7 @@ export function DayView({
           disabled={!hasCalendar}
           onClick={onAddBlock}
         >
+          <Icon name="plus" />
           Add block
         </button>
       }
@@ -84,6 +88,13 @@ export function DayView({
           <>
             {!hasCalendar && (
               <p className={styles.hint}>Add a calendar first: every block belongs to one.</p>
+            )}
+            {hasCalendar && isEmptyDay && (
+              <div className={styles.empty}>
+                <EmptyState icon="sparkle" title="A clear day">
+                  Nothing is planned yet. Click the grid, press Add block, or drag a task here.
+                </EmptyState>
+              </div>
             )}
             <AllDayRow
               events={allDayEvents}

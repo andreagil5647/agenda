@@ -1,16 +1,29 @@
 /*
  * Design tokens. Components never name a colour, a size or a shadow directly;
- * they use these custom properties, so a theme is one place to change.
+ * they use these custom properties, so the look of the app is decided here.
  *
- * Each colour is written once as light-dark(light, dark). Which side applies
- * follows `color-scheme` on the root element: the system preference by
- * default, or a fixed scheme when `data-theme` is set.
+ * The look is a paper planner: warm cream paper, plum-black ink, a pine green
+ * for the things you press, and pastel inks for calendars. Each colour is
+ * written once as light-dark(light, dark), where "dark" is the same planner at
+ * night. Which side applies follows `color-scheme` on the root element: the
+ * system preference by default, or a fixed scheme when `data-theme` is set.
+ *
+ * Colours that carry text are checked against WCAG AA by styles/tokens.test.ts,
+ * so they stay written as six-digit hex values for that test to read.
  */
 :root {
   color-scheme: light dark;
 
-  --font-sans:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Nunito Variable', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+  /* A soft serif for the day and the brand: warm, and still a serious one. */
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+
+  --text-xs: 0.8rem;
+  --text-sm: 0.9rem;
+  --text-md: 1rem;
+  --text-lg: 1.2rem;
+  --text-xl: 1.6rem;
+  --text-display: clamp(2.2rem, 5vw, 3.4rem);
 
   --space-1: 4px;
   --space-2: 8px;
@@ -21,72 +34,115 @@
   --space-8: 32px;
   --space-12: 48px;
 
-  --radius-sm: 6px;
-  --radius-md: 8px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
   --radius-pill: 999px;
 
-  --control-height: 42px;
+  --control-height: 44px;
+  --sidebar-width: 240px;
   /* The height of one hour on the day grid; every block position derives from it. */
   --hour-height: 56px;
-  --sidebar-width: 220px;
 
-  --color-bg: light-dark(#f6f7f9, #0f1318);
-  --color-surface: light-dark(#ffffff, #171c23);
-  --color-surface-muted: light-dark(#edf0f4, #222933);
-  --color-border: light-dark(#d8dde4, #2b333e);
-  --color-border-strong: light-dark(#c9d0d9, #3a4452);
+  --motion-fast: 120ms;
+  --motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  --color-text: light-dark(#17202a, #e6eaf0);
-  --color-text-label: light-dark(#344050, #c3cbd6);
-  --color-text-muted: light-dark(#59636f, #a3adba);
-  --color-text-subtle: light-dark(#7b8591, #7f8a98);
+  /* Paper */
+  --color-bg: light-dark(#fbf5ea, #1b1620);
+  --color-surface: light-dark(#fffcf5, #251f2c);
+  --color-surface-muted: light-dark(#f3e9d6, #2f2837);
+  --color-surface-hover: light-dark(#f8efdd, #2b2433);
+  --color-border: light-dark(#e6d9c2, #3a3242);
+  /* Borders of things you can operate must stand out from the paper (3:1). */
+  --color-border-strong: light-dark(#8c7d6a, #8a7f94);
 
-  --color-accent: light-dark(#2563eb, #6d9bf5);
-  --color-on-accent: light-dark(#ffffff, #0b1220);
-  --color-accent-soft: light-dark(#eaf1ff, #1b2a47);
-  --color-accent-soft-text: light-dark(#1746a2, #a9c4ff);
+  /* Ink */
+  --color-text: light-dark(#2a2230, #f6eddc);
+  --color-text-label: light-dark(#43394a, #dcd1e0);
+  --color-text-muted: light-dark(#665b6d, #b9aec0);
+  --color-text-subtle: light-dark(#716677, #a398ab);
 
-  --color-danger-surface: light-dark(#fff2f2, #3a1c1f);
-  --color-danger-border: light-dark(#f4b4b4, #7a3238);
-  --color-danger-text: light-dark(#9b1c1c, #ffb4b4);
+  /* Pine: what you press, and what is selected */
+  --color-accent: light-dark(#1e6b57, #7fd6b4);
+  --color-accent-hover: light-dark(#175a49, #97e2c5);
+  /* The darker edge under a pressable button. */
+  --color-accent-lip: light-dark(#134a3b, #4fa384);
+  --color-on-accent: light-dark(#fffcf5, #0f241c);
+  --color-accent-soft: light-dark(#dcefe4, #1f3a30);
+  --color-accent-soft-text: light-dark(#134a3b, #a8e6cf);
 
-  --shadow-panel: 0 20px 60px light-dark(rgb(23 32 42 / 8%), rgb(0 0 0 / 40%));
-  --shadow-raised: 0 1px 4px light-dark(rgb(23 32 42 / 14%), rgb(0 0 0 / 50%));
-  --focus-ring: 3px solid light-dark(rgb(37 99 235 / 35%), rgb(109 155 245 / 60%));
+  --color-danger-surface: light-dark(#fde9e4, #3a1d21);
+  --color-danger-border: light-dark(#e8a595, #7a3a40);
+  --color-danger-text: light-dark(#9a2a1b, #ffb8ae);
 
-  /* Calendar palette. A calendar stores a key; data-calendar-color selects the pair. */
-  --calendar-blue-surface: light-dark(#eaf1ff, #1b2a47);
-  --calendar-blue-text: light-dark(#1746a2, #a9c4ff);
-  --calendar-green-surface: light-dark(#e9f8ef, #173524);
-  --calendar-green-text: light-dark(#19603a, #9be0b5);
-  --calendar-purple-surface: light-dark(#f1edff, #2a2247);
-  --calendar-purple-text: light-dark(#5333a3, #c7b6ff);
-  --calendar-rose-surface: light-dark(#fff0f3, #401c27);
-  --calendar-rose-text: light-dark(#9f1d3d, #ffb1c3);
+  --color-focus: light-dark(#2a2230, #f6eddc);
+  /* The current time on the day grid: coral, so it is never mistaken for a calendar. */
+  --color-now: light-dark(#d9482b, #ff8a6e);
 
-  /* What a calendar-coloured element uses; the rules below point them at a pair. */
+  --shadow-paper: 0 3px 0 var(--color-border);
+  --shadow-float: 0 14px 30px light-dark(rgb(70 45 20 / 18%), rgb(0 0 0 / 55%));
+
+  /* Calendar inks: a pastel fill, a darker ink for its text, and a mid tone for its edge.
+     A calendar stores a key; data-calendar-color selects the three. */
+  --calendar-blue-surface: light-dark(#dcebfb, #223850);
+  --calendar-blue-text: light-dark(#1c4a80, #bcd8ff);
+  --calendar-blue-stroke: light-dark(#7aa6dc, #6f9fdc);
+  --calendar-green-surface: light-dark(#dff0dc, #233a26);
+  --calendar-green-text: light-dark(#25592a, #b5e8b0);
+  --calendar-green-stroke: light-dark(#7bb37a, #78b877);
+  --calendar-purple-surface: light-dark(#ece3fa, #35294d);
+  --calendar-purple-text: light-dark(#4b2f86, #d6c6ff);
+  --calendar-purple-stroke: light-dark(#a98fdc, #9d86d4);
+  --calendar-rose-surface: light-dark(#fde1e6, #4a2430);
+  --calendar-rose-text: light-dark(#8e2a45, #ffc1d0);
+  --calendar-rose-stroke: light-dark(#e08aa0, #d9748d);
+  --calendar-peach-surface: light-dark(#ffe6d1, #4a3022);
+  --calendar-peach-text: light-dark(#86400f, #ffd0a8);
+  --calendar-peach-stroke: light-dark(#e7a06b, #e0925a);
+  --calendar-butter-surface: light-dark(#fff0b8, #463c14);
+  --calendar-butter-text: light-dark(#5e4800, #ffe58a);
+  --calendar-butter-stroke: light-dark(#dcb73a, #cfa92e);
+
+  /* What a calendar-coloured element uses; the rules below point them at a set. */
   --calendar-surface: var(--color-surface-muted);
   --calendar-text: var(--color-text-label);
+  --calendar-stroke: var(--color-border-strong);
 }
 
 [data-calendar-color='blue'] {
   --calendar-surface: var(--calendar-blue-surface);
   --calendar-text: var(--calendar-blue-text);
+  --calendar-stroke: var(--calendar-blue-stroke);
 }
 
 [data-calendar-color='green'] {
   --calendar-surface: var(--calendar-green-surface);
   --calendar-text: var(--calendar-green-text);
+  --calendar-stroke: var(--calendar-green-stroke);
 }
 
 [data-calendar-color='purple'] {
   --calendar-surface: var(--calendar-purple-surface);
   --calendar-text: var(--calendar-purple-text);
+  --calendar-stroke: var(--calendar-purple-stroke);
 }
 
 [data-calendar-color='rose'] {
   --calendar-surface: var(--calendar-rose-surface);
   --calendar-text: var(--calendar-rose-text);
+  --calendar-stroke: var(--calendar-rose-stroke);
+}
+
+[data-calendar-color='peach'] {
+  --calendar-surface: var(--calendar-peach-surface);
+  --calendar-text: var(--calendar-peach-text);
+  --calendar-stroke: var(--calendar-peach-stroke);
+}
+
+[data-calendar-color='butter'] {
+  --calendar-surface: var(--calendar-butter-surface);
+  --calendar-text: var(--calendar-butter-text);
+  --calendar-stroke: var(--calendar-butter-stroke);
 }
 
 :root[data-theme='light'] {

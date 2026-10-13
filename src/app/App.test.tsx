@@ -30,14 +30,47 @@ describe('App', () => {
     render(<App />);
 
     expect(await screen.findByLabelText('Email')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Try demo' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Try the demo' })).toBeInTheDocument();
+  });
+
+  it('switches between logging in and creating an account', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Create an account' }));
+
+    expect(screen.getByRole('form', { name: 'Create your account' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Log in' }));
+
+    expect(screen.getByRole('form', { name: 'Log in' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Name')).not.toBeInTheDocument();
+  });
+
+  it('lets the keyboard skip the navigation and go straight to the planner', async () => {
+    fakeApi.signIn();
+    render(<App />);
+
+    const skipLink = await screen.findByRole('link', { name: 'Skip to the planner' });
+
+    expect(skipLink).toHaveAttribute('href', '#main');
+    expect(screen.getByRole('main')).toHaveAttribute('id', 'main');
+  });
+
+  it('says what to do when there are no tasks or calendars yet', async () => {
+    fakeApi.signIn();
+    render(<App />);
+
+    expect(await screen.findByText('No tasks yet')).toBeInTheDocument();
+    expect(screen.getByText('No calendars yet')).toBeInTheDocument();
   });
 
   it('registers a user and enters the planner', async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(await screen.findByRole('tab', { name: 'Create account' }));
+    await user.click(await screen.findByRole('button', { name: 'Create an account' }));
     await user.type(screen.getByLabelText('Name'), 'Andrea');
     await user.type(screen.getByLabelText('Email'), 'andrea@example.com');
     await user.type(screen.getByLabelText('Password'), 'correct horse battery staple');
@@ -51,7 +84,7 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(await screen.findByRole('button', { name: 'Try demo' }));
+    await user.click(await screen.findByRole('button', { name: 'Try the demo' }));
 
     expect(await screen.findByText(/Demo account/)).toBeInTheDocument();
   });

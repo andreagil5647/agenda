@@ -3,21 +3,23 @@
   align-content: start;
   width: 240px;
   /* As tall as the block will be on the grid, so its end is visible before the drop. */
-  height: max(calc(var(--duration) * var(--hour-height) / 60), 22px);
+  height: max(calc(var(--duration) * var(--hour-height) / 60), 28px);
   overflow: hidden;
-  border-left: 3px solid var(--color-accent);
+  border: 2px dashed var(--color-accent);
   border-radius: var(--radius-sm);
   background: var(--color-accent-soft);
-  box-shadow: var(--shadow-panel);
+  box-shadow: var(--shadow-float);
   color: var(--color-accent-soft-text);
   cursor: grabbing;
-  font-size: 0.82rem;
-  line-height: 1.25;
+  font-size: var(--text-xs);
+  line-height: 1.3;
   padding: 2px var(--space-2);
+  transform: rotate(1.5deg);
 }
 
 .preview strong {
   overflow: hidden;
+  font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

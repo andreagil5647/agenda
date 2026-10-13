@@ -1,0 +1,56 @@
+/* A tilted sticker of a day: three blocks on a grid, and a task about to be dropped. */
+.preview {
+  position: relative;
+  width: min(100%, 360px);
+  margin-top: var(--space-8);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-paper);
+  padding: var(--space-4);
+  transform: rotate(-1.5deg);
+}
+
+.day {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.blocks {
+  display: grid;
+  grid-template-rows: repeat(5, 30px);
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.blocks li {
+  grid-row: var(--row) / span var(--span);
+  overflow: hidden;
+  border: 2px solid var(--calendar-stroke);
+  border-radius: var(--radius-sm);
+  background: var(--calendar-surface);
+  color: var(--calendar-text);
+  font-size: var(--text-xs);
+  padding: 2px var(--space-2);
+}
+
+/* The task being carried towards the grid: dashed, as in the real drop preview. */
+.task {
+  position: absolute;
+  right: -14px;
+  bottom: -18px;
+  margin: 0;
+  border: 2px dashed var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  box-shadow: var(--shadow-float);
+  color: var(--color-accent-soft-text);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  padding: var(--space-1) var(--space-3);
+  transform: rotate(3deg);
+}

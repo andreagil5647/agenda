@@ -1,8 +1,8 @@
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import { AuthScreen } from '../features/auth/components/AuthScreen';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
-import controls from '../ui/controls.module.css';
+import { Logo } from '../ui/Logo';
 import { NoticeProvider } from '../ui/notices/NoticeProvider';
 import styles from './App.module.css';
 import { AppShell } from './AppShell';
@@ -25,13 +25,27 @@ function ServerGate({ children }: { children: JSX.Element }): JSX.Element {
   }
 
   return (
+    <StatusScreen title="Getting your planner ready.">
+      <p role="status" aria-live="polite">
+        {STATUS_COPY[status]} ({String(Math.round(elapsedMs / 1000))}s)
+      </p>
+    </StatusScreen>
+  );
+}
+
+/** What is shown while the app is not ready to be used: the brand, a heading and what is going on. */
+function StatusScreen({ title, children }: { title: string; children: ReactNode }): JSX.Element {
+  return (
     <main className={styles.statusScreen}>
-      <div>
-        <p className={controls.eyebrow}>Agenda</p>
-        <h1>Preparing your planner.</h1>
-        <p role="status" aria-live="polite">
-          {STATUS_COPY[status]} ({String(Math.round(elapsedMs / 1000))}s)
-        </p>
+      <div className={styles.status}>
+        <Logo size={64} />
+        <h1>{title}</h1>
+        {children}
+        <div className={styles.loader} aria-hidden="true">
+          <span data-calendar-color="blue" />
+          <span />
+          <span />
+        </div>
       </div>
     </main>
   );
@@ -43,11 +57,11 @@ function AuthGate(): JSX.Element {
 
   if (status === 'loading') {
     return (
-      <main className={styles.statusScreen}>
+      <StatusScreen title="Welcome back.">
         <p role="status" aria-live="polite">
           Loading your session...
         </p>
-      </main>
+      </StatusScreen>
     );
   }
 
