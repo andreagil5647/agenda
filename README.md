@@ -7,11 +7,11 @@ events live on the same timeline, and you plan a day by dragging tasks into time
 
 The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647/agenda-backend).
 
-> **Status:** the day planner works. Sign up or start a one-click demo, then plan a day on
-> an hour grid: drag a task onto it to give it time, drag a block to move it, pull its edge
-> to resize it, or do all three from the keyboard. Changes show at once and are taken back
-> if the API refuses them. A week view, settings and end-to-end tests come next - see the
-> [roadmap](docs/ROADMAP.md).
+> **Status:** the day planner works, in English and Spanish. Sign up or start a one-click
+> demo, then plan a day on an hour grid: drag a task onto it to give it time, drag a block to
+> move it, pull its edge to resize it, or do all three from the keyboard. Changes show at once
+> and are taken back if the API refuses them. Themes, a week view and end-to-end tests come
+> next - see the [roadmap](docs/ROADMAP.md).
 
 <p align="center">
   <img src="docs/images/planner-light.webp" width="49%" alt="The day planner in its light theme: a Tuesday on an hour grid with blocks for stand-up, a design review, lunch and two overlapping calls, next to a list of tasks.">
@@ -28,6 +28,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | Drag       | dnd-kit for pick-up and drop, pointer events for resizing   |
 | Styles     | CSS Modules on design tokens, light and dark themes         |
 | Type       | Nunito and Fraunces, self-hosted variable fonts             |
+| Languages  | English and Spanish, a typed in-repo message catalogue      |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
 | Tests      | Jest 30 (`@swc/jest`), React Testing Library, MSW           |
 | Hosting    | Render static site, rewriting `/api/*` to the backend       |
@@ -56,9 +57,13 @@ src/
                         auth, calendars, tasks, timeline
   styles/              design tokens, a test for their contrast, and the global base layer
   ui/                  shared pieces: Panel, EmptyState, Icon, Logo, query states, notices,
-                        control styles
+                        the dock in the corner, control styles
   lib/api/             API client typed by the contract, one error type, user-facing messages
-  lib/time/            time zone conversion and time formatting, pure and unit-tested
+  lib/i18n/            the language runtime, language detection, and the typed message
+                        catalogues (messages/en.ts is the source, messages/es.ts follows it)
+  lib/preferences/     what the device remembers between visits (today, the language)
+  lib/time/            time zone conversion and time formatting in the language of the screen,
+                        pure and unit-tested
   lib/query/           query client and the optimistic write used by every feature
   lib/env.ts           typed access to PUBLIC_ build-time variables
   lib/serverStatus/    polls the API's liveness endpoint with backoff,
@@ -90,6 +95,30 @@ interface ([ADR 0009](docs/adr/0009-visual-identity.md)).
 - `src/styles/tokens.test.ts` fails if a text colour falls below 4.5:1 against its background, or
   a control border, focus ring or the current-time line below 3:1, in either theme.
 
+## Languages
+
+The app is in English and Spanish. A first visit follows the browser's language; the switch in
+the bottom-left corner of every screen changes it at once, and the choice is remembered on the
+device ([ADR 0010](docs/adr/0010-typed-message-catalogue.md)). It changes the text, the dates
+and times (through `Intl`, in the regional form the browser asks for), plurals, the messages
+for failed requests, and what screen readers hear. What a person typed, such as a task title,
+stays as typed. Spanish is a separate chunk that only loads when it is wanted.
+
+- Messages live in `src/lib/i18n/messages/`. `en.ts` is the source and `es.ts` is typed against
+  it, so a missing, extra or mistyped key, or a message with different placeholders, fails the
+  type check. A test fails if a Spanish message was left in English.
+- ESLint rejects text typed straight into markup and into `aria-label`, `placeholder`, `title`
+  and `alt` in `src/**/*.tsx`, so a screen cannot gain a string that is not translated.
+- The API's own sentences are English and are never shown. A failed request is explained from its
+  `code` and `details.reason`, both listed in the contract, so the explanation follows the
+  language even while it is on screen.
+- Signing up and the demo send the language, so a new account and its demo day start in it.
+
+To add a language: add its code to `LANGUAGES` and its name to `LANGUAGE_NAMES` in
+`src/lib/i18n/languages.ts`, write `messages/<code>.ts` typed against the English one, and add it
+to `loadCatalogue`. On the backend add it to `LOCALES` and give the demo day its words. The
+compiler lists everything that is still missing.
+
 ## Accessibility
 
 - Every pointer interaction has a keyboard path. A task has a **Plan** button, which places it at
@@ -110,6 +139,8 @@ interface ([ADR 0009](docs/adr/0009-visual-identity.md)).
   request level by MSW: `test/msw/fakeApi.ts` is an in-memory API that enforces sessions, the CSRF
   header and `If-Match`, so a test can also change something "from another tab" and watch the app
   take its own change back.
+- The language switch is tested end to end through the UI: the browser's language, the choice and
+  its persistence, errors that change language while on screen, and the planner in Spanish.
 - A coverage floor in `jest.config.js` fails the run if coverage drops, and
   `pnpm run api:check` fails if the generated API types no longer match the contract.
 - Pointer dragging is not covered by automated tests, because jsdom lays nothing out. It is

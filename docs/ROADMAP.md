@@ -79,10 +79,13 @@ Known gaps in the done items:
 
 ### Languages, themes, motion and sound
 
-- [ ] **Languages.** The whole app in English and Spanish, switchable at any time, with
-      dates and numbers in the language's own form. The runtime and the typed catalogue are
-      in ([ADR 0010](adr/0010-typed-message-catalogue.md)); the screens move over one area
-      at a time.
+- [x] **Languages.** The whole app in English and Spanish, switchable at any time from
+      the corner of every screen, with dates, times and numbers in the language's own form,
+      errors explained by reason, and a new account and its demo day started in the language
+      of the screen ([ADR 0010](adr/0010-typed-message-catalogue.md)).
+- [ ] **Preferences follow the account.** The language, and later the theme and the sound
+      setting, saved with the account so they follow a person between devices. Until then
+      they are remembered on each device.
 - [ ] **Themes.** Several complete looks, light and dark, switched from the corner of the
       screen with an animated change.
 - [ ] **Motion.** Feedback for finishing a task, dropping a block and changing day.

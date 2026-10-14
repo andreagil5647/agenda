@@ -52,11 +52,12 @@ export default (env: Record<string, boolean>): Configuration =>
     },
     performance: {
       hints: 'warning',
-      // Sizes before compression. The whole app is one entry of about 355 kB
-      // (111 kB gzipped), 219 kB of it React. The entry limit leaves a little
-      // room above that, so growth shows up as a warning; no single file may
-      // pass the per-asset limit, which is what keeps the chunks split.
-      maxEntrypointSize: 380_000,
+      // Sizes before compression. The whole app is one entry of about 386 kB
+      // (119 kB gzipped), 219 kB of it React and 30 kB of it styles. The entry
+      // limit leaves a little room above that, so growth shows up as a warning;
+      // no single file may pass the per-asset limit, which is what keeps the
+      // chunks split. Other languages load on demand and are not in the entry.
+      maxEntrypointSize: 400_000,
       maxAssetSize: 250_000,
     },
     plugins: [

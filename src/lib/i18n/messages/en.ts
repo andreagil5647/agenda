@@ -41,6 +41,10 @@ export const en = {
     'This was changed somewhere else in the meantime. The latest version is shown now; try again.',
   'error.VALIDATION_ERROR': 'Some of that was not valid. Check the fields and try again.',
   'error.PAYLOAD_TOO_LARGE': 'That is too much to save at once.',
+  'error.RATE_LIMITED': 'Too many attempts. Wait a moment and try again.',
+  'error.reason.email_taken': 'That email is already registered. Try logging in instead.',
+  'error.reason.demo_full': 'The demo is full right now. Try again in a few minutes.',
+  'error.reason.end_not_after_start': 'The end has to be after the start.',
   'auth.invalidCredentials': 'That email and password do not match.',
 
   // The corner of the screen where preferences are changed

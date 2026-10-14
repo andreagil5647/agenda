@@ -5,6 +5,7 @@ import type {
   LoginRequest,
   RegisterRequest,
 } from '../../../lib/api/contract';
+import type { Language } from '../../../lib/i18n/languages';
 
 /** The zone a new account starts in, so its first day view matches the visitor's clock. */
 function browserTimeZone(): string {
@@ -24,9 +25,15 @@ export async function getSessionUser(): Promise<AuthUser | null> {
   return isAuthenticated(session) ? session.user : null;
 }
 
-export function register(input: Omit<RegisterRequest, 'timeZone'>): Promise<AuthenticatedSession> {
+/** A new account starts in the visitor's time zone and in the language of the screen. */
+export function register(
+  input: Omit<RegisterRequest, 'timeZone' | 'locale'>,
+  language: Language,
+): Promise<AuthenticatedSession> {
   return unwrap(
-    api.POST('/api/v1/auth/register', { body: { ...input, timeZone: browserTimeZone() } }),
+    api.POST('/api/v1/auth/register', {
+      body: { ...input, timeZone: browserTimeZone(), locale: language },
+    }),
   );
 }
 
@@ -34,8 +41,11 @@ export function logIn(input: LoginRequest): Promise<AuthenticatedSession> {
   return unwrap(api.POST('/api/v1/auth/login', { body: input }));
 }
 
-export function startDemo(): Promise<AuthenticatedSession> {
-  return unwrap(api.POST('/api/v1/auth/demo', { body: { timeZone: browserTimeZone() } }));
+/** The demo day is laid out on the visitor's clock and written in the language of the screen. */
+export function startDemo(language: Language): Promise<AuthenticatedSession> {
+  return unwrap(
+    api.POST('/api/v1/auth/demo', { body: { timeZone: browserTimeZone(), locale: language } }),
+  );
 }
 
 export function logOut(): Promise<void> {

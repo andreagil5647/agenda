@@ -5,6 +5,11 @@ export type Language = (typeof LANGUAGES)[number];
 
 export const DEFAULT_LANGUAGE: Language = 'en';
 
+/** Whether a value read from outside the app, such as storage, is one of the languages. */
+export function isLanguage(value: unknown): value is Language {
+  return LANGUAGES.some((language) => language === value);
+}
+
 /**
  * Each language is named in itself, never translated: someone who cannot read
  * the current language has to be able to find their own.

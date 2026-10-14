@@ -42,22 +42,29 @@ const metadata = (): { id: string; version: number; createdAt: string; updatedAt
   updatedAt: CREATED_AT,
 });
 
+const DEFAULT_SETTINGS: AuthUser['settings'] = {
+  timeZone: 'UTC',
+  weekStartsOn: 1,
+  hourCycle: 'h23',
+  locale: 'en',
+  theme: 'system',
+  accentColor: 'blue',
+};
+
 export function buildUser(overrides: Partial<AuthUser> = {}): AuthUser {
   return {
     id: nextId(),
     email: 'andrea@example.com',
     displayName: 'Andrea',
-    settings: {
-      timeZone: 'UTC',
-      weekStartsOn: 1,
-      hourCycle: 'h23',
-      locale: 'en',
-      theme: 'system',
-      accentColor: 'blue',
-    },
+    settings: DEFAULT_SETTINGS,
     isDemo: false,
     ...overrides,
   };
+}
+
+/** The settings a new account starts with: in the language it asked for, English if none. */
+function settingsFor(locale: unknown): AuthUser['settings'] {
+  return { ...DEFAULT_SETTINGS, locale: locale === 'es' ? 'es' : 'en' };
 }
 
 export function buildCalendar(overrides: Partial<Calendar> = {}): Calendar {
@@ -226,8 +233,14 @@ const handlers: HttpHandler[] = [
   ),
 
   http.post(`${API}/auth/register`, async ({ request }) => {
-    const { email, displayName } = await jsonBody(request);
-    const user = openSession(buildUser({ email: String(email), displayName: String(displayName) }));
+    const { email, displayName, locale } = await jsonBody(request);
+    const user = openSession(
+      buildUser({
+        email: String(email),
+        displayName: String(displayName),
+        settings: settingsFor(locale),
+      }),
+    );
     return HttpResponse.json(sessionBody(user), { status: 201 });
   }),
 
@@ -236,8 +249,11 @@ const handlers: HttpHandler[] = [
     return errorResponse(401, 'UNAUTHORIZED', 'Invalid email or password');
   }),
 
-  http.post(`${API}/auth/demo`, () => {
-    const user = openSession(buildUser({ displayName: 'Demo User', isDemo: true }));
+  http.post(`${API}/auth/demo`, async ({ request }) => {
+    const { locale } = await jsonBody(request);
+    const user = openSession(
+      buildUser({ displayName: 'Demo User', isDemo: true, settings: settingsFor(locale) }),
+    );
     return HttpResponse.json(sessionBody(user), { status: 201 });
   }),
 
@@ -320,6 +336,10 @@ export const fakeApi = {
   },
 
   /** What the API currently holds, for asserting on the outcome of a write. */
+  get user(): AuthUser | null {
+    return state.user;
+  },
+
   get tasks(): readonly Task[] {
     return state.tasks;
   },
