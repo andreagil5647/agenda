@@ -340,6 +340,10 @@ export const fakeApi = {
     return state.user;
   },
 
+  get calendars(): readonly Calendar[] {
+    return state.calendars;
+  },
+
   get tasks(): readonly Task[] {
     return state.tasks;
   },
