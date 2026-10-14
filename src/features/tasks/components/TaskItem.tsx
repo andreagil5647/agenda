@@ -63,7 +63,7 @@ export function TaskItem({
             onToggleDone(task);
           }}
         />
-        <span>{task.title}</span>
+        <span className={styles.text}>{task.title}</span>
       </label>
       <small className={styles.meta}>
         <span className={styles.duration}>{formatDuration(task.estimateMinutes, locale)}</span>
