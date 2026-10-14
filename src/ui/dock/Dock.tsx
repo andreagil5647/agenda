@@ -50,8 +50,8 @@ export function Dock(): JSX.Element {
             current: t(THEME_NAMES[theme]),
             next: t(THEME_NAMES[upcoming]),
           })}
-          onClick={() => {
-            setTheme(upcoming);
+          onClick={(event) => {
+            setTheme(upcoming, event.currentTarget);
             setAnnouncement(t('theme.changed', { theme: t(THEME_NAMES[upcoming]) }));
           }}
         >

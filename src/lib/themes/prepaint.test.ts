@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { setDeviceColorScheme } from '../../../test/helpers/colorScheme';
+import { setDevice } from '../../../test/helpers/device';
 import { detectTheme, THEMES, type ThemeId } from './themes';
 
 const KEY = 'agenda.preferences';
@@ -47,10 +47,10 @@ describe('the script that picks the theme before the first paint', () => {
   });
 
   it('gives a device that has chosen nothing Paper, or Midnight if the device is set to dark', () => {
-    setDeviceColorScheme('light');
+    setDevice({ colorScheme: 'light' });
     expect(loadPage().theme).toBe('paper');
 
-    setDeviceColorScheme('dark');
+    setDevice({ colorScheme: 'dark' });
     expect(loadPage().theme).toBe('midnight');
   });
 
@@ -61,7 +61,7 @@ describe('the script that picks the theme before the first paint', () => {
   it.each(THEMES)(
     'applies $id when it is the saved choice, whatever the device prefers',
     (theme) => {
-      setDeviceColorScheme(theme.scheme === 'dark' ? 'light' : 'dark');
+      setDevice({ colorScheme: theme.scheme === 'dark' ? 'light' : 'dark' });
       save({ theme: theme.id });
 
       expect(loadPage()).toEqual({ theme: theme.id, color: theme.themeColor });
@@ -74,7 +74,7 @@ describe('the script that picks the theme before the first paint', () => {
     ['an object key that is not a theme', { theme: 'constructor' }],
     ['no theme', { language: 'es' }],
   ])('ignores %s and follows the device', (_name, preferences) => {
-    setDeviceColorScheme('dark');
+    setDevice({ colorScheme: 'dark' });
     save(preferences);
 
     expect(loadPage().theme).toBe('midnight');
@@ -84,14 +84,14 @@ describe('the script that picks the theme before the first paint', () => {
     ['text that is not JSON', 'not json at all'],
     ['JSON that is not an object', 'null'],
   ])('ignores %s and follows the device', (_name, stored) => {
-    setDeviceColorScheme('dark');
+    setDevice({ colorScheme: 'dark' });
     window.localStorage.setItem(KEY, stored);
 
     expect(loadPage().theme).toBe('midnight');
   });
 
   it('follows the device when the storage refuses to be read', () => {
-    setDeviceColorScheme('dark');
+    setDevice({ colorScheme: 'dark' });
     jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new DOMException('blocked', 'SecurityError');
     });
@@ -100,7 +100,7 @@ describe('the script that picks the theme before the first paint', () => {
   });
 
   it.each(CHOICES)('chooses what the app chooses for saved %s, dark device %s', (saved, dark) => {
-    setDeviceColorScheme(dark ? 'dark' : 'light');
+    setDevice({ colorScheme: dark ? 'dark' : 'light' });
     if (saved) save({ theme: saved });
 
     expect(loadPage().theme).toBe(detectTheme(saved, dark));

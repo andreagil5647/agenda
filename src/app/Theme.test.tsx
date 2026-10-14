@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { setDeviceColorScheme } from '../../test/helpers/colorScheme';
+import { setDevice } from '../../test/helpers/device';
 import { App } from './App';
 
 const PREFERENCES_KEY = 'agenda.preferences';
@@ -22,6 +22,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  Reflect.deleteProperty(document, 'startViewTransition');
+  Reflect.deleteProperty(document.documentElement, 'animate');
   window.localStorage.clear();
   delete document.documentElement.dataset.theme;
   document.documentElement.lang = '';
@@ -40,7 +42,7 @@ describe('the theme of the app', () => {
   });
 
   it('starts as Midnight on a device set to dark', async () => {
-    setDeviceColorScheme('dark');
+    setDevice({ colorScheme: 'dark' });
     render(<App />);
 
     expect(
@@ -51,7 +53,7 @@ describe('the theme of the app', () => {
   });
 
   it('is the saved choice, not the device setting, when the two disagree', async () => {
-    setDeviceColorScheme('dark');
+    setDevice({ colorScheme: 'dark' });
     window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify({ theme: 'paper' }));
     render(<App />);
 
@@ -136,6 +138,42 @@ describe('the theme of the app', () => {
     await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
 
     expect(pageTheme()).toBe('midnight');
+  });
+
+  it('is revealed from the button, inside a view transition, when the browser has them', async () => {
+    const start = jest.fn((update: () => void) => {
+      update();
+      return { ready: Promise.resolve() };
+    });
+    const animate = jest.fn();
+    Object.defineProperty(document, 'startViewTransition', { configurable: true, value: start });
+    Object.defineProperty(document.documentElement, 'animate', {
+      configurable: true,
+      value: animate,
+    });
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
+
+    expect(start).toHaveBeenCalledTimes(1);
+    expect(pageTheme()).toBe('midnight');
+    await waitFor(() => {
+      expect(animate).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('is not revealed with a circle when the reader asked for less motion', async () => {
+    const start = jest.fn();
+    Object.defineProperty(document, 'startViewTransition', { configurable: true, value: start });
+    setDevice({ reducedMotion: true });
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
+
+    expect(pageTheme()).toBe('midnight');
+    expect(start).not.toHaveBeenCalled();
   });
 
   it('shows the theme in use as its visible name, and hides the colour drop from screen readers', async () => {

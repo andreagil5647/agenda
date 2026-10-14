@@ -8,14 +8,19 @@ import {
   type JSX,
   type ReactNode,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { readPreferences, writePreferences } from '../preferences/devicePreferences';
 import { applyTheme, deviceIsSetToDark } from './applyTheme';
+import { revealFrom } from './themeTransition';
 import { detectTheme, type ThemeId } from './themes';
 
 interface ThemeValue {
   theme: ThemeId;
-  /** Changes the theme at once and remembers the choice on this device. */
-  setTheme: (theme: ThemeId) => void;
+  /**
+   * Changes the theme at once and remembers the choice on this device. Given the
+   * element that asked for it, the change spreads from there as a circle.
+   */
+  setTheme: (theme: ThemeId, origin?: Element) => void;
 }
 
 const ThemeContext = createContext<ThemeValue | undefined>(undefined);
@@ -34,9 +39,19 @@ export function ThemeProvider({ children }: { children: ReactNode }): JSX.Elemen
     applyTheme(theme);
   }, [theme]);
 
-  const setTheme = useCallback((next: ThemeId): void => {
+  const setTheme = useCallback((next: ThemeId, origin?: Element): void => {
     writePreferences({ theme: next });
-    setThemeState(next);
+    // The page has to be in its new look when this returns, for the transition to capture it.
+    const change = (): void => {
+      flushSync(() => {
+        setThemeState(next);
+      });
+    };
+    if (origin) {
+      revealFrom(origin, change);
+    } else {
+      change();
+    }
   }, []);
 
   const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);

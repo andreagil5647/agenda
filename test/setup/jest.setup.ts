@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { setDeviceColorScheme } from '../helpers/colorScheme';
+import { resetDevice } from '../helpers/device';
 import { fakeApi } from '../msw/fakeApi';
 import { server } from '../msw/server';
 
@@ -11,7 +11,7 @@ beforeAll(() => {
 
 beforeEach(() => {
   fakeApi.reset();
-  setDeviceColorScheme('light');
+  resetDevice();
 });
 
 afterEach(() => {
