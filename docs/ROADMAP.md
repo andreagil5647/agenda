@@ -30,9 +30,8 @@ Known gaps in the done items:
       confirmation dialog, and needs a restore endpoint for events
 - [ ] The quick-add forms label their fields with a placeholder and an accessible name rather
       than a visible label
-- [ ] The theme follows the system; there is no switch until the settings screen exists
-- [ ] The app has one screen: no routes, and no settings screen for the time zone, hour
-      cycle or theme, which are fixed when the account is created
+- [ ] The app has one screen: no routes, and no settings screen for the time zone or hour
+      cycle, which are fixed when the account is created
 
 ## Build order
 
@@ -53,7 +52,7 @@ Known gaps in the done items:
 - [x] **Test network layer.** MSW handlers instead of order-based `fetch` mocks, and a
       coverage threshold in CI.
 - [ ] **Routing and settings.** Day, Week, Tasks and Settings routes; a settings screen for
-      time zone, week start, hour cycle and theme.
+      time zone, week start and hour cycle.
 - [ ] **UI primitives.** Button, Input, Dialog and Toast with consistent focus and error
       states.
 
@@ -86,8 +85,10 @@ Known gaps in the done items:
 - [ ] **Preferences follow the account.** The language, and later the theme and the sound
       setting, saved with the account so they follow a person between devices. Until then
       they are remembered on each device.
-- [ ] **Themes.** Several complete looks, light and dark, switched from the corner of the
-      screen with an animated change.
+- [x] **Themes.** Four complete looks, light and dark: Paper, Arcade, Seaside and Midnight.
+      A button in the corner moves to the next one and a list chooses one directly, with a
+      circular reveal, the choice remembered on the device, and each theme held to the same
+      contrast checks ([ADR 0011](adr/0011-named-themes-as-token-sheets.md)).
 - [ ] **Motion.** Feedback for finishing a task, dropping a block and changing day.
 - [ ] **Sound.** Short synthesised cues in the style of the current theme, off by default.
 

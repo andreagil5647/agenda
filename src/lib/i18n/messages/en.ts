@@ -51,6 +51,14 @@ export const en = {
   'dock.label': 'Preferences',
   'language.label': 'Language',
   'language.loadFailed': 'Could not load that language. Check your connection and try again.',
+  'theme.group': 'Theme',
+  'theme.choose': 'Choose a theme',
+  'theme.paper': 'Paper',
+  'theme.arcade': 'Arcade',
+  'theme.seaside': 'Seaside',
+  'theme.midnight': 'Midnight',
+  'theme.switch': 'Theme: {current}. Switch to {next}.',
+  'theme.changed': 'Theme changed to {theme}.',
 
   // The sign-in screen
   'auth.hero.title': 'Give every task a time.',

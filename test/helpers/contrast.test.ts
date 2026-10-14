@@ -1,4 +1,4 @@
-import { contrastRatio, readThemedColors } from './contrast';
+import { contrastRatio, readColors, readTokenNames } from './contrast';
 
 describe('contrastRatio', () => {
   it('is 21 for black on white and 1 for a colour against itself', () => {
@@ -16,19 +16,27 @@ describe('contrastRatio', () => {
   });
 });
 
-describe('readThemedColors', () => {
-  it('reads both sides of a light-dark() token', () => {
-    const colors = readThemedColors('--color-bg: light-dark(#fbf5ea, #1b1620);');
-
-    expect(colors.light['color-bg']).toBe('#fbf5ea');
-    expect(colors.dark['color-bg']).toBe('#1b1620');
+describe('readColors', () => {
+  it('reads a token written as a hex colour', () => {
+    expect(readColors('--color-bg: #fbf5ea;')).toEqual({ 'color-bg': '#fbf5ea' });
   });
 
-  it('skips tokens that are not a pair of hex colours', () => {
-    const colors = readThemedColors(
-      '--a: #ffffff; --b: var(--a); --c: light-dark(rgb(0 0 0 / 8%), rgb(0 0 0 / 40%));',
-    );
+  it('skips tokens that are not a hex colour', () => {
+    const colors = readColors('--a: #ffffff; --b: var(--a); --c: rgb(0 0 0 / 8%); --d: #fff;');
 
-    expect(colors.light).toEqual({});
+    expect(colors).toEqual({ a: '#ffffff' });
+  });
+});
+
+describe('readTokenNames', () => {
+  it('lists every custom property, whatever its value', () => {
+    const css = `:root {
+      --a: #ffffff;
+      --b: var(--a);
+      color: red;
+      --c: 0 1px 2px;
+    }`;
+
+    expect(readTokenNames(css)).toEqual(['a', 'b', 'c']);
   });
 });

@@ -16,7 +16,9 @@
 
 body {
   margin: 0;
-  background: var(--color-bg);
+  background-color: var(--color-bg);
+  background-image: var(--page-texture);
+  background-size: var(--page-texture-size);
 }
 
 h1,
@@ -86,6 +88,16 @@ select:focus {
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 2px;
+}
+
+/*
+ * A change of theme is revealed by a circle that grows over the old page (see
+ * lib/themes/themeTransition.ts), so the browser's own cross-fade is switched off.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 /* Touch screens get bigger targets: a fingertip is far less precise than a pointer. */

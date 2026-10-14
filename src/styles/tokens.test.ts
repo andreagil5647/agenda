@@ -1,16 +1,20 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { contrastRatio, readThemedColors } from '../../test/helpers/contrast';
+import { contrastRatio, readColors, readTokenNames } from '../../test/helpers/contrast';
+import { THEMES } from '../lib/themes/themes';
 
 const AA_TEXT = 4.5;
 /** Boundaries of controls, and indicators such as focus, only need to be seen. */
 const AA_GRAPHICS = 3;
 
-const colors = readThemedColors(readFileSync(join(__dirname, 'tokens.css'), 'utf8'));
-const themes = [
-  ['light', colors.light],
-  ['dark', colors.dark],
-] as const;
+function readTheme(id: string): string {
+  return readFileSync(join(__dirname, 'themes', `${id}.css`), 'utf8');
+}
+
+/** Every theme has these: what Paper, the default, declares. */
+const PAPER_TOKENS = readTokenNames(readTheme(THEMES[0].id));
+/** The tokens shared by every theme, which a theme may override but not invent. */
+const BASE_TOKENS = readTokenNames(readFileSync(join(__dirname, 'tokens.css'), 'utf8'));
 
 /** Pairs of tokens that appear together, and the contrast they owe each other. */
 const PAIRS: readonly (readonly [text: string, ground: string, minimum: number])[] = [
@@ -37,33 +41,53 @@ const PAIRS: readonly (readonly [text: string, ground: string, minimum: number])
 
 const CALENDARS = ['blue', 'green', 'purple', 'rose', 'peach', 'butter'];
 
-describe.each(themes)('%s theme contrast', (_name, theme) => {
-  it.each(PAIRS)('%s on %s is at least %s:1', (text, ground, minimum) => {
-    const foreground = theme[text];
-    const background = theme[ground];
+describe.each(THEMES)('the $id theme', ({ id, scheme, themeColor }) => {
+  const css = readTheme(id);
+  const colors = readColors(css);
+
+  it.each(PAIRS)('has %s on %s at least %s:1', (text, ground, minimum) => {
+    const foreground = colors[text];
+    const background = colors[ground];
 
     expect(foreground).toBeDefined();
     expect(background).toBeDefined();
     expect(contrastRatio(foreground ?? '', background ?? '')).toBeGreaterThanOrEqual(minimum);
   });
 
-  it.each(CALENDARS)('the %s calendar text is readable on its own fill', (calendar) => {
-    const text = theme[`calendar-${calendar}-text`];
-    const surface = theme[`calendar-${calendar}-surface`];
+  it.each(CALENDARS)('has readable %s calendar text on its own fill', (calendar) => {
+    const text = colors[`calendar-${calendar}-text`];
+    const surface = colors[`calendar-${calendar}-surface`];
 
     expect(text).toBeDefined();
     expect(surface).toBeDefined();
     expect(contrastRatio(text ?? '', surface ?? '')).toBeGreaterThanOrEqual(AA_TEXT);
   });
-});
 
-describe('tokens', () => {
   it('gives every calendar colour a fill, a text colour and an edge', () => {
     for (const calendar of CALENDARS) {
       for (const part of ['surface', 'text', 'stroke']) {
-        expect(colors.light[`calendar-${calendar}-${part}`]).toBeDefined();
-        expect(colors.dark[`calendar-${calendar}-${part}`]).toBeDefined();
+        expect(colors[`calendar-${calendar}-${part}`]).toBeDefined();
       }
     }
+  });
+
+  it('declares every token that Paper declares', () => {
+    const names = readTokenNames(css);
+
+    expect(PAPER_TOKENS.filter((name) => !names.includes(name))).toEqual([]);
+  });
+
+  it('declares nothing else except an override of a token the base defines', () => {
+    const extras = readTokenNames(css).filter((name) => !PAPER_TOKENS.includes(name));
+
+    expect(extras.filter((name) => !BASE_TOKENS.includes(name))).toEqual([]);
+  });
+
+  it('is the scheme the list of themes says it is', () => {
+    expect(css).toContain(`color-scheme: ${scheme};`);
+  });
+
+  it('paints the browser bar with the colour of its page', () => {
+    expect(colors['color-bg']).toBe(themeColor);
   });
 });

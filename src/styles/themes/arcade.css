@@ -1,0 +1,86 @@
+/*
+ * Arcade: a game cabinet. Near-black navy, neon magenta for what you press, cyan
+ * for focus and yellow for the current time. Everything is squared, shadows are
+ * hard offsets, motion moves in steps, and the page has a faint grid behind it.
+ * Only the headings are in the pixel font; the text you read stays in the
+ * interface font.
+ *
+ * It has the same colour tokens as every theme, and styles/tokens.test.ts holds
+ * them to the same contrast. Layout, spacing and target sizes are not touched.
+ */
+[data-theme='arcade'] {
+  color-scheme: dark;
+
+  --font-display: 'Pixelify Sans Variable', 'Courier New', monospace;
+
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-pill: 0;
+  --radius-check: 0;
+
+  --motion-fast: 90ms;
+  --motion-ease: steps(3, end);
+
+  --shadow-paper: 4px 4px 0 var(--color-border);
+  --block-shadow: 2px 2px 0;
+  --page-texture:
+    linear-gradient(rgb(127 138 214 / 8%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(127 138 214 / 8%) 1px, transparent 1px);
+  --page-texture-size: 32px 32px;
+
+  /* Surfaces */
+  --color-bg: #0c0f24;
+  --color-surface: #151a38;
+  --color-surface-muted: #1e2448;
+  --color-surface-hover: #1a2044;
+  --color-border: #2e3770;
+  /* Borders of things you can operate must stand out from the page (3:1). */
+  --color-border-strong: #7f8ad6;
+
+  /* Ink */
+  --color-text: #f4f6ff;
+  --color-text-label: #dde1ff;
+  --color-text-muted: #b6bdee;
+  --color-text-subtle: #a5adde;
+
+  /* Accent: what you press, and what is selected */
+  --color-accent: #ff4fd8;
+  --color-accent-hover: #ff7ae3;
+  /* The darker edge under a pressable button. */
+  --color-accent-lip: #b81f98;
+  --color-on-accent: #1a0620;
+  --color-accent-soft: #3b1245;
+  --color-accent-soft-text: #ffa3ee;
+
+  --color-danger-surface: #3d1024;
+  --color-danger-border: #8a2b4c;
+  --color-danger-text: #ff9fb0;
+
+  --color-focus: #3df2ff;
+  /* The current time on the day grid: yellow, so it is never mistaken for a calendar. */
+  --color-now: #ffe14d;
+
+  --shadow-float: 6px 6px 0 rgb(0 0 0 / 70%);
+
+  /* Calendar inks: a deep fill, a neon ink for its text, and the same neon for its edge.
+     A calendar stores a key; data-calendar-color selects the three. */
+  --calendar-blue-surface: #12294f;
+  --calendar-blue-text: #a9d0ff;
+  --calendar-blue-stroke: #4d9bff;
+  --calendar-green-surface: #0f3a2a;
+  --calendar-green-text: #9bffc9;
+  --calendar-green-stroke: #2fe38b;
+  --calendar-purple-surface: #2d1b57;
+  --calendar-purple-text: #d2b8ff;
+  --calendar-purple-stroke: #9a6bff;
+  --calendar-rose-surface: #4a1236;
+  --calendar-rose-text: #ffb0d9;
+  --calendar-rose-stroke: #ff4fa8;
+  --calendar-peach-surface: #4a2410;
+  --calendar-peach-text: #ffc99c;
+  --calendar-peach-stroke: #ff9a3d;
+  --calendar-butter-surface: #43390a;
+  --calendar-butter-text: #ffee8a;
+  --calendar-butter-stroke: #f2d21f;
+}

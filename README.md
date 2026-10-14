@@ -10,12 +10,14 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 > **Status:** the day planner works, in English and Spanish. Sign up or start a one-click
 > demo, then plan a day on an hour grid: drag a task onto it to give it time, drag a block to
 > move it, pull its edge to resize it, or do all three from the keyboard. Changes show at once
-> and are taken back if the API refuses them. Themes, a week view and end-to-end tests come
-> next - see the [roadmap](docs/ROADMAP.md).
+> and are taken back if the API refuses them. Four themes, switched from the corner of the
+> screen. A week view and end-to-end tests come next - see the [roadmap](docs/ROADMAP.md).
 
 <p align="center">
-  <img src="docs/images/planner-light.webp" width="49%" alt="The day planner in its light theme: a Tuesday on an hour grid with blocks for stand-up, a design review, lunch and two overlapping calls, next to a list of tasks.">
-  <img src="docs/images/planner-dark.webp" width="49%" alt="The same day planner in its dark theme.">
+  <img src="docs/images/planner-light.webp" width="49%" alt="The day planner in its Paper theme: a Tuesday on an hour grid with blocks for stand-up, a design review, lunch and two overlapping calls, next to a list of tasks.">
+  <img src="docs/images/planner-dark.webp" width="49%" alt="The same day planner in its Midnight theme.">
+  <img src="docs/images/planner-arcade.webp" width="49%" alt="The same day planner in its Arcade theme: a pixel font for the headings, squared corners, hard shadows and neon calendar colours on a dark navy page with a faint grid.">
+  <img src="docs/images/planner-seaside.webp" width="49%" alt="The same day planner in its Seaside theme: pale aqua, deep teal ink, rounded shapes and soft glows.">
 </p>
 
 ## Stack
@@ -26,7 +28,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | Build      | Webpack 5, hand-written dev/prod config, SWC (`swc-loader`) |
 | Data       | TanStack Query, API client typed by the OpenAPI contract    |
 | Drag       | dnd-kit for pick-up and drop, pointer events for resizing   |
-| Styles     | CSS Modules on design tokens, light and dark themes         |
+| Styles     | CSS Modules on design tokens, one stylesheet per theme      |
 | Type       | Nunito and Fraunces, self-hosted variable fonts             |
 | Languages  | English and Spanish, a typed in-repo message catalogue      |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
@@ -86,14 +88,37 @@ interface ([ADR 0009](docs/adr/0009-visual-identity.md)).
   <img src="docs/images/sign-in.webp" width="80%" alt="The sign-in screen: a smiling calendar logo, the headline 'Give every task a time', and a card with a one-click demo above the log-in form.">
 </p>
 
-- Every colour, size and shadow is a custom property in `src/styles/tokens.css`. Components use
-  them and never name a value, so changing the look is a change to that file.
-- Light and dark come from the same tokens, with each colour written once as
-  `light-dark(light, dark)`. The theme follows the system.
+- Every colour, size and shadow is a custom property. What every theme shares (type, space,
+  shape, motion) is in `src/styles/tokens.css`; the colours are in `src/styles/themes/`, one
+  file per theme. Components use the tokens and never name a value.
+- There are four themes ([ADR 0011](docs/adr/0011-named-themes-as-token-sheets.md)): **Paper**,
+  the cream and plum look above; **Arcade**, a dark game cabinet with neon colours, squared
+  corners, hard shadows and a pixel font for the headings; **Seaside**, pale aqua and deep teal
+  with rounded shapes and soft glows; and **Midnight**, Paper at night. A theme may change
+  colours, the display font, corner radii, shadows, motion timing and the page texture. It may
+  not change layout, spacing or target sizes, so they are equally usable.
 - The fonts are bundled and served from the same origin, so a visit makes no request to a font
   service.
-- `src/styles/tokens.test.ts` fails if a text colour falls below 4.5:1 against its background, or
-  a control border, focus ring or the current-time line below 3:1, in either theme.
+- `src/styles/tokens.test.ts` runs for every theme and fails if a text colour falls below 4.5:1
+  against its background, a control border, focus ring or the current-time line below 3:1, or a
+  theme is missing a token another one has.
+
+## Themes
+
+The button in the bottom-left corner of every screen shows the theme in use and moves to the
+next one; the arrow beside it opens a list to choose one directly. The new look spreads from the
+button as a circle where the browser supports view transitions, and appears at once where it
+does not or where the reader asked for less motion. The choice is remembered on the device. The
+pixel and rounded fonts of Arcade and Seaside are only downloaded once one of those themes is
+used. A first visit gets Paper, or Midnight on a device set
+to dark, and a short script in `index.html` puts it on the page before the first paint, so there
+is no flash of the other one.
+
+To add a theme: copy `src/styles/themes/paper.css` to `<id>.css`, then change the colours, the
+`color-scheme` and, if its look needs it, tokens from `tokens.css` such as the radii or the
+display font. Import it in `src/index.tsx`, add it to `THEMES` in `src/lib/themes/themes.ts` and
+to the script in `src/index.html`, and name it in both message catalogues. The type check lists
+the places that still need its name, and the tests list any token or contrast it is missing.
 
 ## Languages
 
