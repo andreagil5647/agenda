@@ -85,10 +85,10 @@ Known gaps in the done items:
 - [ ] **Preferences follow the account.** The language, and later the theme and the sound
       setting, saved with the account so they follow a person between devices. Until then
       they are remembered on each device.
-- [ ] **Themes.** Several complete looks, light and dark, switched from the corner of the
-      screen with an animated change. Paper and Midnight are in, with the button, the saved
-      choice and the circular reveal ([ADR 0011](adr/0011-named-themes-as-token-sheets.md));
-      Arcade and Seaside are next, with a picker to choose one directly.
+- [x] **Themes.** Four complete looks, light and dark: Paper, Arcade, Seaside and Midnight.
+      A button in the corner moves to the next one and a list chooses one directly, with a
+      circular reveal, the choice remembered on the device, and each theme held to the same
+      contrast checks ([ADR 0011](adr/0011-named-themes-as-token-sheets.md)).
 - [ ] **Motion.** Feedback for finishing a task, dropping a block and changing day.
 - [ ] **Sound.** Short synthesised cues in the style of the current theme, off by default.
 

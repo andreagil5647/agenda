@@ -26,6 +26,7 @@
   border: 2px solid var(--calendar-stroke);
   border-radius: var(--radius-sm);
   background: var(--calendar-surface);
+  box-shadow: var(--block-shadow) var(--calendar-stroke);
   color: var(--calendar-text);
   cursor: grab;
   font-size: var(--text-xs);
@@ -49,7 +50,9 @@
 
 /* Selected: the edge thickens inwards, so nothing around it moves. */
 .body[aria-pressed='true'] {
-  box-shadow: inset 0 0 0 2px var(--calendar-text);
+  box-shadow:
+    inset 0 0 0 2px var(--calendar-text),
+    var(--block-shadow) var(--calendar-stroke);
 }
 
 .body[aria-busy='true'] {

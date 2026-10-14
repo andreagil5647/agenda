@@ -10,7 +10,12 @@
       // default never flashes. It repeats what src/lib/themes decides, because the app has
       // not loaded yet; themes.test.ts keeps the two the same.
       (function () {
-        var colors = { paper: '#fbf5ea', midnight: '#1b1620' };
+        var colors = {
+          paper: '#fbf5ea',
+          arcade: '#0c0f24',
+          seaside: '#e6f6f5',
+          midnight: '#1b1620',
+        };
         var theme = null;
         try {
           var saved = JSON.parse(localStorage.getItem('agenda.preferences') || '{}').theme;

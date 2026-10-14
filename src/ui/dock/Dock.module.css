@@ -54,13 +54,50 @@
   cursor: default;
 }
 
+/* The theme controls: a button for the theme in use, one to open the list, and the list. */
+.themes {
+  position: relative;
+  display: flex;
+  gap: var(--space-1);
+  /* Set apart from the languages, which are a different kind of choice. */
+  margin-inline-start: var(--space-2);
+}
+
 /* The theme button is not one of a set: it shows the theme in use and moves to the next. */
 .themeButton {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  /* Set apart from the languages, which are a different kind of choice. */
-  margin-inline-start: var(--space-2);
+}
+
+.pickerToggle {
+  display: grid;
+  place-items: center;
+  min-width: 36px;
+  padding: 0;
+}
+
+/* Opens upwards, away from the edge of the screen the dock sits on. */
+.picker {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + var(--space-4));
+  display: grid;
+  gap: var(--space-1);
+  min-width: 180px;
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-float);
+  padding: var(--space-2);
+}
+
+.pickerOption {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  text-align: start;
 }
 
 /*
@@ -82,6 +119,11 @@
   .option {
     min-height: 44px;
     padding: 0 var(--space-4);
+  }
+
+  .pickerToggle {
+    min-width: 44px;
+    padding: 0;
   }
 }
 

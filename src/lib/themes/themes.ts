@@ -9,6 +9,8 @@
  */
 export const THEMES = [
   { id: 'paper', scheme: 'light', themeColor: '#fbf5ea' },
+  { id: 'arcade', scheme: 'dark', themeColor: '#0c0f24' },
+  { id: 'seaside', scheme: 'light', themeColor: '#e6f6f5' },
   { id: 'midnight', scheme: 'dark', themeColor: '#1b1620' },
 ] as const;
 

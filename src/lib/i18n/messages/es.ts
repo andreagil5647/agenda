@@ -50,7 +50,11 @@ export const es: Translation<typeof en> = {
   'language.label': 'Idioma',
   'language.loadFailed':
     'No se pudo cargar ese idioma. Comprueba tu conexión e inténtalo de nuevo.',
+  'theme.group': 'Tema',
+  'theme.choose': 'Elegir un tema',
   'theme.paper': 'Papel',
+  'theme.arcade': 'Recreativa',
+  'theme.seaside': 'Costa',
   'theme.midnight': 'Medianoche',
   'theme.switch': 'Tema: {current}. Cambiar a {next}.',
   'theme.changed': 'Tema cambiado a {theme}.',

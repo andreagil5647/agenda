@@ -35,7 +35,10 @@ theme is on.
 - `src/styles/tokens.css` keeps what no theme changes: type sizes, spacing, control sizes, radii,
   motion and the calendar colour mapping. A theme may override any of it if its look needs to.
 - `src/styles/themes/<id>.css` defines every colour, and the shadow that contains one, for that
-  theme, and its `color-scheme`. Each theme has exactly one scheme.
+  theme, and its `color-scheme`. Each theme has exactly one scheme. A theme may also override a
+  token from `tokens.css` (the display font, the radii, motion, the paper shadow, the block
+  shadow, the page texture), and a test rejects an override of a token that does not exist.
+  Layout, spacing and target sizes are not tokens a theme should change.
 - Paper is also what the page wears with no attribute, through `:where(:root)`, which has no
   specificity, so any other theme wins whatever the order of the files.
 - The selector is the attribute alone, not `:root[data-theme]`, so an element can carry a theme of
@@ -51,14 +54,28 @@ theme is on.
   setting, and fail if it ever disagrees with the app.
 - The new theme spreads in a circle from the button, with the View Transitions API. It is only an
   extra: a browser without it, or a reader who asked for less motion, gets an instant change.
-- The switch is one button that goes to the next theme. A picker to choose directly is built when
-  there are more than two themes to choose from.
+- The switch is one button that goes to the next theme, and beside it a list, opened by a second
+  button, to choose one directly. It was added with the third theme, when stepping through them
+  stopped being a way to reach one. It closes on Escape, on a press or focus elsewhere, and on a
+  choice, and gives the focus back to its button.
+- A theme that has its own display font names it in `--font-display`. The fonts are bundled like
+  the others, from `@fontsource-variable` packages, and their `@font-face` rules are in the main
+  stylesheet, but a browser only downloads a font file when text is set in it, so Paper and
+  Midnight never fetch the pixel or the rounded font. Importing each font's stylesheet on demand
+  instead would save about 2 kB of rules, and cost a request and a flash of fallback text when a
+  saved theme loads first.
 
 ## Consequences
 
-- Adding a theme is one stylesheet, one line in the list and its name in the message catalogue.
-  Tests fail if the stylesheet misses a token another theme has, if its scheme or bar colour
-  disagree with the list, or if any colour pair drops below its contrast minimum.
+- Adding a theme is one stylesheet, one line in the list, its colour in the inline script and its
+  name in the message catalogue. Tests fail if the stylesheet misses a token Paper has, if its
+  scheme or bar colour disagree with the list, or if any colour pair drops below its contrast
+  minimum, and the type check fails where a theme has no name yet.
+- Arcade's pixel font (Pixelify Sans, about 12 kB for the Latin subset) and Seaside's rounded one
+  (Fredoka, about 30 kB) are fetched the first time those themes are used. Both are licensed under
+  the SIL Open Font License.
+- A theme file overrides tokens by coming after `tokens.css`, so the order of the imports in
+  `src/index.tsx` matters. It is commented there.
 - Components never mention a theme. A look that needs something tokens cannot express gets a new
   token in every theme, not a rule in a component.
 - `light-dark()` is no longer used, so the app needs no browser from 2024 or later for colour.
