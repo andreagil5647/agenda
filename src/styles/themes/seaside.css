@@ -1,0 +1,79 @@
+/*
+ * Seaside: the calm one. Pale aqua and white, sand, and a deep teal ink. Shapes
+ * are rounder, shadows are soft glows instead of edges, and motion is slower
+ * and gentler. Headings are in a soft rounded font.
+ *
+ * It has the same colour tokens as every theme, and styles/tokens.test.ts holds
+ * them to the same contrast. Layout, spacing and target sizes are not touched.
+ */
+[data-theme='seaside'] {
+  color-scheme: light;
+
+  --font-display: 'Fredoka Variable', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+
+  --radius-sm: 14px;
+  --radius-md: 22px;
+  --radius-lg: 32px;
+  --radius-check: 13px;
+
+  --motion-fast: 220ms;
+  --motion-ease: cubic-bezier(0.37, 0, 0.63, 1);
+
+  --shadow-paper: 0 6px 18px rgb(11 116 130 / 15%);
+  --block-shadow: 0 3px 10px;
+
+  /* Surfaces */
+  --color-bg: #e6f6f5;
+  --color-surface: #fbffff;
+  --color-surface-muted: #f4ecd8;
+  --color-surface-hover: #eef9f8;
+  --color-border: #c5e1df;
+  /* Borders of things you can operate must stand out from the water (3:1). */
+  --color-border-strong: #568a8f;
+
+  /* Ink */
+  --color-text: #0d343b;
+  --color-text-label: #1b474e;
+  --color-text-muted: #3b6268;
+  --color-text-subtle: #4a7177;
+
+  /* Accent: what you press, and what is selected */
+  --color-accent: #0b7482;
+  --color-accent-hover: #08606c;
+  /* The darker edge under a pressable button. */
+  --color-accent-lip: #064a54;
+  --color-on-accent: #f6ffff;
+  --color-accent-soft: #c9ecea;
+  --color-accent-soft-text: #07505a;
+
+  --color-danger-surface: #ffe9e2;
+  --color-danger-border: #f0a592;
+  --color-danger-text: #9b2c18;
+
+  --color-focus: #0d343b;
+  /* The current time on the day grid: coral, so it is never mistaken for a calendar. */
+  --color-now: #e0502f;
+
+  --shadow-float: 0 18px 40px rgb(11 116 130 / 24%);
+
+  /* Calendar inks: a pastel fill, a darker ink for its text, and a mid tone for its edge.
+     A calendar stores a key; data-calendar-color selects the three. */
+  --calendar-blue-surface: #d7ecfb;
+  --calendar-blue-text: #17497e;
+  --calendar-blue-stroke: #7aa9dc;
+  --calendar-green-surface: #d9f1e3;
+  --calendar-green-text: #1f5a35;
+  --calendar-green-stroke: #6fb98c;
+  --calendar-purple-surface: #e8e2f8;
+  --calendar-purple-text: #47308a;
+  --calendar-purple-stroke: #a18fd8;
+  --calendar-rose-surface: #fde0e6;
+  --calendar-rose-text: #8a2943;
+  --calendar-rose-stroke: #e08aa0;
+  --calendar-peach-surface: #ffe7d0;
+  --calendar-peach-text: #7f4010;
+  --calendar-peach-stroke: #e5a06b;
+  --calendar-butter-surface: #fcefb5;
+  --calendar-butter-text: #5a4500;
+  --calendar-butter-stroke: #d6b238;
+}

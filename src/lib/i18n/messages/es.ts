@@ -53,6 +53,8 @@ export const es: Translation<typeof en> = {
   'theme.group': 'Tema',
   'theme.choose': 'Elegir un tema',
   'theme.paper': 'Papel',
+  'theme.arcade': 'Recreativa',
+  'theme.seaside': 'Costa',
   'theme.midnight': 'Medianoche',
   'theme.switch': 'Tema: {current}. Cambiar a {next}.',
   'theme.changed': 'Tema cambiado a {theme}.',

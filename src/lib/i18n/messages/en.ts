@@ -54,6 +54,8 @@ export const en = {
   'theme.group': 'Theme',
   'theme.choose': 'Choose a theme',
   'theme.paper': 'Paper',
+  'theme.arcade': 'Arcade',
+  'theme.seaside': 'Seaside',
   'theme.midnight': 'Midnight',
   'theme.switch': 'Theme: {current}. Switch to {next}.',
   'theme.changed': 'Theme changed to {theme}.',

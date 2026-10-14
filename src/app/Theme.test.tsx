@@ -42,7 +42,7 @@ describe('the theme of the app', () => {
     render(<App />);
 
     expect(
-      await screen.findByRole('button', { name: 'Theme: Paper. Switch to Midnight.' }),
+      await screen.findByRole('button', { name: 'Theme: Paper. Switch to Arcade.' }),
     ).toBeInTheDocument();
     expect(pageTheme()).toBe('paper');
   });
@@ -60,13 +60,13 @@ describe('the theme of the app', () => {
 
   it('is the saved choice, not the device setting, when the two disagree', async () => {
     setDevice({ colorScheme: 'dark' });
-    window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify({ theme: 'paper' }));
+    window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify({ theme: 'seaside' }));
     render(<App />);
 
     expect(
-      await screen.findByRole('button', { name: 'Theme: Paper. Switch to Midnight.' }),
+      await screen.findByRole('button', { name: 'Theme: Seaside. Switch to Midnight.' }),
     ).toBeInTheDocument();
-    expect(pageTheme()).toBe('paper');
+    expect(pageTheme()).toBe('seaside');
   });
 
   it('is changed from the corner of the sign-in screen, and says what it changed to', async () => {
@@ -75,32 +75,40 @@ describe('the theme of the app', () => {
 
     await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
 
-    expect(pageTheme()).toBe('midnight');
-    expect(browserBarColor()).toBe('#1b1620');
-    expect(screen.getByRole('button', { name: 'Theme: Midnight. Switch to Paper.' })).toBeVisible();
-    expect(screen.getByText('Theme changed to Midnight.')).toHaveAttribute('role', 'status');
+    expect(pageTheme()).toBe('arcade');
+    expect(browserBarColor()).toBe('#0c0f24');
+    expect(screen.getByRole('button', { name: 'Theme: Arcade. Switch to Seaside.' })).toBeVisible();
+    expect(screen.getByText('Theme changed to Arcade.')).toHaveAttribute('role', 'status');
+  });
 
-    await user.click(screen.getByRole('button', { name: /^Theme: Midnight/ }));
+  it('goes through every theme in order and starts again after the last', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const visited = [pageTheme()];
 
-    expect(pageTheme()).toBe('paper');
+    for (const name of [/^Theme: Paper/, /^Theme: Arcade/, /^Theme: Seaside/, /^Theme: Midnight/]) {
+      await user.click(await screen.findByRole('button', { name }));
+      visited.push(pageTheme());
+    }
+
+    expect(visited).toEqual(['paper', 'arcade', 'seaside', 'midnight', 'paper']);
     expect(browserBarColor()).toBe('#fbf5ea');
-    expect(screen.getByText('Theme changed to Paper.')).toBeInTheDocument();
   });
 
   it('is remembered on the next visit', async () => {
     const user = userEvent.setup();
     const first = render(<App />);
     await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
-    expect(savedPreferences()).toEqual({ theme: 'midnight' });
+    expect(savedPreferences()).toEqual({ theme: 'arcade' });
     first.unmount();
     delete document.documentElement.dataset.theme;
 
     render(<App />);
 
     expect(
-      await screen.findByRole('button', { name: 'Theme: Midnight. Switch to Paper.' }),
+      await screen.findByRole('button', { name: 'Theme: Arcade. Switch to Seaside.' }),
     ).toBeInTheDocument();
-    expect(pageTheme()).toBe('midnight');
+    expect(pageTheme()).toBe('arcade');
   });
 
   it('is kept when the language changes, and the language is kept when the theme changes', async () => {
@@ -109,14 +117,14 @@ describe('the theme of the app', () => {
     await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
 
     await user.click(screen.getByRole('button', { name: 'Español' }));
-    await screen.findByRole('button', { name: 'Tema: Medianoche. Cambiar a Papel.' });
+    await screen.findByRole('button', { name: 'Tema: Recreativa. Cambiar a Costa.' });
 
-    expect(pageTheme()).toBe('midnight');
-    expect(savedPreferences()).toEqual({ language: 'es', theme: 'midnight' });
+    expect(pageTheme()).toBe('arcade');
+    expect(savedPreferences()).toEqual({ language: 'es', theme: 'arcade' });
 
-    await user.click(screen.getByRole('button', { name: /^Tema: Medianoche/ }));
+    await user.click(screen.getByRole('button', { name: /^Tema: Recreativa/ }));
 
-    expect(savedPreferences()).toEqual({ language: 'es', theme: 'paper' });
+    expect(savedPreferences()).toEqual({ language: 'es', theme: 'seaside' });
   });
 
   it('is named and announced in the language of the screen', async () => {
@@ -125,13 +133,13 @@ describe('the theme of the app', () => {
     render(<App />);
 
     await user.click(
-      await screen.findByRole('button', { name: 'Tema: Papel. Cambiar a Medianoche.' }),
+      await screen.findByRole('button', { name: 'Tema: Papel. Cambiar a Recreativa.' }),
     );
 
-    expect(screen.getByText('Tema cambiado a Medianoche.')).toHaveAttribute('role', 'status');
+    expect(screen.getByText('Tema cambiado a Recreativa.')).toHaveAttribute('role', 'status');
     expect(
-      screen.getByRole('button', { name: 'Tema: Medianoche. Cambiar a Papel.' }),
-    ).toHaveTextContent('Medianoche');
+      screen.getByRole('button', { name: 'Tema: Recreativa. Cambiar a Costa.' }),
+    ).toHaveTextContent('Recreativa');
   });
 
   it('still changes when the choice cannot be saved on this device', async () => {
@@ -143,7 +151,7 @@ describe('the theme of the app', () => {
 
     await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
 
-    expect(pageTheme()).toBe('midnight');
+    expect(pageTheme()).toBe('arcade');
   });
 
   it('is revealed from the button, inside a view transition, when the browser has them', async () => {
@@ -163,7 +171,7 @@ describe('the theme of the app', () => {
     await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
 
     expect(start).toHaveBeenCalledTimes(1);
-    expect(pageTheme()).toBe('midnight');
+    expect(pageTheme()).toBe('arcade');
     await waitFor(() => {
       expect(animate).toHaveBeenCalledTimes(1);
     });
@@ -178,7 +186,7 @@ describe('the theme of the app', () => {
 
     await user.click(await screen.findByRole('button', { name: /^Theme: Paper/ }));
 
-    expect(pageTheme()).toBe('midnight');
+    expect(pageTheme()).toBe('arcade');
     expect(start).not.toHaveBeenCalled();
   });
 
@@ -215,12 +223,12 @@ describe('choosing a theme from the list', () => {
       'aria-expanded',
       'true',
     );
-    expect(namesOf(list)).toEqual(['Paper', 'Midnight']);
+    expect(namesOf(list)).toEqual(['Paper', 'Arcade', 'Seaside', 'Midnight']);
     expect(within(list).getByRole('button', { name: 'Paper' })).toHaveAttribute(
       'aria-pressed',
       'true',
     );
-    expect(within(list).getByRole('button', { name: 'Midnight' })).toHaveAttribute(
+    expect(within(list).getByRole('button', { name: 'Seaside' })).toHaveAttribute(
       'aria-pressed',
       'false',
     );
@@ -231,13 +239,15 @@ describe('choosing a theme from the list', () => {
     render(<App />);
     const list = await openList(user);
 
-    await user.click(within(list).getByRole('button', { name: 'Midnight' }));
+    await user.click(within(list).getByRole('button', { name: 'Seaside' }));
 
-    expect(pageTheme()).toBe('midnight');
-    expect(browserBarColor()).toBe('#1b1620');
-    expect(savedPreferences()).toEqual({ theme: 'midnight' });
-    expect(screen.getByText('Theme changed to Midnight.')).toHaveAttribute('role', 'status');
-    expect(screen.getByRole('button', { name: 'Theme: Midnight. Switch to Paper.' })).toBeVisible();
+    expect(pageTheme()).toBe('seaside');
+    expect(browserBarColor()).toBe('#e6f6f5');
+    expect(savedPreferences()).toEqual({ theme: 'seaside' });
+    expect(screen.getByText('Theme changed to Seaside.')).toHaveAttribute('role', 'status');
+    expect(
+      screen.getByRole('button', { name: 'Theme: Seaside. Switch to Midnight.' }),
+    ).toBeVisible();
   });
 
   it('closes once a theme is chosen, and gives the focus back to the button that opened it', async () => {
@@ -255,7 +265,7 @@ describe('choosing a theme from the list', () => {
     const user = userEvent.setup();
     render(<App />);
     const list = await openList(user);
-    within(list).getByRole('button', { name: 'Midnight' }).focus();
+    within(list).getByRole('button', { name: 'Arcade' }).focus();
 
     await user.keyboard('{Escape}');
 
@@ -304,6 +314,6 @@ describe('choosing a theme from the list', () => {
     await user.click(await screen.findByRole('button', { name: 'Elegir un tema' }));
     const list = screen.getByRole('group', { name: 'Tema' });
 
-    expect(namesOf(list)).toEqual(['Papel', 'Medianoche']);
+    expect(namesOf(list)).toEqual(['Papel', 'Recreativa', 'Costa', 'Medianoche']);
   });
 });

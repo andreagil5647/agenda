@@ -9,6 +9,8 @@ import styles from './Dock.module.css';
 
 const THEME_NAMES = {
   paper: 'theme.paper',
+  arcade: 'theme.arcade',
+  seaside: 'theme.seaside',
   midnight: 'theme.midnight',
 } as const satisfies Record<ThemeId, PlainMessageKey>;
 
