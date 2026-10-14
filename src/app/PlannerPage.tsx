@@ -27,14 +27,14 @@ import controls from '../ui/controls.module.css';
 import styles from './PlannerPage.module.css';
 
 interface PlannerPageProps {
-  /** Days are laid out in this account's time zone and written in its locale. */
+  /** Days are laid out in this account's time zone, with its hour cycle. */
   settings: AuthUser['settings'];
 }
 
 /** The day planner: one day's timeline next to the tasks and calendars that feed it. */
 export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
-  const { t } = useI18n();
-  const { timeZone, hourCycle, locale } = settings;
+  const { t, locale } = useI18n();
+  const { timeZone, hourCycle } = settings;
   const selected = useSelectedDay(timeZone);
   const now = useNow();
   const nowMinutes = selected.isToday ? minutesOfDay(now, timeZone) : null;
@@ -72,10 +72,10 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
   const scheduleTask = useCallback(
     (task: Task, span: TimeSpan): void => {
       createBlock({ title: task.title, span, taskId: task.id });
-      const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle);
+      const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle, locale);
       setAnnouncement(t('announce.planned', { title: task.title, time: times }));
     },
-    [createBlock, hourCycle, t],
+    [createBlock, hourCycle, locale, t],
   );
 
   /** Gives a block new times on the day in view, and says so for those who cannot see it move. */
@@ -88,7 +88,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
           endUtc: instantAt(selected.day, span.endMinutes, timeZone).toISOString(),
         },
       });
-      const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle);
+      const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle, locale);
       setAnnouncement(
         t(change === 'moved' ? 'announce.moved' : 'announce.resized', {
           title: event.title,
@@ -96,7 +96,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
         }),
       );
     },
-    [updateEvent, selected.day, timeZone, hourCycle, t],
+    [updateEvent, selected.day, timeZone, hourCycle, locale, t],
   );
   const moveBlock = useCallback(
     (event: PlannerEvent, span: TimeSpan): void => {
@@ -127,7 +127,6 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
       <DayHeader
         day={selected.day}
         isToday={selected.isToday}
-        locale={locale}
         onShowDay={selected.showDay}
         onShowToday={selected.showToday}
         onShowPrevious={selected.showPrevious}

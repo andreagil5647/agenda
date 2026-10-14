@@ -1,6 +1,12 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { buildCalendar, buildTask, buildTimedEvent, fakeApi } from '../../test/msw/fakeApi';
+import {
+  buildCalendar,
+  buildTask,
+  buildTimedEvent,
+  buildUser,
+  fakeApi,
+} from '../../test/msw/fakeApi';
 import { App } from './App';
 
 const PREFERENCES_KEY = 'agenda.preferences';
@@ -150,6 +156,29 @@ describe('the planner in Spanish', () => {
       screen.getByRole('button', { name: 'Planificar Preparar la lista' }),
     ).toBeInTheDocument();
     expect(screen.getByText('1 abierta')).toBeInTheDocument();
+  });
+
+  it('writes the day and the length of a task in Spanish, whatever the account says', async () => {
+    seedPlanner();
+    fakeApi.seed({ tasks: [buildTask({ title: 'Una hora', estimateMinutes: 60 })] });
+    render(<App />);
+
+    await screen.findByRole('region', { name: 'Línea de tiempo' });
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      /^\p{L}+, \d{1,2} de \p{L}+$/u,
+    );
+    expect(await screen.findByText('1 h')).toBeInTheDocument();
+  });
+
+  it('writes 12-hour times with the Spanish period of the day', async () => {
+    seedPlanner();
+    const { settings } = buildUser();
+    fakeApi.signIn(buildUser({ settings: { ...settings, hourCycle: 'h12' } }));
+    render(<App />);
+
+    expect(await screen.findAllByText(/\d:\d{2}\sa\.\sm\./)).not.toHaveLength(0);
+    expect(screen.getAllByText(/\d:\d{2}\sp\.\sm\./)).not.toHaveLength(0);
   });
 
   it('counts open tasks in the right plural', async () => {

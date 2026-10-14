@@ -33,7 +33,7 @@ export function TaskItem({
   onDelete,
   onPlan,
 }: TaskItemProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isOpen = task.status === 'todo';
   const { setNodeRef, listeners, isDragging } = useDraggable({
     id: `task:${task.id}`,
@@ -66,7 +66,7 @@ export function TaskItem({
         <span>{task.title}</span>
       </label>
       <small className={styles.meta}>
-        {formatDuration(task.estimateMinutes)}
+        {formatDuration(task.estimateMinutes, locale)}
         {isPlanned && <span className={styles.planned}> · {t('tasks.item.planned')}</span>}
       </small>
       {isOpen && canPlan && (

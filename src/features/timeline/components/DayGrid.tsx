@@ -49,7 +49,7 @@ export function DayGrid({
   onDeleteBlock,
   onCreateAt,
 }: DayGridProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   // The drop target is the part of the day that is scrolled into view, so the
@@ -98,7 +98,7 @@ export function DayGrid({
       <div className={styles.grid}>
         <ol className={styles.hours} aria-hidden="true">
           {HOURS.map((hour) => (
-            <li key={hour}>{formatTimeOfDay(hour * 60, hourCycle)}</li>
+            <li key={hour}>{formatTimeOfDay(hour * 60, hourCycle, locale)}</li>
           ))}
         </ol>
 
@@ -125,7 +125,7 @@ export function DayGrid({
               style={{ '--start': landingSpan.startMinutes, '--end': landingSpan.endMinutes }}
               aria-hidden="true"
             >
-              {formatTimeOfDay(landingSpan.startMinutes, hourCycle)}
+              {formatTimeOfDay(landingSpan.startMinutes, hourCycle, locale)}
             </li>
           )}
           {nowMinutes !== null && (
