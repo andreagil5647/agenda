@@ -63,3 +63,73 @@ jobs:
           name: dist
           path: dist/
           retention-days: 7
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    # The tests drive a real browser against the real API, which needs its database.
+    services:
+      mongo:
+        image: mongo:8
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # The API lives in its own repository. Its develop branch is the one this repository's
+      # develop is written against, so a change that needs a new API merges there first.
+      - name: Check out the API
+        uses: actions/checkout@v7
+        with:
+          repository: andreagil5647/agenda-backend
+          ref: develop
+          path: agenda-backend
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.13.1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build the API
+        working-directory: agenda-backend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Start the API
+        working-directory: agenda-backend
+        env:
+          NODE_ENV: production
+          MONGODB_URI: mongodb://localhost:27017
+          CORS_ORIGINS: http://localhost:3000
+          LOG_LEVEL: warn
+        run: |
+          node dist/server.js > "$GITHUB_WORKSPACE/api.log" 2>&1 &
+          curl --fail --silent --retry 30 --retry-delay 1 --retry-connrefused \
+            http://localhost:4000/api/v1/health
+
+      - run: pnpm exec playwright install --with-deps chromium
+
+      - run: pnpm run test:e2e
+
+      - name: Show the API's log
+        if: failure()
+        run: cat api.log
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
