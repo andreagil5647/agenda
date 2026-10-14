@@ -77,6 +77,17 @@ Known gaps in the done items:
 - [ ] **Edit and delete calendars**, and hide a calendar's blocks.
 - [ ] **Week grid** reusing the day column.
 
+### Languages, themes, motion and sound
+
+- [ ] **Languages.** The whole app in English and Spanish, switchable at any time, with
+      dates and numbers in the language's own form. The runtime and the typed catalogue are
+      in ([ADR 0010](adr/0010-typed-message-catalogue.md)); the screens move over one area
+      at a time.
+- [ ] **Themes.** Several complete looks, light and dark, switched from the corner of the
+      screen with an animated change.
+- [ ] **Motion.** Feedback for finishing a task, dropping a block and changing day.
+- [ ] **Sound.** Short synthesised cues in the style of the current theme, off by default.
+
 ### 3. Release quality
 
 - [ ] End-to-end tests (Playwright) against the real API in CI

@@ -1,6 +1,7 @@
 import type { JSX, ReactNode } from 'react';
 import { AuthScreen } from '../features/auth/components/AuthScreen';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
+import { I18nProvider } from '../lib/i18n/I18nProvider';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
 import { Logo } from '../ui/Logo';
 import { NoticeProvider } from '../ui/notices/NoticeProvider';
@@ -80,12 +81,14 @@ function AuthGate(): JSX.Element {
 
 export function App(): JSX.Element {
   return (
-    <ServerGate>
-      <NoticeProvider>
-        <AuthProvider>
-          <AuthGate />
-        </AuthProvider>
-      </NoticeProvider>
-    </ServerGate>
+    <I18nProvider>
+      <ServerGate>
+        <NoticeProvider>
+          <AuthProvider>
+            <AuthGate />
+          </AuthProvider>
+        </NoticeProvider>
+      </ServerGate>
+    </I18nProvider>
   );
 }
