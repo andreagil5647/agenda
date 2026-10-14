@@ -25,10 +25,10 @@ export function AppShell({ user, children }: AppShellProps): JSX.Element {
   return (
     <div className={styles.shell}>
       <a className={styles.skipLink} href="#main">
-        Skip to the planner
+        {t('shell.skipLink')}
       </a>
 
-      <aside className={styles.sidebar} aria-label="Account">
+      <aside className={styles.sidebar} aria-label={t('shell.account')}>
         <div className={styles.brand}>
           <Logo size={36} />
           <span>{t('brand.name')}</span>
@@ -39,15 +39,13 @@ export function AppShell({ user, children }: AppShellProps): JSX.Element {
             {initialOf(user.displayName)}
           </span>
           <p className={styles.name}>{user.displayName}</p>
-          {user.isDemo && (
-            <p className={styles.demoNote}>Demo account. It is deleted after a day.</p>
-          )}
+          {user.isDemo && <p className={styles.demoNote}>{t('shell.demoNote')}</p>}
           <button type="button" className={controls.secondaryAction} onClick={() => void logOut()}>
-            Log out
+            {t('shell.logOut')}
           </button>
         </div>
 
-        <p className={styles.version}>web {env.appVersion}</p>
+        <p className={styles.version}>{t('shell.version', { version: env.appVersion })}</p>
       </aside>
 
       <main id="main" tabIndex={-1} className={styles.workspace}>

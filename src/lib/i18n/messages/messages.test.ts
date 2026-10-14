@@ -3,8 +3,11 @@ import type { Catalogue, MessageValue } from '../translator';
 import { en } from './en';
 import { es } from './es';
 
-/** Text that is the same in both languages on purpose: names, and words Spanish shares with English. */
-const SAME_IN_BOTH_LANGUAGES = new Set(['brand.name']);
+/**
+ * Text that is the same in both languages on purpose: a name, a version label, and templates
+ * made only of placeholders. Anything else left identical to English is a missed translation.
+ */
+const SAME_IN_BOTH_LANGUAGES = new Set(['brand.name', 'shell.version', 'app.status.elapsed']);
 
 const translations: Readonly<Record<(typeof LANGUAGES)[number], Catalogue>> = { en, es };
 

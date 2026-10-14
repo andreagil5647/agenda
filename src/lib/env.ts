@@ -5,5 +5,5 @@
  * and replaces textually - no runtime `process` global exists in the bundle.
  */
 export const env = {
-  appVersion: process.env.PUBLIC_APP_VERSION,
+  appVersion: process.env.PUBLIC_APP_VERSION ?? 'dev',
 } as const;

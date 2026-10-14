@@ -18,7 +18,7 @@ export function PlannerQueryProvider({ children }: { children: ReactNode }): JSX
   const [queryClient] = useState(() =>
     createQueryClient({
       onWriteError: (error) => {
-        notify(describeError(error));
+        notify((t) => describeError(error, t));
       },
       onSessionEnded: expireSession,
     }),
