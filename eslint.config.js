@@ -51,6 +51,35 @@ export default tseslint.config(
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
   {
+    // Text a person reads or hears lives in the message catalogue, in every language, so a
+    // screen cannot end up half translated. Words in markup are the usual way that happens.
+    files: ['src/**/*.tsx'],
+    ignores: ['**/*.test.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'JSXText[value=/[A-Za-z]{2,}/]',
+          message: 'Text in markup is not translated. Add it to the catalogue and use t().',
+        },
+        {
+          selector: 'JSXElement > JSXExpressionContainer > Literal[value=/[A-Za-z]{2,}/]',
+          message: 'Text in markup is not translated. Add it to the catalogue and use t().',
+        },
+        {
+          selector: `JSXAttribute[name.name=/^(aria-label|aria-description|placeholder|title|alt|loadingLabel)$/] > Literal`,
+          message:
+            'This text is read by people or by screen readers, so it is not translated. Use t().',
+        },
+        {
+          selector: `JSXAttribute[name.name=/^(aria-label|aria-description|placeholder|title|alt|loadingLabel)$/] > JSXExpressionContainer > :matches(Literal, TemplateLiteral)`,
+          message:
+            'This text is read by people or by screen readers, so it is not translated. Use t().',
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.test.{ts,tsx}', 'test/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
