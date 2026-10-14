@@ -29,3 +29,6 @@ pnpm-debug.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# End-to-end tests: the saved session of the demo account
+e2e/.auth/
