@@ -16,7 +16,9 @@
 
 body {
   margin: 0;
-  background: var(--color-bg);
+  background-color: var(--color-bg);
+  background-image: var(--page-texture);
+  background-size: var(--page-texture-size);
 }
 
 h1,

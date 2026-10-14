@@ -11,6 +11,11 @@ function readTheme(id: string): string {
   return readFileSync(join(__dirname, 'themes', `${id}.css`), 'utf8');
 }
 
+/** Every theme has these: what Paper, the default, declares. */
+const PAPER_TOKENS = readTokenNames(readTheme(THEMES[0].id));
+/** The tokens shared by every theme, which a theme may override but not invent. */
+const BASE_TOKENS = readTokenNames(readFileSync(join(__dirname, 'tokens.css'), 'utf8'));
+
 /** Pairs of tokens that appear together, and the contrast they owe each other. */
 const PAIRS: readonly (readonly [text: string, ground: string, minimum: number])[] = [
   ['color-text', 'color-bg', AA_TEXT],
@@ -66,11 +71,16 @@ describe.each(THEMES)('the $id theme', ({ id, scheme, themeColor }) => {
     }
   });
 
-  it('declares the same tokens as every other theme', () => {
-    const names = readTokenNames(css).sort();
-    const reference = readTokenNames(readTheme(THEMES[0].id)).sort();
+  it('declares every token that Paper declares', () => {
+    const names = readTokenNames(css);
 
-    expect(names).toEqual(reference);
+    expect(PAPER_TOKENS.filter((name) => !names.includes(name))).toEqual([]);
+  });
+
+  it('declares nothing else except an override of a token the base defines', () => {
+    const extras = readTokenNames(css).filter((name) => !PAPER_TOKENS.includes(name));
+
+    expect(extras.filter((name) => !BASE_TOKENS.includes(name))).toEqual([]);
   });
 
   it('is the scheme the list of themes says it is', () => {

@@ -6,7 +6,9 @@
  * Colours, and the shadows that contain one, are not here. Each theme in
  * themes/ defines them all, and the page wears the one named by data-theme on
  * the root element. A theme may also override anything below it, if its look
- * needs a different shape or motion.
+ * needs a different font, shape, shadow or motion; themes are loaded after this
+ * file, so their overrides win. A test rejects an override of a token that is
+ * not listed here.
  */
 :root {
   --font-body: 'Nunito Variable', ui-rounded, 'Segoe UI', system-ui, sans-serif;
@@ -33,6 +35,8 @@
   --radius-md: 16px;
   --radius-lg: 24px;
   --radius-pill: 999px;
+  /* The tick box of a task, which is small enough to read as a different shape. */
+  --radius-check: 9px;
 
   --control-height: 44px;
   --sidebar-width: 240px;
@@ -44,6 +48,12 @@
 
   /* The paper edge under panels and buttons, in the border colour of the theme. */
   --shadow-paper: 0 3px 0 var(--color-border);
+  /* How far a block on the day grid lifts off the page: x, y and blur, in its calendar's edge colour. */
+  --block-shadow: 0 0 0;
+
+  /* A pattern behind the page, and the size of one tile of it. */
+  --page-texture: none;
+  --page-texture-size: auto;
 
   /* What a calendar-coloured element uses; the rules below point them at a set. */
   --calendar-surface: var(--color-surface-muted);
