@@ -1,6 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import { useCallback, useEffect, useMemo, useRef, type JSX, type MouseEvent } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import { formatTimeOfDay, type HourCycle } from '../../../lib/time/formatTime';
 import { MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
 import controls from '../../../ui/controls.module.css';
@@ -48,6 +49,7 @@ export function DayGrid({
   onDeleteBlock,
   onCreateAt,
 }: DayGridProps): JSX.Element {
+  const { t } = useI18n();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   // The drop target is the part of the day that is scrolled into view, so the
@@ -91,8 +93,7 @@ export function DayGrid({
   return (
     <div className={styles.scroller} ref={setScroller} onScroll={onScroll}>
       <p id={BLOCK_SHORTCUTS_ID} className={controls.visuallyHidden}>
-        Press the up or down arrow key to move the block by 15 minutes. Hold Shift with an arrow key
-        to make it shorter or longer. Press Delete to remove it.
+        {t('timeline.shortcuts')}
       </p>
       <div className={styles.grid}>
         <ol className={styles.hours} aria-hidden="true">
@@ -104,7 +105,7 @@ export function DayGrid({
         {/* Clicking the empty grid is a pointer shortcut. The "Add block" button
             above the grid does the same from the keyboard. */}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
-        <ol className={styles.column} aria-label="Blocks" onClick={createAtPointer}>
+        <ol className={styles.column} aria-label={t('timeline.blocks')} onClick={createAtPointer}>
           {blocks.map((block) => (
             <TimeBlock
               key={block.event.id}

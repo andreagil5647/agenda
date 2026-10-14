@@ -20,12 +20,11 @@ import { useNow } from '../features/timeline/hooks/useNow';
 import { usePlanningDrag } from '../features/timeline/hooks/usePlanningDrag';
 import { useSelectedDay } from '../features/timeline/hooks/useSelectedDay';
 import type { AuthUser, PlannerEvent, Task } from '../lib/api/contract';
+import { useI18n } from '../lib/i18n/I18nProvider';
 import { formatTimeRange } from '../lib/time/formatTime';
 import { instantAt, minutesOfDay } from '../lib/time/zonedTime';
 import controls from '../ui/controls.module.css';
 import styles from './PlannerPage.module.css';
-
-const NEW_BLOCK_TITLE = 'New block';
 
 interface PlannerPageProps {
   /** Days are laid out in this account's time zone and written in its locale. */
@@ -34,6 +33,7 @@ interface PlannerPageProps {
 
 /** The day planner: one day's timeline next to the tasks and calendars that feed it. */
 export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
+  const { t } = useI18n();
   const { timeZone, hourCycle, locale } = settings;
   const selected = useSelectedDay(timeZone);
   const now = useNow();
@@ -61,7 +61,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
   const createUntitledBlock = (span: TimeSpan): void => {
     // The new block is selected once saved, so its title can be typed straight away.
     createBlock({
-      title: NEW_BLOCK_TITLE,
+      title: t('block.new'),
       span,
       onSaved: (event) => {
         setSelectedEventId(event.id);
@@ -73,14 +73,14 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
     (task: Task, span: TimeSpan): void => {
       createBlock({ title: task.title, span, taskId: task.id });
       const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle);
-      setAnnouncement(`Planned ${task.title} for ${times}.`);
+      setAnnouncement(t('announce.planned', { title: task.title, time: times }));
     },
-    [createBlock, hourCycle],
+    [createBlock, hourCycle, t],
   );
 
   /** Gives a block new times on the day in view, and says so for those who cannot see it move. */
   const reschedule = useCallback(
-    (event: PlannerEvent, span: TimeSpan, verb: string): void => {
+    (event: PlannerEvent, span: TimeSpan, change: 'moved' | 'resized'): void => {
       updateEvent({
         event,
         changes: {
@@ -89,22 +89,27 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
         },
       });
       const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle);
-      setAnnouncement(`${verb} ${event.title}: ${times}.`);
+      setAnnouncement(
+        t(change === 'moved' ? 'announce.moved' : 'announce.resized', {
+          title: event.title,
+          time: times,
+        }),
+      );
     },
-    [updateEvent, selected.day, timeZone, hourCycle],
+    [updateEvent, selected.day, timeZone, hourCycle, t],
   );
   const moveBlock = useCallback(
     (event: PlannerEvent, span: TimeSpan): void => {
-      reschedule(event, span, 'Moved');
+      reschedule(event, span, 'moved');
     },
     [reschedule],
   );
   const resizeBlock = (event: PlannerEvent, span: TimeSpan): void => {
-    reschedule(event, span, 'Resized');
+    reschedule(event, span, 'resized');
   };
   const deleteBlock = (event: PlannerEvent): void => {
     deleteEvent(event);
-    setAnnouncement(`Deleted ${event.title}.`);
+    setAnnouncement(t('announce.deleted', { title: event.title }));
   };
 
   const drag = usePlanningDrag({ onScheduleTask: scheduleTask, onMoveBlock: moveBlock });

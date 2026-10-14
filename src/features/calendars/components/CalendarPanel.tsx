@@ -1,5 +1,6 @@
 import type { JSX, SyntheticEvent } from 'react';
 import { readField } from '../../../lib/forms';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import controls from '../../../ui/controls.module.css';
 import { EmptyState } from '../../../ui/EmptyState';
 import { Panel } from '../../../ui/Panel';
@@ -9,6 +10,7 @@ import { useCalendars, useCreateCalendar } from '../hooks/useCalendars';
 import styles from './CalendarPanel.module.css';
 
 export function CalendarPanel(): JSX.Element {
+  const { t } = useI18n();
   const calendarsQuery = useCalendars();
   const createCalendar = useCreateCalendar();
 
@@ -31,19 +33,23 @@ export function CalendarPanel(): JSX.Element {
   };
 
   return (
-    <Panel title="Calendars" icon="calendar">
+    <Panel title={t('calendars.title')} icon="calendar">
       <form className={styles.form} autoComplete="off" onSubmit={submitCalendar}>
         <input
           name="name"
-          aria-label="New calendar"
-          placeholder="New calendar"
+          aria-label={t('calendars.new')}
+          placeholder={t('calendars.new')}
           maxLength={80}
           required
         />
-        <select name="colorKey" aria-label="Colour" defaultValue={DEFAULT_CALENDAR_COLOR}>
+        <select
+          name="colorKey"
+          aria-label={t('calendars.color')}
+          defaultValue={DEFAULT_CALENDAR_COLOR}
+        >
           {CALENDAR_COLORS.map(({ key, label }) => (
             <option value={key} key={key}>
-              {label}
+              {t(label)}
             </option>
           ))}
         </select>
@@ -52,15 +58,15 @@ export function CalendarPanel(): JSX.Element {
           className={controls.primaryAction}
           disabled={createCalendar.isPending}
         >
-          Add calendar
+          {t('calendars.add')}
         </button>
       </form>
 
-      <QueryBoundary query={calendarsQuery} loadingLabel="Loading calendars...">
+      <QueryBoundary query={calendarsQuery} loadingLabel={t('calendars.loading')}>
         {(calendars) =>
           calendars.length === 0 ? (
-            <EmptyState icon="calendar" title="No calendars yet">
-              Every block lives in a calendar, so add one first.
+            <EmptyState icon="calendar" title={t('calendars.empty.title')}>
+              {t('calendars.empty.hint')}
             </EmptyState>
           ) : (
             <ul className={styles.list}>
