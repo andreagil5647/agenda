@@ -16,21 +16,21 @@ export function contrastRatio(first: string, second: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-export interface ThemedColors {
-  light: Record<string, string>;
-  dark: Record<string, string>;
-}
+const HEX_TOKEN = /--([\w-]+):\s*(#[0-9a-f]{6})\s*;/gi;
+const ANY_TOKEN = /^\s*--([\w-]+):/gm;
 
-const LIGHT_DARK_TOKEN = /--([\w-]+):\s*light-dark\(\s*(#[0-9a-f]{6})\s*,\s*(#[0-9a-f]{6})\s*\)/gi;
-
-/** The colour tokens written as light-dark(#hex, #hex), by name, for each theme. */
-export function readThemedColors(css: string): ThemedColors {
-  const colors: ThemedColors = { light: {}, dark: {} };
-  for (const [, name, light, dark] of css.matchAll(LIGHT_DARK_TOKEN)) {
-    if (name && light && dark) {
-      colors.light[name] = light;
-      colors.dark[name] = dark;
+/** The colour tokens written as a six-digit hex value, by name. Anything else is skipped. */
+export function readColors(css: string): Record<string, string> {
+  const colors: Record<string, string> = {};
+  for (const [, name, hex] of css.matchAll(HEX_TOKEN)) {
+    if (name && hex) {
+      colors[name] = hex;
     }
   }
   return colors;
+}
+
+/** The name of every custom property a stylesheet declares, whatever its value. */
+export function readTokenNames(css: string): string[] {
+  return Array.from(css.matchAll(ANY_TOKEN), ([, name]) => name ?? '');
 }

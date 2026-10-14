@@ -1,19 +1,14 @@
 /*
- * Design tokens. Components never name a colour, a size or a shadow directly;
- * they use these custom properties, so the look of the app is decided here.
+ * Design tokens shared by every theme: type, space, shape, sizes and motion.
+ * Components never name a colour, a size or a shadow directly; they use these
+ * custom properties, so the look of the app is decided here and in themes/.
  *
- * The look is a paper planner: warm cream paper, plum-black ink, a pine green
- * for the things you press, and pastel inks for calendars. Each colour is
- * written once as light-dark(light, dark), where "dark" is the same planner at
- * night. Which side applies follows `color-scheme` on the root element: the
- * system preference by default, or a fixed scheme when `data-theme` is set.
- *
- * Colours that carry text are checked against WCAG AA by styles/tokens.test.ts,
- * so they stay written as six-digit hex values for that test to read.
+ * Colours, and the shadows that contain one, are not here. Each theme in
+ * themes/ defines them all, and the page wears the one named by data-theme on
+ * the root element. A theme may also override anything below it, if its look
+ * needs a different shape or motion.
  */
 :root {
-  color-scheme: light dark;
-
   --font-body: 'Nunito Variable', ui-rounded, 'Segoe UI', system-ui, sans-serif;
   /* A soft serif for the day and the brand: warm, and still a serious one. */
   --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
@@ -47,61 +42,8 @@
   --motion-fast: 120ms;
   --motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* Paper */
-  --color-bg: light-dark(#fbf5ea, #1b1620);
-  --color-surface: light-dark(#fffcf5, #251f2c);
-  --color-surface-muted: light-dark(#f3e9d6, #2f2837);
-  --color-surface-hover: light-dark(#f8efdd, #2b2433);
-  --color-border: light-dark(#e6d9c2, #3a3242);
-  /* Borders of things you can operate must stand out from the paper (3:1). */
-  --color-border-strong: light-dark(#8c7d6a, #8a7f94);
-
-  /* Ink */
-  --color-text: light-dark(#2a2230, #f6eddc);
-  --color-text-label: light-dark(#43394a, #dcd1e0);
-  --color-text-muted: light-dark(#665b6d, #b9aec0);
-  --color-text-subtle: light-dark(#716677, #a398ab);
-
-  /* Pine: what you press, and what is selected */
-  --color-accent: light-dark(#1e6b57, #7fd6b4);
-  --color-accent-hover: light-dark(#175a49, #97e2c5);
-  /* The darker edge under a pressable button. */
-  --color-accent-lip: light-dark(#134a3b, #4fa384);
-  --color-on-accent: light-dark(#fffcf5, #0f241c);
-  --color-accent-soft: light-dark(#dcefe4, #1f3a30);
-  --color-accent-soft-text: light-dark(#134a3b, #a8e6cf);
-
-  --color-danger-surface: light-dark(#fde9e4, #3a1d21);
-  --color-danger-border: light-dark(#e8a595, #7a3a40);
-  --color-danger-text: light-dark(#9a2a1b, #ffb8ae);
-
-  --color-focus: light-dark(#2a2230, #f6eddc);
-  /* The current time on the day grid: coral, so it is never mistaken for a calendar. */
-  --color-now: light-dark(#d9482b, #ff8a6e);
-
+  /* The paper edge under panels and buttons, in the border colour of the theme. */
   --shadow-paper: 0 3px 0 var(--color-border);
-  --shadow-float: 0 14px 30px light-dark(rgb(70 45 20 / 18%), rgb(0 0 0 / 55%));
-
-  /* Calendar inks: a pastel fill, a darker ink for its text, and a mid tone for its edge.
-     A calendar stores a key; data-calendar-color selects the three. */
-  --calendar-blue-surface: light-dark(#dcebfb, #223850);
-  --calendar-blue-text: light-dark(#1c4a80, #bcd8ff);
-  --calendar-blue-stroke: light-dark(#7aa6dc, #6f9fdc);
-  --calendar-green-surface: light-dark(#dff0dc, #233a26);
-  --calendar-green-text: light-dark(#25592a, #b5e8b0);
-  --calendar-green-stroke: light-dark(#7bb37a, #78b877);
-  --calendar-purple-surface: light-dark(#ece3fa, #35294d);
-  --calendar-purple-text: light-dark(#4b2f86, #d6c6ff);
-  --calendar-purple-stroke: light-dark(#a98fdc, #9d86d4);
-  --calendar-rose-surface: light-dark(#fde1e6, #4a2430);
-  --calendar-rose-text: light-dark(#8e2a45, #ffc1d0);
-  --calendar-rose-stroke: light-dark(#e08aa0, #d9748d);
-  --calendar-peach-surface: light-dark(#ffe6d1, #4a3022);
-  --calendar-peach-text: light-dark(#86400f, #ffd0a8);
-  --calendar-peach-stroke: light-dark(#e7a06b, #e0925a);
-  --calendar-butter-surface: light-dark(#fff0b8, #463c14);
-  --calendar-butter-text: light-dark(#5e4800, #ffe58a);
-  --calendar-butter-stroke: light-dark(#dcb73a, #cfa92e);
 
   /* What a calendar-coloured element uses; the rules below point them at a set. */
   --calendar-surface: var(--color-surface-muted);
@@ -143,12 +85,4 @@
   --calendar-surface: var(--calendar-butter-surface);
   --calendar-text: var(--calendar-butter-text);
   --calendar-stroke: var(--calendar-butter-stroke);
-}
-
-:root[data-theme='light'] {
-  color-scheme: light;
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
 }

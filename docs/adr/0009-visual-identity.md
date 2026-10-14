@@ -1,6 +1,6 @@
 # 0009. A paper planner look, with self-hosted fonts and checked contrast
 
-- Status: Accepted
+- Status: Accepted. How a theme is stored and chosen is superseded by [0011](0011-named-themes-as-token-sheets.md): the light version is the Paper theme and the dark one is Midnight
 - Date: 2026-10-13
 
 ## Context

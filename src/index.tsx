@@ -4,6 +4,8 @@ import { App } from './app/App';
 import '@fontsource-variable/fraunces/wght.css';
 import '@fontsource-variable/nunito/wght.css';
 import './styles/tokens.css';
+import './styles/themes/paper.css';
+import './styles/themes/midnight.css';
 import './styles/global.css';
 
 const container = document.getElementById('root');

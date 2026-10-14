@@ -5,12 +5,13 @@
   z-index: 15;
   display: grid;
   gap: var(--space-2);
-  max-width: min(320px, calc(100vw - 2 * var(--space-4)));
+  max-width: min(360px, calc(100vw - 2 * var(--space-4)));
 }
 
-/* A pill of choices, one of them pressed in. */
-.group {
+/* One pill holding every control, with the chosen one of a set pressed in. */
+.pill {
   display: flex;
+  align-items: center;
   gap: var(--space-1);
   width: fit-content;
   border: 2px solid var(--color-border-strong);
@@ -18,6 +19,11 @@
   background: var(--color-surface);
   box-shadow: var(--shadow-paper);
   padding: var(--space-1);
+}
+
+.group {
+  display: flex;
+  gap: var(--space-1);
 }
 
 .option {
@@ -48,10 +54,47 @@
   cursor: default;
 }
 
+/* The theme button is not one of a set: it shows the theme in use and moves to the next. */
+.themeButton {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  /* Set apart from the languages, which are a different kind of choice. */
+  margin-inline-start: var(--space-2);
+}
+
+/*
+ * A drop of the theme's own page and accent colours. The theme is named on the
+ * element, so the tokens it reads are that theme's, not the ones on the page.
+ */
+.swatch {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border: 5px solid var(--color-bg);
+  border-radius: 50%;
+  background: var(--color-accent);
+  outline: 2px solid currentcolor;
+}
+
 @media (pointer: coarse) {
   .option {
     min-height: 44px;
     padding: 0 var(--space-4);
+  }
+}
+
+/* On a narrow screen the drop is enough: the name is still in the button's own label. */
+@media (max-width: 480px) {
+  .themeName {
+    display: none;
+  }
+
+  .themeButton {
+    justify-content: center;
+    min-width: 44px;
+    padding: 0;
   }
 }
 

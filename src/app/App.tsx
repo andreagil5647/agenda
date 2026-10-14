@@ -3,6 +3,7 @@ import { AuthScreen } from '../features/auth/components/AuthScreen';
 import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
 import type { PlainMessageKey } from '../lib/i18n/catalogues';
 import { I18nProvider, useI18n } from '../lib/i18n/I18nProvider';
+import { ThemeProvider } from '../lib/themes/ThemeProvider';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
 import { Dock } from '../ui/dock/Dock';
 import { Logo } from '../ui/Logo';
@@ -88,15 +89,17 @@ function AuthGate(): JSX.Element {
 
 export function App(): JSX.Element {
   return (
-    <I18nProvider>
-      <ServerGate>
-        <NoticeProvider>
-          <AuthProvider>
-            <AuthGate />
-          </AuthProvider>
-        </NoticeProvider>
-      </ServerGate>
-      <Dock />
-    </I18nProvider>
+    <ThemeProvider>
+      <I18nProvider>
+        <ServerGate>
+          <NoticeProvider>
+            <AuthProvider>
+              <AuthGate />
+            </AuthProvider>
+          </NoticeProvider>
+        </ServerGate>
+        <Dock />
+      </I18nProvider>
+    </ThemeProvider>
   );
 }
