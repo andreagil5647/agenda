@@ -19,11 +19,18 @@ Done:
 - [x] Cold-start aware server check ("waking up the server")
 - [x] Sign up, log in, log out and a one-click demo session
 - [x] Day planner: calendars, a task list and the selected day on an hour grid
+- [x] Visual identity: a paper planner look in light and dark, self-hosted fonts, and a test
+      that holds every colour pair to WCAG AA ([ADR 0009](adr/0009-visual-identity.md))
 
 Known gaps in the done items:
 
 - [ ] The pointer paths of dragging are checked by hand; only the keyboard paths and the
       arithmetic have automated tests
+- [ ] Deleting a task, block or calendar has no undo. An undo notice is better than a
+      confirmation dialog, and needs a restore endpoint for events
+- [ ] The quick-add forms label their fields with a placeholder and an accessible name rather
+      than a visible label
+- [ ] The theme follows the system; there is no switch until the settings screen exists
 - [ ] The app has one screen: no routes, and no settings screen for the time zone, hour
       cycle or theme, which are fixed when the account is created
 
@@ -69,6 +76,20 @@ Known gaps in the done items:
 - [ ] **Reorder tasks** by dragging in the list.
 - [ ] **Edit and delete calendars**, and hide a calendar's blocks.
 - [ ] **Week grid** reusing the day column.
+
+### Languages, themes, motion and sound
+
+- [x] **Languages.** The whole app in English and Spanish, switchable at any time from
+      the corner of every screen, with dates, times and numbers in the language's own form,
+      errors explained by reason, and a new account and its demo day started in the language
+      of the screen ([ADR 0010](adr/0010-typed-message-catalogue.md)).
+- [ ] **Preferences follow the account.** The language, and later the theme and the sound
+      setting, saved with the account so they follow a person between devices. Until then
+      they are remembered on each device.
+- [ ] **Themes.** Several complete looks, light and dark, switched from the corner of the
+      screen with an animated change.
+- [ ] **Motion.** Feedback for finishing a task, dropping a block and changing day.
+- [ ] **Sound.** Short synthesised cues in the style of the current theme, off by default.
 
 ### 3. Release quality
 

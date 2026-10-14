@@ -1,8 +1,10 @@
 import { useDraggable } from '@dnd-kit/core';
 import type { JSX } from 'react';
 import type { Task } from '../../../lib/api/contract';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import { formatDuration } from '../../../lib/time/formatTime';
 import controls from '../../../ui/controls.module.css';
+import { Icon } from '../../../ui/Icon';
 import { draggedTask } from '../../timeline/planningDrag';
 import styles from './TaskItem.module.css';
 
@@ -31,6 +33,7 @@ export function TaskItem({
   onDelete,
   onPlan,
 }: TaskItemProps): JSX.Element {
+  const { t, locale } = useI18n();
   const isOpen = task.status === 'todo';
   const { setNodeRef, listeners, isDragging } = useDraggable({
     id: `task:${task.id}`,
@@ -46,10 +49,10 @@ export function TaskItem({
         ref={setNodeRef}
         className={styles.grip}
         aria-hidden="true"
-        title={isOpen ? 'Drag onto the timeline' : undefined}
+        title={isOpen ? t('tasks.item.drag') : undefined}
         {...listeners}
       >
-        ⠿
+        <Icon name="grip" />
       </span>
       <label className={styles.title}>
         <input
@@ -63,30 +66,30 @@ export function TaskItem({
         <span>{task.title}</span>
       </label>
       <small className={styles.meta}>
-        {formatDuration(task.estimateMinutes)}
-        {isPlanned && <span className={styles.planned}> · planned</span>}
+        <span className={styles.duration}>{formatDuration(task.estimateMinutes, locale)}</span>
+        {isPlanned && <span className={styles.planned}>· {t('tasks.item.planned')}</span>}
       </small>
       {isOpen && canPlan && (
         <button
           type="button"
           className={styles.plan}
-          aria-label={`Plan ${task.title}`}
+          aria-label={t('tasks.item.planLabel', { title: task.title })}
           onClick={() => {
             onPlan(task);
           }}
         >
-          Plan
+          {t('tasks.item.plan')}
         </button>
       )}
       <button
         type="button"
         className={controls.iconAction}
-        aria-label={`Delete ${task.title}`}
+        aria-label={t('tasks.item.deleteLabel', { title: task.title })}
         onClick={() => {
           onDelete(task);
         }}
       >
-        ×
+        <Icon name="close" />
       </button>
     </li>
   );

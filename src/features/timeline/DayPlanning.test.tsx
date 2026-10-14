@@ -184,6 +184,15 @@ describe('planning a day', () => {
     expect(fakeApi.events.map((event) => event.title)).not.toContain('Stand-up');
   });
 
+  it('invites you to plan a day that has nothing in it', async () => {
+    fakeApi.signIn();
+    fakeApi.seed({ calendars: [buildCalendar()] });
+    await renderDay();
+
+    expect(await screen.findByText('A clear day')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add block' })).toBeEnabled();
+  });
+
   it('asks for a calendar before any block can be added', async () => {
     fakeApi.signIn();
     await renderDay();

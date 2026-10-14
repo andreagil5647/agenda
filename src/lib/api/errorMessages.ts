@@ -1,39 +1,57 @@
+import type { AppTranslate, PlainMessageKey } from '../i18n/catalogues';
 import { ApiError, type ApiErrorCode } from './ApiError';
-
-const FALLBACK = 'Something went wrong on our side. Try again in a moment.';
+import type { ErrorReason } from './contract';
 
 /**
- * What to tell the user for each kind of failure. Codes mapped to `null` show
- * the API's own message, which for those is already written for people
- * ("Event end must be after start", "Email is already registered").
+ * What to tell the user for each kind of failure. The API's own sentence is
+ * English and written for logs, so no message on screen is taken from it.
  */
-const MESSAGES: Record<ApiErrorCode, string | null> = {
-  NETWORK_ERROR: 'Could not reach the server. Check your connection and try again.',
-  UNEXPECTED_RESPONSE: FALLBACK,
-  INTERNAL_ERROR: FALLBACK,
-  UNAUTHORIZED: 'Your session has ended. Log in again to continue.',
-  FORBIDDEN: 'That request was refused. Reload the page and try again.',
-  NOT_FOUND: 'That item no longer exists. It may have been deleted somewhere else.',
-  PRECONDITION_FAILED:
-    'This was changed somewhere else in the meantime. The latest version is shown now; try again.',
-  PRECONDITION_REQUIRED: FALLBACK,
-  VALIDATION_ERROR: 'Some of that was not valid. Check the fields and try again.',
-  PAYLOAD_TOO_LARGE: 'That is too much to save at once.',
-  BAD_REQUEST: null,
-  CONFLICT: null,
-  RATE_LIMITED: null,
+const CODE_MESSAGE_KEYS: Readonly<Record<ApiErrorCode, PlainMessageKey>> = {
+  NETWORK_ERROR: 'error.NETWORK_ERROR',
+  UNEXPECTED_RESPONSE: 'error.generic',
+  INTERNAL_ERROR: 'error.generic',
+  UNAUTHORIZED: 'error.UNAUTHORIZED',
+  FORBIDDEN: 'error.FORBIDDEN',
+  NOT_FOUND: 'error.NOT_FOUND',
+  PRECONDITION_FAILED: 'error.PRECONDITION_FAILED',
+  PRECONDITION_REQUIRED: 'error.generic',
+  VALIDATION_ERROR: 'error.VALIDATION_ERROR',
+  PAYLOAD_TOO_LARGE: 'error.PAYLOAD_TOO_LARGE',
+  RATE_LIMITED: 'error.RATE_LIMITED',
+  BAD_REQUEST: 'error.generic',
+  CONFLICT: 'error.generic',
 };
 
 /**
- * Turns any thrown value into a sentence for the user. A screen can override
- * the wording of a code where it means something more specific there.
+ * What to tell the user where the reason says more than the code. Every reason
+ * in the contract needs a line here, or the build fails.
  */
+const REASON_MESSAGE_KEYS: Readonly<Record<ErrorReason, PlainMessageKey>> = {
+  stale_version: 'error.PRECONDITION_FAILED',
+  email_taken: 'error.reason.email_taken',
+  demo_full: 'error.reason.demo_full',
+  end_not_after_start: 'error.reason.end_not_after_start',
+  fields_of_other_kind: 'error.generic',
+};
+
+// Looked up by text: a reason this version does not know falls back to its code.
+const REASON_KEYS: ReadonlyMap<string, PlainMessageKey> = new Map(
+  Object.entries(REASON_MESSAGE_KEYS),
+);
+
+/** A screen can word a code differently where it means something more specific there. */
+export type ErrorOverrides = Readonly<Partial<Record<ApiErrorCode, PlainMessageKey>>>;
+
+/** Turns any thrown value into a sentence for the user, in the language of `t`. */
 export function describeError(
   error: unknown,
-  overrides: Partial<Record<ApiErrorCode, string>> = {},
+  t: AppTranslate,
+  overrides: ErrorOverrides = {},
 ): string {
   if (!(error instanceof ApiError)) {
-    return FALLBACK;
+    return t('error.generic');
   }
-  return overrides[error.code] ?? MESSAGES[error.code] ?? error.message;
+
+  const reasonKey = error.reason === undefined ? undefined : REASON_KEYS.get(error.reason);
+  return t(reasonKey ?? overrides[error.code] ?? CODE_MESSAGE_KEYS[error.code]);
 }

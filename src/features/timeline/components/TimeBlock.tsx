@@ -1,6 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
 import { useState, type JSX, type KeyboardEvent, type PointerEvent } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import { formatTimeRange, type HourCycle } from '../../../lib/time/formatTime';
 import controls from '../../../ui/controls.module.css';
 import {
@@ -52,6 +53,7 @@ export function TimeBlock({
   onResize,
   onDelete,
 }: TimeBlockProps): JSX.Element {
+  const { locale } = useI18n();
   const { event, column, columns } = block;
   // The end while the edge is being pulled, before it is saved.
   const [pulledEnd, setPulledEnd] = useState<number | null>(null);
@@ -144,7 +146,7 @@ export function TimeBlock({
       >
         <strong className={styles.title}>{event.title}</strong>{' '}
         <span className={styles.time}>
-          {formatTimeRange(span.startMinutes, span.endMinutes, hourCycle)}
+          {formatTimeRange(span.startMinutes, span.endMinutes, hourCycle, locale)}
         </span>
         {/* Part of the block's accessible name, not of its face. */}
         {calendar && <span className={controls.visuallyHidden}>{calendar.name}</span>}

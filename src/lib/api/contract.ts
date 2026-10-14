@@ -8,6 +8,8 @@ import type { components } from './schema';
 type Schemas = components['schemas'];
 
 export type ApiErrorBody = Schemas['ErrorResponse'];
+/** Why a request failed, where its code alone is too coarse to say. */
+export type ErrorReason = NonNullable<NonNullable<ApiErrorBody['details']>['reason']>;
 
 export type AuthUser = Schemas['AuthUser'];
 export type AuthenticatedSession = Schemas['AuthenticatedSession'];

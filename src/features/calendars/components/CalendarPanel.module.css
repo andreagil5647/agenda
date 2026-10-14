@@ -17,16 +17,13 @@
   padding: 0;
 }
 
+/* A pill in the calendar's own colours, the same ones its blocks wear on the grid. */
 .calendar {
+  border: 2px solid var(--calendar-stroke);
   border-radius: var(--radius-pill);
   background: var(--calendar-surface);
   color: var(--calendar-text);
-  padding: 6px 10px;
-  font-size: 0.86rem;
-  font-weight: 750;
-}
-
-.empty {
-  margin: 0;
-  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  padding: var(--space-1) var(--space-3);
 }

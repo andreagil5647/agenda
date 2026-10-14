@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type JSX, type SyntheticEvent } from 'react';
 import type { Calendar, PatchEventRequest, PlannerEvent, Task } from '../../../lib/api/contract';
 import { readField } from '../../../lib/forms';
-import { formatTimeOfDay, parseTimeOfDay } from '../../../lib/time/formatTime';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
+import { formatTimeInputValue, parseTimeOfDay } from '../../../lib/time/formatTime';
 import { instantAt, localDateOf, minutesOfDay, MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
 import controls from '../../../ui/controls.module.css';
 import { Panel } from '../../../ui/Panel';
@@ -19,7 +20,7 @@ interface BlockEditorProps {
 
 /** The value a time input shows for an instant, on the wall clock of `timeZone`. */
 function timeInputValue(instant: string | null, timeZone: string): string {
-  return instant ? formatTimeOfDay(minutesOfDay(new Date(instant), timeZone), 'h23') : '';
+  return instant ? formatTimeInputValue(minutesOfDay(new Date(instant), timeZone)) : '';
 }
 
 /**
@@ -55,7 +56,8 @@ export function BlockEditor({
 }: BlockEditorProps): JSX.Element {
   const updateEvent = useUpdateEvent();
   const deleteEvent = useDeleteEvent();
-  const [problem, setProblem] = useState<string | null>(null);
+  const { t } = useI18n();
+  const [hasTimeProblem, setHasTimeProblem] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const isTimed = event.kind === 'timed';
 
@@ -70,11 +72,11 @@ export function BlockEditor({
     const form = new FormData(submitEvent.currentTarget);
     const times = isTimed ? readTimes(form, event, timeZone) : {};
     if (times === null) {
-      setProblem('The end has to be after the start.');
+      setHasTimeProblem(true);
       return;
     }
 
-    setProblem(null);
+    setHasTimeProblem(false);
     updateEvent.mutate({
       event,
       changes: {
@@ -92,11 +94,11 @@ export function BlockEditor({
 
   return (
     <Panel
-      eyebrow={isTimed ? 'Block' : 'All day'}
-      title="Details"
+      title={t('block.details')}
+      icon="sparkle"
       aside={
         <button type="button" className={controls.secondaryAction} onClick={onClose}>
-          Close
+          {t('block.close')}
         </button>
       }
     >
@@ -108,11 +110,11 @@ export function BlockEditor({
         onSubmit={save}
       >
         <label>
-          Title
+          {t('block.title')}
           <input ref={titleRef} name="title" defaultValue={event.title} maxLength={160} required />
         </label>
         <label>
-          Calendar
+          {t('block.calendar')}
           <select name="calendarId" defaultValue={event.calendarId}>
             {calendars.map((calendar) => (
               <option value={calendar.id} key={calendar.id}>
@@ -124,7 +126,7 @@ export function BlockEditor({
         {isTimed && (
           <div className={styles.times}>
             <label>
-              Start
+              {t('block.start')}
               <input
                 name="start"
                 type="time"
@@ -134,7 +136,7 @@ export function BlockEditor({
               />
             </label>
             <label>
-              End
+              {t('block.end')}
               <input
                 name="end"
                 type="time"
@@ -145,18 +147,20 @@ export function BlockEditor({
             </label>
           </div>
         )}
-        {linkedTask && <p className={styles.link}>Time set aside for “{linkedTask.title}”.</p>}
-        {problem && (
+        {linkedTask && (
+          <p className={styles.link}>{t('block.linkedTask', { title: linkedTask.title })}</p>
+        )}
+        {hasTimeProblem && (
           <p className={controls.formError} role="alert">
-            {problem}
+            {t('block.endAfterStart')}
           </p>
         )}
         <div className={styles.actions}>
           <button type="submit" className={controls.primaryAction}>
-            Save
+            {t('block.save')}
           </button>
           <button type="button" className={controls.secondaryAction} onClick={remove}>
-            Delete block
+            {t('block.delete')}
           </button>
         </div>
       </form>

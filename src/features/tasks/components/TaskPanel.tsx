@@ -1,7 +1,9 @@
 import type { JSX, SyntheticEvent } from 'react';
 import type { Task } from '../../../lib/api/contract';
 import { readField } from '../../../lib/forms';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import controls from '../../../ui/controls.module.css';
+import { EmptyState } from '../../../ui/EmptyState';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '../hooks/useTasks';
@@ -27,6 +29,7 @@ export function TaskPanel({
   plannedTaskIds,
   onPlanTask,
 }: TaskPanelProps): JSX.Element {
+  const { t } = useI18n();
   const tasksQuery = useTasks();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
@@ -59,31 +62,47 @@ export function TaskPanel({
 
   return (
     <Panel
-      eyebrow="Inbox"
-      title="Tasks"
-      aside={openCount === undefined ? null : <span>{openCount} open</span>}
+      title={t('tasks.title')}
+      icon="check-circle"
+      aside={
+        openCount === undefined ? null : <span>{t('tasks.openCount', { count: openCount })}</span>
+      }
     >
       <form className={styles.form} autoComplete="off" onSubmit={submitTask}>
-        <input name="title" aria-label="New task" placeholder="New task" maxLength={160} required />
-        <input key={day} name="dueDate" type="date" aria-label="Due date" defaultValue={day} />
+        <input
+          name="title"
+          aria-label={t('tasks.new')}
+          placeholder={t('tasks.new')}
+          maxLength={160}
+          required
+        />
+        <input
+          key={day}
+          name="dueDate"
+          type="date"
+          aria-label={t('tasks.dueDate')}
+          defaultValue={day}
+        />
         <input
           name="estimateMinutes"
           type="number"
           min={5}
           max={1440}
           step={5}
-          aria-label="Estimate in minutes"
+          aria-label={t('tasks.estimate')}
           defaultValue={DEFAULT_ESTIMATE_MINUTES}
         />
         <button type="submit" className={controls.primaryAction} disabled={createTask.isPending}>
-          Add task
+          {t('tasks.add')}
         </button>
       </form>
 
-      <QueryBoundary query={tasksQuery} loadingLabel="Loading tasks...">
+      <QueryBoundary query={tasksQuery} loadingLabel={t('tasks.loading')}>
         {(tasks) =>
           tasks.length === 0 ? (
-            <p className={styles.empty}>No tasks yet. Add the first one above.</p>
+            <EmptyState icon="leaf" title={t('tasks.empty.title')}>
+              {t('tasks.empty.hint')}
+            </EmptyState>
           ) : (
             <ul className={styles.list}>
               {tasks.map((task) => (
