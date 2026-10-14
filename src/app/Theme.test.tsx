@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { setDevice } from '../../test/helpers/device';
 import { App } from './App';
@@ -15,6 +15,12 @@ function pageTheme(): string | undefined {
 
 function browserBarColor(): string | null | undefined {
   return document.querySelector('meta[name="theme-color"]')?.getAttribute('content');
+}
+
+function namesOf(list: HTMLElement): (string | null)[] {
+  return within(list)
+    .getAllByRole('button')
+    .map((button) => button.textContent);
 }
 
 beforeEach(() => {
@@ -182,5 +188,122 @@ describe('the theme of the app', () => {
 
     expect(button).toHaveTextContent('Paper');
     expect(button.querySelector('[data-theme="paper"]')).toHaveAttribute('aria-hidden', 'true');
+  });
+});
+
+describe('choosing a theme from the list', () => {
+  async function openList(user: ReturnType<typeof userEvent.setup>): Promise<HTMLElement> {
+    await user.click(await screen.findByRole('button', { name: 'Choose a theme' }));
+    return screen.getByRole('group', { name: 'Theme' });
+  }
+
+  it('is closed until it is asked for, and says so', async () => {
+    render(<App />);
+    const toggle = await screen.findByRole('button', { name: 'Choose a theme' });
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('group', { name: 'Theme' })).not.toBeInTheDocument();
+  });
+
+  it('lists every theme, with the one in use pressed', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const list = await openList(user);
+
+    expect(screen.getByRole('button', { name: 'Choose a theme' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(namesOf(list)).toEqual(['Paper', 'Midnight']);
+    expect(within(list).getByRole('button', { name: 'Paper' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(within(list).getByRole('button', { name: 'Midnight' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
+  });
+
+  it('goes straight to the theme chosen, saves it and says so', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const list = await openList(user);
+
+    await user.click(within(list).getByRole('button', { name: 'Midnight' }));
+
+    expect(pageTheme()).toBe('midnight');
+    expect(browserBarColor()).toBe('#1b1620');
+    expect(savedPreferences()).toEqual({ theme: 'midnight' });
+    expect(screen.getByText('Theme changed to Midnight.')).toHaveAttribute('role', 'status');
+    expect(screen.getByRole('button', { name: 'Theme: Midnight. Switch to Paper.' })).toBeVisible();
+  });
+
+  it('closes once a theme is chosen, and gives the focus back to the button that opened it', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const list = await openList(user);
+
+    await user.click(within(list).getByRole('button', { name: 'Midnight' }));
+
+    expect(screen.queryByRole('group', { name: 'Theme' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Choose a theme' })).toHaveFocus();
+  });
+
+  it('closes on Escape, with the focus back on the button that opened it', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const list = await openList(user);
+    within(list).getByRole('button', { name: 'Midnight' }).focus();
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByRole('group', { name: 'Theme' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Choose a theme' })).toHaveFocus();
+    expect(pageTheme()).toBe('paper');
+  });
+
+  it('closes when the button that opened it is pressed again', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await openList(user);
+
+    await user.click(screen.getByRole('button', { name: 'Choose a theme' }));
+
+    expect(screen.queryByRole('group', { name: 'Theme' })).not.toBeInTheDocument();
+  });
+
+  it('closes when something else on the page is pressed', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await openList(user);
+
+    await user.click(await screen.findByRole('heading', { name: 'Give every task a time.' }));
+
+    expect(screen.queryByRole('group', { name: 'Theme' })).not.toBeInTheDocument();
+    expect(pageTheme()).toBe('paper');
+  });
+
+  it('closes when the keyboard leaves it', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const list = await openList(user);
+    within(list).getByRole('button', { name: 'Midnight' }).focus();
+
+    await user.tab();
+
+    expect(screen.queryByRole('group', { name: 'Theme' })).not.toBeInTheDocument();
+  });
+
+  it('names the themes in the language of the screen', async () => {
+    window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify({ language: 'es' }));
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('button', { name: 'Elegir un tema' }));
+    const list = screen.getByRole('group', { name: 'Tema' });
+
+    expect(namesOf(list)).toEqual(['Papel', 'Medianoche']);
   });
 });

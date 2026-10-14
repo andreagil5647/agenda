@@ -51,6 +51,8 @@ export const en = {
   'dock.label': 'Preferences',
   'language.label': 'Language',
   'language.loadFailed': 'Could not load that language. Check your connection and try again.',
+  'theme.group': 'Theme',
+  'theme.choose': 'Choose a theme',
   'theme.paper': 'Paper',
   'theme.midnight': 'Midnight',
   'theme.switch': 'Theme: {current}. Switch to {next}.',
