@@ -61,6 +61,13 @@
   cursor: pointer;
 }
 
+/* The tick box, and the burst that flies out of it, which is placed against it. */
+.check {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+}
+
 .text {
   overflow-wrap: anywhere;
 }

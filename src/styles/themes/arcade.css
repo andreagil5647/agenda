@@ -21,6 +21,16 @@
 
   --motion-fast: 90ms;
   --motion-ease: steps(3, end);
+  --motion-feedback: 200ms;
+
+  /* Pixel coins. */
+  --burst-size: 7px;
+  --burst-distance: 28px;
+  --burst-shape: none;
+  --burst-radius: 0;
+  --burst-color-1: var(--color-now);
+  --burst-color-2: var(--calendar-butter-stroke);
+  --burst-color-3: var(--color-accent);
 
   --shadow-paper: 4px 4px 0 var(--color-border);
   --block-shadow: 2px 2px 0;

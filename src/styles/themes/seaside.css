@@ -18,6 +18,16 @@
 
   --motion-fast: 220ms;
   --motion-ease: cubic-bezier(0.37, 0, 0.63, 1);
+  --motion-feedback: 300ms;
+
+  /* Petals. */
+  --burst-size: 11px;
+  --burst-distance: 36px;
+  --burst-shape: none;
+  --burst-radius: 60% 0 60% 0;
+  --burst-color-1: var(--calendar-rose-stroke);
+  --burst-color-2: var(--calendar-peach-stroke);
+  --burst-color-3: var(--calendar-purple-stroke);
 
   --shadow-paper: 0 6px 18px rgb(11 116 130 / 15%);
   --block-shadow: 0 3px 10px;

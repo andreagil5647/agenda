@@ -129,8 +129,10 @@
   border: solid var(--color-on-accent);
   border-width: 0 0 3px 3px;
   content: '';
-  transform: rotate(-45deg) scale(0);
-  transition: transform var(--motion-fast) var(--motion-ease);
+  /* Drawn from its short stroke to its long one: it grows out of its left edge. */
+  transform: rotate(-45deg) scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-feedback) var(--motion-ease);
 }
 
 .checkboxAction:checked {
@@ -139,7 +141,7 @@
 }
 
 .checkboxAction:checked::after {
-  transform: rotate(-45deg) scale(1);
+  transform: rotate(-45deg) scaleX(1);
 }
 
 .formError {
