@@ -1,13 +1,22 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { setDeviceColorScheme } from '../../../test/helpers/colorScheme';
-import { THEMES, type ThemeId } from './themes';
+import { detectTheme, THEMES, type ThemeId } from './themes';
 
 const KEY = 'agenda.preferences';
 const html = readFileSync(join(__dirname, '../../index.html'), 'utf8');
 const page = new DOMParser().parseFromString(html, 'text/html');
 const script = page.querySelector('script')?.textContent ?? '';
 const initialColor = page.querySelector('meta[name="theme-color"]')?.getAttribute('content');
+
+/** Every combination of a saved theme (or none) and a device set to dark or not. */
+const CHOICES: [saved: ThemeId | undefined, dark: boolean][] = [
+  undefined,
+  ...THEMES.map(({ id }) => id),
+].flatMap((saved) => [
+  [saved, false],
+  [saved, true],
+]);
 
 /** Runs the script from index.html the way the browser does, on a page that has not painted. */
 function loadPage(): { theme: string | undefined; color: string | null | undefined } {
@@ -88,6 +97,13 @@ describe('the script that picks the theme before the first paint', () => {
     });
 
     expect(loadPage().theme).toBe('midnight');
+  });
+
+  it.each(CHOICES)('chooses what the app chooses for saved %s, dark device %s', (saved, dark) => {
+    setDeviceColorScheme(dark ? 'dark' : 'light');
+    if (saved) save({ theme: saved });
+
+    expect(loadPage().theme).toBe(detectTheme(saved, dark));
   });
 
   it('knows exactly the themes the app has', () => {

@@ -1,4 +1,5 @@
 import { isLanguage, type Language } from '../i18n/languages';
+import { isThemeId, type ThemeId } from '../themes/themes';
 
 const STORAGE_KEY = 'agenda.preferences';
 
@@ -11,6 +12,7 @@ const STORAGE_KEY = 'agenda.preferences';
  */
 export interface DevicePreferences {
   language?: Language;
+  theme?: ThemeId;
 }
 
 /** Storage can be missing or refuse access (private windows, blocked site data). */
@@ -29,10 +31,18 @@ function parse(raw: string | null): DevicePreferences {
 
   try {
     const stored: unknown = JSON.parse(raw);
-    const isObject = typeof stored === 'object' && stored !== null;
-    return isObject && 'language' in stored && isLanguage(stored.language)
-      ? { language: stored.language }
-      : {};
+    if (typeof stored !== 'object' || stored === null) {
+      return {};
+    }
+
+    const preferences: DevicePreferences = {};
+    if ('language' in stored && isLanguage(stored.language)) {
+      preferences.language = stored.language;
+    }
+    if ('theme' in stored && isThemeId(stored.theme)) {
+      preferences.theme = stored.theme;
+    }
+    return preferences;
   } catch {
     return {};
   }

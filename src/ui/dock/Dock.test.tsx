@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import type * as Catalogues from '../../lib/i18n/catalogues';
 import { loadCatalogue } from '../../lib/i18n/catalogues';
 import { I18nProvider } from '../../lib/i18n/I18nProvider';
+import { ThemeProvider } from '../../lib/themes/ThemeProvider';
 import { Dock } from './Dock';
 
 // The real loader, except where a test makes it fail.
@@ -11,6 +12,16 @@ jest.mock('../../lib/i18n/catalogues', () => {
   return { ...actual, loadCatalogue: jest.fn(actual.loadCatalogue) };
 });
 
+function renderDock(): void {
+  render(
+    <ThemeProvider>
+      <I18nProvider>
+        <Dock />
+      </I18nProvider>
+    </ThemeProvider>,
+  );
+}
+
 afterEach(() => {
   window.localStorage.clear();
 });
@@ -18,11 +29,7 @@ afterEach(() => {
 describe('Dock', () => {
   it('tells the reader when a language could not be loaded, and stays in the one in use', async () => {
     const user = userEvent.setup();
-    render(
-      <I18nProvider>
-        <Dock />
-      </I18nProvider>,
-    );
+    renderDock();
     jest.mocked(loadCatalogue).mockRejectedValueOnce(new Error('offline'));
 
     await user.click(await screen.findByRole('button', { name: 'Español' }));
@@ -33,11 +40,7 @@ describe('Dock', () => {
 
   it('lets the reader try again, and clears the problem once it works', async () => {
     const user = userEvent.setup();
-    render(
-      <I18nProvider>
-        <Dock />
-      </I18nProvider>,
-    );
+    renderDock();
     jest.mocked(loadCatalogue).mockRejectedValueOnce(new Error('offline'));
     await user.click(await screen.findByRole('button', { name: 'Español' }));
     await screen.findByRole('alert');
