@@ -16,5 +16,6 @@ A superseded record stays in place with a link to the one that replaces it.
 | 0009 | [A paper planner look, with self-hosted fonts and checked contrast](0009-visual-identity.md)              | Accepted                             |
 | 0010 | [A typed message catalogue for translations](0010-typed-message-catalogue.md)                             | Accepted                             |
 | 0011 | [Named themes, each one a stylesheet of tokens](0011-named-themes-as-token-sheets.md)                     | Accepted                             |
+| 0012 | [Motion in CSS and browser APIs, under rules every theme keeps](0012-motion-with-css-and-browser-apis.md) | Accepted                             |
 
 New records copy [the template](template.md).

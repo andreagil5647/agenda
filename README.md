@@ -103,6 +103,15 @@ interface ([ADR 0009](docs/adr/0009-visual-identity.md)).
   against its background, a control border, focus ring or the current-time line below 3:1, or a
   theme is missing a token another one has.
 
+## Motion
+
+Finishing a task draws its tick and sends a small burst out of the box, in the style of the
+theme: stars, pixel coins or petals ([ADR 0012](docs/adr/0012-motion-with-css-and-browser-apis.md)).
+It is feedback for something the reader just did, so a task that was already finished when the
+list loaded does not play it. It is written in CSS, moves only with `transform` and `opacity`,
+lasts under 300 ms and never holds up the next click. For a reader who asked for less motion
+nothing moves: the tick and the strike-through simply appear.
+
 ## Themes
 
 The button in the bottom-left corner of every screen shows the theme in use and moves to the
