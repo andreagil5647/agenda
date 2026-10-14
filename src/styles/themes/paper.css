@@ -1,0 +1,68 @@
+/*
+ * Paper, the default theme: warm cream paper, plum-black ink and a pine green
+ * for the things you press, in the light. It is also what the page wears when
+ * no theme has been chosen yet, so it is selected with zero specificity and
+ * any other theme wins over it.
+ *
+ * Every colour that carries text is a six-digit hex value, so that
+ * styles/tokens.test.ts can check it against WCAG AA.
+ */
+:where(:root),
+[data-theme='paper'] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --color-bg: #fbf5ea;
+  --color-surface: #fffcf5;
+  --color-surface-muted: #f3e9d6;
+  --color-surface-hover: #f8efdd;
+  --color-border: #e6d9c2;
+  /* Borders of things you can operate must stand out from the paper (3:1). */
+  --color-border-strong: #8c7d6a;
+
+  /* Ink */
+  --color-text: #2a2230;
+  --color-text-label: #43394a;
+  --color-text-muted: #665b6d;
+  --color-text-subtle: #716677;
+
+  /* Accent: what you press, and what is selected */
+  --color-accent: #1e6b57;
+  --color-accent-hover: #175a49;
+  /* The darker edge under a pressable button. */
+  --color-accent-lip: #134a3b;
+  --color-on-accent: #fffcf5;
+  --color-accent-soft: #dcefe4;
+  --color-accent-soft-text: #134a3b;
+
+  --color-danger-surface: #fde9e4;
+  --color-danger-border: #e8a595;
+  --color-danger-text: #9a2a1b;
+
+  --color-focus: #2a2230;
+  /* The current time on the day grid: coral, so it is never mistaken for a calendar. */
+  --color-now: #d9482b;
+
+  --shadow-float: 0 14px 30px rgb(70 45 20 / 18%);
+
+  /* Calendar inks: a pastel fill, a darker ink for its text, and a mid tone for its edge.
+     A calendar stores a key; data-calendar-color selects the three. */
+  --calendar-blue-surface: #dcebfb;
+  --calendar-blue-text: #1c4a80;
+  --calendar-blue-stroke: #7aa6dc;
+  --calendar-green-surface: #dff0dc;
+  --calendar-green-text: #25592a;
+  --calendar-green-stroke: #7bb37a;
+  --calendar-purple-surface: #ece3fa;
+  --calendar-purple-text: #4b2f86;
+  --calendar-purple-stroke: #a98fdc;
+  --calendar-rose-surface: #fde1e6;
+  --calendar-rose-text: #8e2a45;
+  --calendar-rose-stroke: #e08aa0;
+  --calendar-peach-surface: #ffe6d1;
+  --calendar-peach-text: #86400f;
+  --calendar-peach-stroke: #e7a06b;
+  --calendar-butter-surface: #fff0b8;
+  --calendar-butter-text: #5e4800;
+  --calendar-butter-stroke: #dcb73a;
+}

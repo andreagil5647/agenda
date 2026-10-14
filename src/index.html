@@ -4,8 +4,26 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fbf5ea" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1620" />
+    <meta name="theme-color" content="#fbf5ea" />
+    <script>
+      // Puts the theme on the page before it is first painted, so a theme other than the
+      // default never flashes. It repeats what src/lib/themes decides, because the app has
+      // not loaded yet; themes.test.ts keeps the two the same.
+      (function () {
+        var colors = { paper: '#fbf5ea', midnight: '#1b1620' };
+        var theme = null;
+        try {
+          var saved = JSON.parse(localStorage.getItem('agenda.preferences') || '{}').theme;
+          if (Object.prototype.hasOwnProperty.call(colors, saved)) theme = saved;
+        } catch (error) {
+          // Storage that cannot be read just means nothing was saved.
+        }
+        if (!theme)
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'midnight' : 'paper';
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', colors[theme]);
+      })();
+    </script>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%3Crect%20width%3D'40'%20height%3D'40'%20rx%3D'12'%20fill%3D'%231e6b57'%2F%3E%3Crect%20x%3D'8'%20y%3D'10'%20width%3D'24'%20height%3D'22'%20rx%3D'6'%20fill%3D'%23fffcf5'%2F%3E%3Cpath%20d%3D'M14%207.5v5M26%207.5v5'%20stroke%3D'%23fffcf5'%20stroke-width%3D'3'%20stroke-linecap%3D'round'%20fill%3D'none'%2F%3E%3Ccircle%20cx%3D'15.5'%20cy%3D'20.5'%20r%3D'1.7'%20fill%3D'%23134a3b'%2F%3E%3Ccircle%20cx%3D'24.5'%20cy%3D'20.5'%20r%3D'1.7'%20fill%3D'%23134a3b'%2F%3E%3Cpath%20d%3D'M15.5%2025.5c2.5%203%206.5%203%209%200'%20stroke%3D'%23134a3b'%20stroke-width%3D'2.4'%20stroke-linecap%3D'round'%20fill%3D'none'%2F%3E%3C%2Fsvg%3E"
