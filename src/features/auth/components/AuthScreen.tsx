@@ -1,5 +1,6 @@
 import { useState, type JSX, type SyntheticEvent } from 'react';
 import { readField } from '../../../lib/forms';
+import type { PlainMessageKey } from '../../../lib/i18n/catalogues';
 import { useI18n } from '../../../lib/i18n/I18nProvider';
 import controls from '../../../ui/controls.module.css';
 import { Icon, type IconName } from '../../../ui/Icon';
@@ -10,13 +11,10 @@ import styles from './AuthScreen.module.css';
 
 type AuthMode = 'login' | 'register';
 
-const POINTS: readonly { icon: IconName; text: string }[] = [
-  { icon: 'clock', text: 'Drag a task onto the day to give it a time.' },
-  { icon: 'sparkle', text: 'Everything you can drag, you can also do with the keyboard.' },
-  {
-    icon: 'check-circle',
-    text: 'Changes show at once and are taken back if they cannot be saved.',
-  },
+const POINTS: readonly { icon: IconName; text: PlainMessageKey }[] = [
+  { icon: 'clock', text: 'auth.points.drag' },
+  { icon: 'sparkle', text: 'auth.points.keyboard' },
+  { icon: 'check-circle', text: 'auth.points.safe' },
 ];
 
 export function AuthScreen(): JSX.Element {
@@ -57,18 +55,15 @@ export function AuthScreen(): JSX.Element {
           <Logo size={48} />
           <span>{t('brand.name')}</span>
         </div>
-        <h1>Give every task a time.</h1>
-        <p className={styles.lead}>
-          Agenda puts your tasks and your events on one timeline, so the plan you make is a day you
-          can actually keep.
-        </p>
+        <h1>{t('auth.hero.title')}</h1>
+        <p className={styles.lead}>{t('auth.hero.lead')}</p>
         <ul className={styles.points}>
           {POINTS.map(({ icon, text }) => (
             <li key={icon}>
               <span className={styles.pointIcon}>
                 <Icon name={icon} />
               </span>
-              {text}
+              {t(text)}
             </li>
           ))}
         </ul>
@@ -77,8 +72,8 @@ export function AuthScreen(): JSX.Element {
 
       <div className={styles.card}>
         <section className={styles.demo} aria-labelledby="demo-title">
-          <h2 id="demo-title">Just looking around?</h2>
-          <p>Open a ready-made day and try it. No sign-up, and nothing to set up.</p>
+          <h2 id="demo-title">{t('auth.demo.title')}</h2>
+          <p>{t('auth.demo.text')}</p>
           <button
             className={controls.primaryAction}
             type="button"
@@ -87,12 +82,12 @@ export function AuthScreen(): JSX.Element {
               void handleDemo();
             }}
           >
-            Try the demo
+            {t('auth.demo.button')}
           </button>
         </section>
 
         <p className={styles.divider}>
-          <span>or {isRegistering ? 'create an account' : 'log in'}</span>
+          <span>{t(isRegistering ? 'auth.divider.register' : 'auth.divider.logIn')}</span>
         </p>
 
         <form
@@ -102,20 +97,20 @@ export function AuthScreen(): JSX.Element {
           }}
         >
           <h2 id="auth-title" className={controls.visuallyHidden}>
-            {isRegistering ? 'Create your account' : 'Log in'}
+            {t(isRegistering ? 'auth.register.heading' : 'auth.logIn')}
           </h2>
           {isRegistering && (
             <label>
-              Name
+              {t('auth.field.name')}
               <input name="displayName" autoComplete="name" minLength={1} maxLength={80} required />
             </label>
           )}
           <label>
-            Email
+            {t('auth.field.email')}
             <input name="email" type="email" autoComplete="email" required />
           </label>
           <label>
-            Password
+            {t('auth.field.password')}
             <input
               name="password"
               type="password"
@@ -138,12 +133,14 @@ export function AuthScreen(): JSX.Element {
             disabled={isSubmitting}
             aria-busy={isSubmitting}
           >
-            {isSubmitting ? 'Working...' : isRegistering ? 'Create account' : 'Log in'}
+            {isSubmitting
+              ? t('auth.submit.working')
+              : t(isRegistering ? 'auth.register.submit' : 'auth.logIn')}
           </button>
         </form>
 
         <p className={styles.switch}>
-          {isRegistering ? 'Already have an account?' : 'New here?'}{' '}
+          {t(isRegistering ? 'auth.switch.haveAccount' : 'auth.switch.newHere')}{' '}
           <button
             type="button"
             className={styles.link}
@@ -151,7 +148,7 @@ export function AuthScreen(): JSX.Element {
               switchMode(isRegistering ? 'login' : 'register');
             }}
           >
-            {isRegistering ? 'Log in' : 'Create an account'}
+            {t(isRegistering ? 'auth.logIn' : 'auth.register.switch')}
           </button>
         </p>
       </div>
