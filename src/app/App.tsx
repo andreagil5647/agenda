@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from '../features/auth/hooks/useAuth';
 import type { PlainMessageKey } from '../lib/i18n/catalogues';
 import { I18nProvider, useI18n } from '../lib/i18n/I18nProvider';
 import { useServerStatus, type ServerStatus } from '../lib/serverStatus/useServerStatus';
+import { Dock } from '../ui/dock/Dock';
 import { Logo } from '../ui/Logo';
 import { NoticeProvider } from '../ui/notices/NoticeProvider';
 import styles from './App.module.css';
@@ -95,6 +96,7 @@ export function App(): JSX.Element {
           </AuthProvider>
         </NoticeProvider>
       </ServerGate>
+      <Dock />
     </I18nProvider>
   );
 }

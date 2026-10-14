@@ -41,6 +41,12 @@ export const es: Translation<typeof en> = {
   'error.PAYLOAD_TOO_LARGE': 'Es demasiado para guardarlo de una vez.',
   'auth.invalidCredentials': 'Ese correo y esa contraseña no coinciden.',
 
+  // The corner of the screen where preferences are changed
+  'dock.label': 'Preferencias',
+  'language.label': 'Idioma',
+  'language.loadFailed':
+    'No se pudo cargar ese idioma. Comprueba tu conexión e inténtalo de nuevo.',
+
   // The sign-in screen
   'auth.hero.title': 'Dale una hora a cada tarea.',
   'auth.hero.lead':

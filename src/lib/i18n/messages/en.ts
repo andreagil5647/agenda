@@ -43,6 +43,11 @@ export const en = {
   'error.PAYLOAD_TOO_LARGE': 'That is too much to save at once.',
   'auth.invalidCredentials': 'That email and password do not match.',
 
+  // The corner of the screen where preferences are changed
+  'dock.label': 'Preferences',
+  'language.label': 'Language',
+  'language.loadFailed': 'Could not load that language. Check your connection and try again.',
+
   // The sign-in screen
   'auth.hero.title': 'Give every task a time.',
   'auth.hero.lead':
