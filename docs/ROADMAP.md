@@ -24,8 +24,6 @@ Done:
 
 Known gaps in the done items:
 
-- [ ] The pointer paths of dragging are checked by hand; only the keyboard paths and the
-      arithmetic have automated tests
 - [ ] Deleting a task, block or calendar has no undo. An undo notice is better than a
       confirmation dialog, and needs a restore endpoint for events
 - [ ] The quick-add forms label their fields with a placeholder and an accessible name rather
@@ -96,7 +94,9 @@ Known gaps in the done items:
 
 ### 3. Release quality
 
-- [ ] End-to-end tests (Playwright) against the real API in CI
+- [x] End-to-end tests (Playwright) against the real API in CI: planning with the pointer, the
+      theme and the language, the burst with and without reduced motion, and every theme at
+      phone width ([ADR 0013](adr/0013-end-to-end-tests-with-playwright.md))
 - [ ] Accessibility checks (axe) in component and end-to-end tests
 - [ ] Route-level code splitting and a bundle budget in CI
 - [ ] Empty, loading, error and offline states on every screen; responsive down to phone

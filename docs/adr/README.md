@@ -17,5 +17,6 @@ A superseded record stays in place with a link to the one that replaces it.
 | 0010 | [A typed message catalogue for translations](0010-typed-message-catalogue.md)                             | Accepted                             |
 | 0011 | [Named themes, each one a stylesheet of tokens](0011-named-themes-as-token-sheets.md)                     | Accepted                             |
 | 0012 | [Motion in CSS and browser APIs, under rules every theme keeps](0012-motion-with-css-and-browser-apis.md) | Accepted                             |
+| 0013 | [End-to-end tests with Playwright, against the real API](0013-end-to-end-tests-with-playwright.md)        | Accepted                             |
 
 New records copy [the template](template.md).

@@ -11,7 +11,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 > demo, then plan a day on an hour grid: drag a task onto it to give it time, drag a block to
 > move it, pull its edge to resize it, or do all three from the keyboard. Changes show at once
 > and are taken back if the API refuses them. Four themes, switched from the corner of the
-> screen. A week view and end-to-end tests come next - see the [roadmap](docs/ROADMAP.md).
+> screen. A week view comes next - see the [roadmap](docs/ROADMAP.md).
 
 <p align="center">
   <img src="docs/images/planner-light.webp" width="49%" alt="The day planner in its Paper theme: a Tuesday on an hour grid with blocks for stand-up, a design review, lunch and two overlapping calls, next to a list of tasks.">
@@ -32,7 +32,7 @@ The API lives in [andreagil5647/agenda-backend](https://github.com/andreagil5647
 | Type       | Nunito and Fraunces, self-hosted variable fonts             |
 | Languages  | English and Spanish, a typed in-repo message catalogue      |
 | Validation | zod 4, for build-time `PUBLIC_` environment variables       |
-| Tests      | Jest 30 (`@swc/jest`), React Testing Library, MSW           |
+| Tests      | Jest 30 (`@swc/jest`), Testing Library, MSW, Playwright     |
 | Hosting    | Render static site, rewriting `/api/*` to the backend       |
 
 ## Architecture
@@ -177,8 +177,21 @@ compiler lists everything that is still missing.
   its persistence, errors that change language while on screen, and the planner in Spanish.
 - A coverage floor in `jest.config.js` fails the run if coverage drops, and
   `pnpm run api:check` fails if the generated API types no longer match the contract.
-- Pointer dragging is not covered by automated tests, because jsdom lays nothing out. It is
-  checked by hand in a browser, and is the first thing end-to-end tests should cover.
+- What jsdom cannot see is tested in a real browser with Playwright, against the real API
+  ([ADR 0013](docs/adr/0013-end-to-end-tests-with-playwright.md)): dragging a task onto the grid,
+  moving a block and pulling its edge, the theme and the language on the page before the app has
+  loaded, the burst for a finished task with and without reduced motion, and every theme at phone
+  width. CI runs them in a job of their own, with the API built from its repository next to a
+  MongoDB container. To run them locally, start the API on port 4000, install the browser once and
+  run the script; the dev server is started if it is not already running:
+
+  ```bash
+  pnpm exec playwright install chromium   # once
+  pnpm run test:e2e
+  ```
+
+  Each run opens one demo account, which the API deletes after a day. A failed test leaves a trace
+  in `test-results/`, opened with `pnpm exec playwright show-trace <file>`.
 
 ## Getting started
 
@@ -201,6 +214,7 @@ pnpm run dev       # http://localhost:3000, proxies /api to http://localhost:400
 | `pnpm test` / `pnpm run test:coverage` | Jest / Jest with a coverage report in `coverage/` |
 | `pnpm run lint` / `pnpm run format`    | ESLint (type-aware) / Prettier                    |
 | `pnpm run typecheck`                   | `tsc --noEmit`                                    |
+| `pnpm run test:e2e`                    | Playwright, in a real browser against the API     |
 | `pnpm run api:sync`                    | Copy the API contract from the backend repo       |
 | `pnpm run api:generate` / `api:check`  | Generate the API types / fail if they are stale   |
 
