@@ -1,6 +1,6 @@
 # 0006. CSS Modules on design tokens, themes with `light-dark()`
 
-- Status: Accepted
+- Status: Accepted. The `light-dark()` part is superseded by [0011](0011-named-themes-as-token-sheets.md)
 - Date: 2026-10-12
 
 ## Context
