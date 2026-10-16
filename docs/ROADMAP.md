@@ -87,9 +87,9 @@ Known gaps in the done items:
       A button in the corner moves to the next one and a list chooses one directly, with a
       circular reveal, the choice remembered on the device, and each theme held to the same
       contrast checks ([ADR 0011](adr/0011-named-themes-as-token-sheets.md)).
-- [ ] **Motion.** Feedback for the things you do. Finishing a task, and dropping, making and
-      deleting a block, are done ([ADR 0012](adr/0012-motion-with-css-and-browser-apis.md));
-      changing day and clearing the day are next.
+- [x] **Motion.** Feedback for the things you do. Finishing a task, dropping, making and
+      deleting a block, changing day, the open-task count, the block details and clearing the
+      list are done ([ADR 0012](adr/0012-motion-with-css-and-browser-apis.md)).
 - [ ] **Sound.** Short synthesised cues in the style of the current theme, off by default.
 
 ### 3. Release quality

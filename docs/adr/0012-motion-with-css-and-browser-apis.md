@@ -74,6 +74,20 @@ Second use, blocks on the grid:
   A block now keeps the key it first had (`blockKey`), or the saved block would replace the one
   that is animating and cut it short.
 
+Third use, the rest of the planner:
+
+- The day slides in from the side the reader went towards, for a day they changed to and never
+  the one shown on load. The open-task count rolls to its new number when the reader's own action
+  moved it. The details of a block slide in when a block is first selected.
+- Finishing the last open task is a bigger moment: a large burst, and a line of praise in a status
+  region that is always on the page, so that it is read out when it appears.
+- Which changes are the reader's is recorded as they are made. The open-task count first tried to
+  tell from whether a write was pending, and that worked only on a slow network: with a fast API
+  the write is over before anything is drawn, and the count changed in a render that saw nothing
+  pending. A test through the whole app found it; the component rules alone had passed.
+- Left out on purpose: the plan had the current-time line "breathe". That is motion on its own,
+  with nobody having done anything, which the first rule rules out, so it is not built.
+
 ## Consequences
 
 - No new dependency, and nothing in the entry bundle beyond a few hundred bytes of CSS per effect.
@@ -84,6 +98,15 @@ Second use, blocks on the grid:
   the `motion` library again, with an ADR that says what it cost.
 - JavaScript-driven animation checks the reduced-motion query through `prefersReducedMotion()`,
   which the theme reveal and the block motion share.
+- What it costs was measured with `pnpm run perf:motion`: the same minute of planning, repeated,
+  with the CPU slowed down six times, alternating runs with motion and with reduced motion, three
+  of each. It runs against the development build, so the absolute times are far worse than what
+  ships and mean little; the comparison is what counts. The worst input delay was about the same
+  (836 ms with motion, 849 ms without, medians), as was the worst interaction (1520 ms and
+  1952 ms). Long tasks were higher with motion (110 against 89), but the runs without motion
+  ranged from 82 to 152, so that is inside the noise and not a finding either way. Nothing in
+  this says motion is free, only that it does not show up above the variation in this setup.
+  Running it against the production build is worth doing before a release.
 - Each effect has to be seen to be believed: jsdom cannot play an animation, so tests cover what
   decides whether one plays (only for the reader's own action, taken back with the change), and the
   look is checked in a browser in every theme.
