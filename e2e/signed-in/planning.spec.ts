@@ -94,4 +94,39 @@ test.describe('at phone width', () => {
       expect(overflow).toBeLessThanOrEqual(0);
     });
   }
+
+  const LANGUAGES = {
+    en: { account: 'Account', logOut: 'Log out' },
+    es: { account: 'Cuenta', logOut: 'Cerrar sesión' },
+  };
+
+  for (const [language, words] of Object.entries(LANGUAGES)) {
+    for (const name of ['Demo User', 'Alexandria Montgomery-Featherstonehaugh']) {
+      test(`the top bar keeps the avatar, the name and Log out apart: ${name}, ${language}`, async ({
+        page,
+      }) => {
+        await page.addInitScript((lang) => {
+          localStorage.setItem('agenda.preferences', JSON.stringify({ language: lang }));
+        }, language);
+        await page.goto('/');
+        const account = page.getByRole('complementary', { name: words.account });
+        await expect(account.getByRole('button', { name: words.logOut })).toBeVisible();
+        // A name of any length: the page shows what the account says, so the test says it too.
+        await account.getByText('Demo User').evaluate((element, text) => {
+          element.textContent = text;
+        }, name);
+
+        const [avatar, label, logOut] = await Promise.all([
+          account.locator('span[aria-hidden="true"]').boundingBox(),
+          account.getByText(name).boundingBox(),
+          account.getByRole('button', { name: words.logOut }).boundingBox(),
+        ]);
+        if (!avatar || !label || !logOut) throw new Error('The top bar is missing a part.');
+
+        expect(avatar.x + avatar.width).toBeLessThanOrEqual(label.x);
+        expect(label.x + label.width).toBeLessThanOrEqual(logOut.x);
+        expect(logOut.x + logOut.width).toBeLessThanOrEqual(360);
+      });
+    }
+  }
 });
