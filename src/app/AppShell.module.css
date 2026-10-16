@@ -114,14 +114,21 @@
     padding: var(--space-3) var(--space-4);
   }
 
+  .brand {
+    flex: none;
+  }
+
   .brand span {
     display: none;
   }
 
+  /* The name is the part that gives way: a long name, or a longer "Log out" in another
+     language, shortens it instead of pushing the parts over one another. */
   .account {
     grid-auto-flow: column;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-width: 0;
     align-items: center;
-    justify-items: end;
     gap: var(--space-3);
   }
 
@@ -133,7 +140,9 @@
   }
 
   .name {
-    max-width: 12ch;
+    min-width: 0;
+    /* Never wider than its column, which is sized to leave room for the other parts. */
+    max-width: min(12ch, 100%);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
