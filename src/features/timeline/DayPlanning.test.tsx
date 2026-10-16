@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { http } from 'msw';
 import { buildCalendar, buildTask, buildTimedEvent, fakeApi } from '../../../test/msw/fakeApi';
+import { server } from '../../../test/msw/server';
 import { App } from '../../app/App';
 import { addDays } from '../../lib/time/zonedTime';
 
@@ -113,6 +115,34 @@ describe('planning a day', () => {
 
     expect(await block(/Write release notes/)).toBeInTheDocument();
     expect(fakeApi.events.map((event) => event.title)).toContain('Write release notes');
+  });
+
+  it('keeps the same block on screen while it is saved, rather than swapping it for another', async () => {
+    seedDay();
+    // Held open, so the block can be seen while it is still being saved.
+    let release = (): void => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    server.use(
+      http.post('*/api/v1/events', async () => {
+        await gate;
+        // No answer here: the request goes on to the fake API.
+      }),
+    );
+    const user = await renderDay();
+
+    await user.click(screen.getByRole('button', { name: 'Add block' }));
+    const saving = await block(/New block/);
+    expect(saving).toHaveAttribute('aria-busy', 'true');
+    const item = saving.closest('li');
+    release();
+
+    // If the saved block were a new element, this one would be gone and would never be updated.
+    await waitFor(() => {
+      expect(saving).toHaveAttribute('aria-busy', 'false');
+    });
+    expect(saving.closest('li')).toBe(item);
   });
 
   it('creates a block at the time that was clicked on the grid', async () => {

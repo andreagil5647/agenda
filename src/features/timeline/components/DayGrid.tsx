@@ -7,6 +7,7 @@ import { MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
 import controls from '../../../ui/controls.module.css';
 import { minutesAtOffset, type PlacedBlock, type TimeSpan } from '../dayLayout';
 import { DAY_GRID_DROP_ID, type DayGridTarget } from '../planningDrag';
+import { blockKey } from '../provisionalEvent';
 import styles from './DayGrid.module.css';
 import { BLOCK_SHORTCUTS_ID, TimeBlock } from './TimeBlock';
 
@@ -108,7 +109,7 @@ export function DayGrid({
         <ol className={styles.column} aria-label={t('timeline.blocks')} onClick={createAtPointer}>
           {blocks.map((block) => (
             <TimeBlock
-              key={block.event.id}
+              key={blockKey(block.event)}
               block={block}
               calendar={calendars.find((calendar) => calendar.id === block.event.calendarId)}
               hourCycle={hourCycle}
