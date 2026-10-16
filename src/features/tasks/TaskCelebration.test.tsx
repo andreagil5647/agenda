@@ -199,3 +199,19 @@ describe('finishing the last open task', () => {
     window.localStorage.clear();
   });
 });
+
+describe('the number of open tasks', () => {
+  it('counts down when the reader finishes a task, and up when they add one', async () => {
+    seedTasks(buildTask({ title: 'Draft launch checklist' }), buildTask({ title: 'Send invoice' }));
+    const user = userEvent.setup();
+    render(<App />);
+    expect(await screen.findByText('2 open')).not.toHaveAttribute('data-tick');
+
+    await user.click(screen.getByRole('checkbox', { name: /Send invoice/ }));
+    expect(await screen.findByText('1 open')).toHaveAttribute('data-tick', 'down');
+
+    await user.type(screen.getByRole('textbox', { name: 'New task' }), 'Water the plants');
+    await user.click(screen.getByRole('button', { name: 'Add task' }));
+    expect(await screen.findByText('2 open')).toHaveAttribute('data-tick', 'up');
+  });
+});

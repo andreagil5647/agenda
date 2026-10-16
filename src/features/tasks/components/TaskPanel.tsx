@@ -1,4 +1,4 @@
-import type { JSX, SyntheticEvent } from 'react';
+import { useState, type JSX, type SyntheticEvent } from 'react';
 import type { Task } from '../../../lib/api/contract';
 import { readField } from '../../../lib/forms';
 import { useI18n } from '../../../lib/i18n/I18nProvider';
@@ -8,6 +8,7 @@ import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { useCelebration } from '../hooks/useCelebration';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '../hooks/useTasks';
+import { OpenCount } from './OpenCount';
 import { TaskItem } from './TaskItem';
 import styles from './TaskPanel.module.css';
 
@@ -35,6 +36,11 @@ export function TaskPanel({
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  // Counted so that the number of open tasks can tell the reader's own changes from others.
+  const [readerActions, setReaderActions] = useState(0);
+  const noteReaderAction = (): void => {
+    setReaderActions((actions) => actions + 1);
+  };
 
   const openCount = tasksQuery.data?.filter((task) => task.status === 'todo').length;
   // Every task done, and there is at least one: a clear day. A list still loading is not clear.
@@ -43,6 +49,7 @@ export function TaskPanel({
 
   const submitTask = (event: SyntheticEvent<HTMLFormElement>): void => {
     event.preventDefault();
+    noteReaderAction();
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
 
@@ -61,6 +68,7 @@ export function TaskPanel({
   };
 
   const toggleDone = (task: Task): void => {
+    noteReaderAction();
     if (task.status === 'todo' && openCount === 1) clearDay.start();
     updateTask.mutate({ task, changes: { status: task.status === 'done' ? 'todo' : 'done' } });
   };
@@ -69,9 +77,7 @@ export function TaskPanel({
     <Panel
       title={t('tasks.title')}
       icon="check-circle"
-      aside={
-        openCount === undefined ? null : <span>{t('tasks.openCount', { count: openCount })}</span>
-      }
+      aside={<OpenCount count={openCount} readerActions={readerActions} />}
     >
       <form className={styles.form} autoComplete="off" onSubmit={submitTask}>
         <input
@@ -128,7 +134,10 @@ export function TaskPanel({
                   isPlanned={plannedTaskIds.has(task.id)}
                   isLastOpen={task.status === 'todo' && openCount === 1}
                   onToggleDone={toggleDone}
-                  onDelete={deleteTask.mutate}
+                  onDelete={(task) => {
+                    noteReaderAction();
+                    deleteTask.mutate(task);
+                  }}
                   onPlan={onPlanTask}
                 />
               ))}

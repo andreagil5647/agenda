@@ -188,16 +188,18 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
         />
         <div className={styles.side}>
           {selectedEvent && (
-            <BlockEditor
-              event={selectedEvent}
-              calendars={calendars}
-              linkedTask={tasks.find((task) => task.id === selectedEvent.taskId)}
-              timeZone={timeZone}
-              onDelete={deleteBlock}
-              onClose={() => {
-                setSelectedEventId(null);
-              }}
-            />
+            <div className={styles.details}>
+              <BlockEditor
+                event={selectedEvent}
+                calendars={calendars}
+                linkedTask={tasks.find((task) => task.id === selectedEvent.taskId)}
+                timeZone={timeZone}
+                onDelete={deleteBlock}
+                onClose={() => {
+                  setSelectedEventId(null);
+                }}
+              />
+            </div>
           )}
           <TaskPanel
             day={selected.day}
