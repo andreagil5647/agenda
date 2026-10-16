@@ -47,6 +47,8 @@
   --motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   /* How long feedback for something the reader just did lasts: 300ms at the most. */
   --motion-feedback: 260ms;
+  /* Settling into place: an easing that goes a little past where it is going, and back. */
+  --motion-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* The marks that fly out of a task's tick box when it is finished: their size, how far they
      travel, their shape (a clip, or a corner radius) and three colours that take turns. */

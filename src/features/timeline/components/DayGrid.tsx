@@ -7,9 +7,10 @@ import { MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
 import controls from '../../../ui/controls.module.css';
 import { minutesAtOffset, type PlacedBlock, type TimeSpan } from '../dayLayout';
 import { DAY_GRID_DROP_ID, type DayGridTarget } from '../planningDrag';
+import type { BlockMotion } from '../hooks/useBlockMotion';
 import { blockKey } from '../provisionalEvent';
 import styles from './DayGrid.module.css';
-import { BLOCK_SHORTCUTS_ID, TimeBlock } from './TimeBlock';
+import { BLOCK_SHORTCUTS_ID, LeavingBlock, TimeBlock } from './TimeBlock';
 
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour);
 
@@ -25,6 +26,8 @@ interface DayGridProps {
   landingSpan: TimeSpan | null;
   /** Called when the grid scrolls, which moves the time under a held pointer. */
   onScroll: () => void;
+  /** What the grid is doing to its blocks because of what the reader did. */
+  motion: BlockMotion;
   selectedEventId: string | null;
   onSelectEvent: (event: PlannerEvent) => void;
   onMoveBlock: (event: PlannerEvent, span: TimeSpan) => void;
@@ -43,6 +46,7 @@ export function DayGrid({
   initialMinutes,
   landingSpan,
   onScroll,
+  motion,
   selectedEventId,
   onSelectEvent,
   onMoveBlock,
@@ -52,6 +56,10 @@ export function DayGrid({
 }: DayGridProps): JSX.Element {
   const { t, locale } = useI18n();
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  // A deleted block that comes back, because the API refused to delete it, is not leaving after all.
+  const leavingBlocks = motion.leaving.filter(
+    (leaving) => !blocks.some((block) => blockKey(block.event) === blockKey(leaving.event)),
+  );
 
   // The drop target is the part of the day that is scrolled into view, so the
   // time under a screen position depends on how far the grid is scrolled.
@@ -107,17 +115,35 @@ export function DayGrid({
             above the grid does the same from the keyboard. */}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
         <ol className={styles.column} aria-label={t('timeline.blocks')} onClick={createAtPointer}>
-          {blocks.map((block) => (
-            <TimeBlock
-              key={blockKey(block.event)}
+          {blocks.map((block) => {
+            const key = blockKey(block.event);
+            return (
+              <TimeBlock
+                key={key}
+                block={block}
+                calendar={calendars.find((calendar) => calendar.id === block.event.calendarId)}
+                hourCycle={hourCycle}
+                isSelected={block.event.id === selectedEventId}
+                arrival={motion.arrivals.get(key)}
+                onArrived={() => {
+                  motion.arrived(key);
+                }}
+                onSelect={onSelectEvent}
+                onMove={onMoveBlock}
+                onResize={onResizeBlock}
+                onDelete={onDeleteBlock}
+              />
+            );
+          })}
+          {leavingBlocks.map((block) => (
+            <LeavingBlock
+              key={`leaving-${blockKey(block.event)}`}
               block={block}
               calendar={calendars.find((calendar) => calendar.id === block.event.calendarId)}
               hourCycle={hourCycle}
-              isSelected={block.event.id === selectedEventId}
-              onSelect={onSelectEvent}
-              onMove={onMoveBlock}
-              onResize={onResizeBlock}
-              onDelete={onDeleteBlock}
+              onGone={() => {
+                motion.left(blockKey(block.event));
+              }}
             />
           ))}
           {landingSpan && (
