@@ -6,3 +6,26 @@
 .empty {
   margin-bottom: var(--space-4);
 }
+
+/*
+ * The day slides in from the side the reader went towards, only for a day they changed to: the
+ * hours and the all-day row move together. Only transform and opacity change.
+ */
+.day[data-slide='forward'] {
+  --slide-from: 32px;
+}
+
+.day[data-slide='back'] {
+  --slide-from: -32px;
+}
+
+.day[data-slide] {
+  animation: slide-in var(--motion-feedback) var(--motion-ease);
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--slide-from));
+  }
+}
