@@ -1,7 +1,16 @@
 .burst {
+  --mark-size: var(--burst-size);
+  --reach: var(--burst-distance);
+
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+/* A bigger moment has bigger marks that go further, and there are more of them. */
+.burst[data-size='large'] {
+  --mark-size: calc(var(--burst-size) * 1.4);
+  --reach: calc(var(--burst-distance) * 2.2);
 }
 
 /* Each mark starts in the middle and travels outwards along its own angle. */
@@ -9,42 +18,24 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: var(--burst-size);
-  height: var(--burst-size);
-  margin: calc(var(--burst-size) / -2) 0 0 calc(var(--burst-size) / -2);
+  width: var(--mark-size);
+  height: var(--mark-size);
+  margin: calc(var(--mark-size) / -2) 0 0 calc(var(--mark-size) / -2);
   border-radius: var(--burst-radius);
   background: var(--mark-color);
   clip-path: var(--burst-shape);
   animation: fly var(--motion-feedback) var(--motion-ease) both;
 }
 
-.mark:nth-child(1) {
-  --angle: 0deg;
+.mark[data-tone='0'] {
   --mark-color: var(--burst-color-1);
 }
 
-.mark:nth-child(2) {
-  --angle: 60deg;
+.mark[data-tone='1'] {
   --mark-color: var(--burst-color-2);
 }
 
-.mark:nth-child(3) {
-  --angle: 120deg;
-  --mark-color: var(--burst-color-3);
-}
-
-.mark:nth-child(4) {
-  --angle: 180deg;
-  --mark-color: var(--burst-color-1);
-}
-
-.mark:nth-child(5) {
-  --angle: 240deg;
-  --mark-color: var(--burst-color-2);
-}
-
-.mark:nth-child(6) {
-  --angle: 300deg;
+.mark[data-tone='2'] {
   --mark-color: var(--burst-color-3);
 }
 
@@ -61,7 +52,7 @@
 
   to {
     opacity: 0;
-    transform: rotate(var(--angle)) translateY(calc(var(--burst-distance) * -1)) scale(1);
+    transform: rotate(var(--angle)) translateY(calc(var(--reach) * -1)) scale(1);
   }
 }
 
