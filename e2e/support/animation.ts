@@ -19,13 +19,14 @@ export async function finishAnimations(page: Page): Promise<void> {
   });
 }
 
-/** The properties the animations on an element, and on what is inside it, are changing. */
+/** The properties the keyframe animations on an element, and on what is inside it, are changing. */
 export async function animatedProperties(element: Locator): Promise<string[]> {
   const properties = await element.evaluate((root) =>
     [root, ...root.querySelectorAll('*')].flatMap((node) =>
       node.getAnimations().flatMap((animation) => {
         const effect = animation.effect;
-        return effect instanceof KeyframeEffect
+        // Keyframe animations only: a transition, such as a focus ring fading in, is not one.
+        return animation instanceof CSSAnimation && effect instanceof KeyframeEffect
           ? effect.getKeyframes().flatMap((frame) => Object.keys(frame))
           : [];
       }),
