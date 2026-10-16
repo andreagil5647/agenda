@@ -61,11 +61,18 @@
   cursor: pointer;
 }
 
-.title span {
+/* The tick box, and the burst that flies out of it, which is placed against it. */
+.check {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+}
+
+.text {
   overflow-wrap: anywhere;
 }
 
-.item[data-status='done'] .title span {
+.item[data-status='done'] .text {
   color: var(--color-text-subtle);
   text-decoration: line-through;
   text-decoration-thickness: 2px;

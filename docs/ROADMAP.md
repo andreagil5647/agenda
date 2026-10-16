@@ -24,8 +24,6 @@ Done:
 
 Known gaps in the done items:
 
-- [ ] The pointer paths of dragging are checked by hand; only the keyboard paths and the
-      arithmetic have automated tests
 - [ ] Deleting a task, block or calendar has no undo. An undo notice is better than a
       confirmation dialog, and needs a restore endpoint for events
 - [ ] The quick-add forms label their fields with a placeholder and an accessible name rather
@@ -89,12 +87,16 @@ Known gaps in the done items:
       A button in the corner moves to the next one and a list chooses one directly, with a
       circular reveal, the choice remembered on the device, and each theme held to the same
       contrast checks ([ADR 0011](adr/0011-named-themes-as-token-sheets.md)).
-- [ ] **Motion.** Feedback for finishing a task, dropping a block and changing day.
+- [ ] **Motion.** Feedback for the things you do. Finishing a task is done, with a burst in the
+      style of the theme ([ADR 0012](adr/0012-motion-with-css-and-browser-apis.md)); dropping a
+      block, creating and deleting, changing day and clearing the day are next.
 - [ ] **Sound.** Short synthesised cues in the style of the current theme, off by default.
 
 ### 3. Release quality
 
-- [ ] End-to-end tests (Playwright) against the real API in CI
+- [x] End-to-end tests (Playwright) against the real API in CI: planning with the pointer, the
+      theme and the language, the burst with and without reduced motion, and every theme at
+      phone width ([ADR 0013](adr/0013-end-to-end-tests-with-playwright.md))
 - [ ] Accessibility checks (axe) in component and end-to-end tests
 - [ ] Route-level code splitting and a bundle budget in CI
 - [ ] Empty, loading, error and offline states on every screen; responsive down to phone

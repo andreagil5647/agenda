@@ -1,6 +1,7 @@
 import {
   useMutation,
   useQueryClient,
+  type Query,
   type QueryClient,
   type QueryKey,
   type UseMutationResult,
@@ -30,6 +31,17 @@ interface OptimisticListOptions<TItem, TVariables, TResult> {
 
 type Snapshot<TItem> = [QueryKey, TItem[] | undefined][];
 
+interface WriteContext<TItem> {
+  /** The cached lists as they were when the write began. */
+  snapshot: Snapshot<TItem>;
+  /** The lists that had nothing to show yet, so the write could not be applied to them. */
+  loading: QueryKey[];
+}
+
+function isLoaded(query: Query): boolean {
+  return query.state.data !== undefined;
+}
+
 function savedVersionOf(queryClient: QueryClient, queryKey: QueryKey, item: Versioned): number {
   for (const [, items] of queryClient.getQueriesData<Versioned[]>({ queryKey })) {
     const cached = items?.find((candidate) => candidate.id === item.id);
@@ -46,6 +58,10 @@ function savedVersionOf(queryClient: QueryClient, queryKey: QueryKey, item: Vers
  * then refetched, so what is on screen is what the server has, which matters
  * most when the failure was that someone else changed the same item.
  *
+ * A list that has not loaded yet has nothing to edit, and the read in flight
+ * for it is cancelled with the rest, so it is read again once the write is
+ * done. Without that it would stay loading for good: nothing else asks for it.
+ *
  * Writes to the same lists are sent one at a time. The API only accepts a
  * change based on the current version of a resource, so a second change made
  * while the first is still on its way has to wait for the version the first
@@ -60,7 +76,7 @@ export function useOptimisticListMutation<TItem extends Versioned, TVariables, T
   TResult,
   Error,
   TVariables,
-  Snapshot<TItem>
+  WriteContext<TItem>
 > {
   const queryClient = useQueryClient();
 
@@ -72,24 +88,33 @@ export function useOptimisticListMutation<TItem extends Versioned, TVariables, T
         version: savedVersionOf(queryClient, queryKey, item),
       })),
     onMutate: async (variables) => {
+      const loading = queryClient
+        .getQueryCache()
+        .findAll({ queryKey, predicate: (query) => !isLoaded(query) })
+        .map((query) => query.queryKey);
       // A fetch already in flight would overwrite the optimistic list when it lands.
       await queryClient.cancelQueries({ queryKey });
       const snapshot = queryClient.getQueriesData<TItem[]>({ queryKey });
       queryClient.setQueriesData<TItem[]>({ queryKey }, (items) =>
         items ? optimistic(items, variables) : items,
       );
-      return snapshot;
+      return { snapshot, loading };
     },
     onSuccess: (result, variables) => {
       queryClient.setQueriesData<TItem[]>({ queryKey }, (items) =>
         items ? confirmed(items, result, variables) : items,
       );
     },
-    onError: (_error, _variables, snapshot) => {
-      for (const [key, items] of snapshot ?? []) {
+    onError: (_error, _variables, context) => {
+      for (const [key, items] of context?.snapshot ?? []) {
         queryClient.setQueryData(key, items);
       }
       void queryClient.invalidateQueries({ queryKey });
+    },
+    onSettled: (_result, _error, _variables, context) => {
+      for (const key of context?.loading ?? []) {
+        void queryClient.invalidateQueries({ queryKey: key });
+      }
     },
   });
 }

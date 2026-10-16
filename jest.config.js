@@ -40,7 +40,8 @@ const config = {
   },
   setupFiles: ['<rootDir>/test/setup/env.ts'],
   setupFilesAfterEnv: ['<rootDir>/test/setup/jest.setup.ts'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  // The end-to-end tests are run by Playwright, not Jest.
+  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/e2e/'],
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts', '!src/index.tsx'],
   coverageDirectory: 'coverage',
   // A floor just under the current numbers, raised as coverage grows, so a

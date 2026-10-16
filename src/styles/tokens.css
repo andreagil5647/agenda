@@ -45,6 +45,29 @@
 
   --motion-fast: 120ms;
   --motion-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* How long feedback for something the reader just did lasts: 300ms at the most. */
+  --motion-feedback: 260ms;
+
+  /* The marks that fly out of a task's tick box when it is finished: their size, how far they
+     travel, their shape (a clip, or a corner radius) and three colours that take turns. */
+  --burst-size: 11px;
+  --burst-distance: 30px;
+  --burst-shape: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  --burst-radius: 0;
+  --burst-color-1: var(--color-accent);
+  --burst-color-2: var(--calendar-rose-stroke);
+  --burst-color-3: var(--calendar-butter-stroke);
 
   /* The paper edge under panels and buttons, in the border colour of the theme. */
   --shadow-paper: 0 3px 0 var(--color-border);

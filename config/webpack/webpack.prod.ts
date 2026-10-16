@@ -52,8 +52,8 @@ export default (env: Record<string, boolean>): Configuration =>
     },
     performance: {
       hints: 'warning',
-      // Sizes before compression. The whole app is one entry of about 397 kB
-      // (122 kB gzipped), 219 kB of it React and 37 kB of it styles, which hold
+      // Sizes before compression. The whole app is one entry of about 399 kB
+      // (122 kB gzipped), 219 kB of it React and 38 kB of it styles, which hold
       // every theme and the rules for the theme fonts. The entry
       // limit leaves a little room above that, so growth shows up as a warning;
       // no single file may pass the per-asset limit, which is what keeps the

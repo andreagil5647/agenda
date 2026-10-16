@@ -3,9 +3,11 @@ import type { JSX } from 'react';
 import type { Task } from '../../../lib/api/contract';
 import { useI18n } from '../../../lib/i18n/I18nProvider';
 import { formatDuration } from '../../../lib/time/formatTime';
+import { Burst } from '../../../ui/Burst';
 import controls from '../../../ui/controls.module.css';
 import { Icon } from '../../../ui/Icon';
 import { draggedTask } from '../../timeline/planningDrag';
+import { useCelebration } from '../hooks/useCelebration';
 import styles from './TaskItem.module.css';
 
 interface TaskItemProps {
@@ -35,6 +37,7 @@ export function TaskItem({
 }: TaskItemProps): JSX.Element {
   const { t, locale } = useI18n();
   const isOpen = task.status === 'todo';
+  const { isCelebrating, start, stop } = useCelebration(isOpen);
   const { setNodeRef, listeners, isDragging } = useDraggable({
     id: `task:${task.id}`,
     data: draggedTask(task),
@@ -55,15 +58,21 @@ export function TaskItem({
         <Icon name="grip" />
       </span>
       <label className={styles.title}>
-        <input
-          type="checkbox"
-          className={controls.checkboxAction}
-          checked={!isOpen}
-          onChange={() => {
-            onToggleDone(task);
-          }}
-        />
-        <span>{task.title}</span>
+        <span className={styles.check}>
+          <input
+            type="checkbox"
+            className={controls.checkboxAction}
+            checked={!isOpen}
+            onChange={() => {
+              if (isOpen) {
+                start();
+              }
+              onToggleDone(task);
+            }}
+          />
+          {isCelebrating && <Burst onEnd={stop} />}
+        </span>
+        <span className={styles.text}>{task.title}</span>
       </label>
       <small className={styles.meta}>
         <span className={styles.duration}>{formatDuration(task.estimateMinutes, locale)}</span>
