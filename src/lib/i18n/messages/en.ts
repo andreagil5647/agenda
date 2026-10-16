@@ -120,6 +120,7 @@ export const en = {
 
   // Tasks
   'tasks.title': 'Tasks',
+  'tasks.allDone': 'Every task is done. Enjoy the rest of your day.',
   'tasks.openCount': { one: '{count} open', other: '{count} open' },
   'tasks.new': 'New task',
   'tasks.dueDate': 'Due date',

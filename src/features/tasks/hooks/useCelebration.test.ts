@@ -34,6 +34,28 @@ describe('useCelebration', () => {
     expect(result.current.isCelebrating).toBe(true);
   });
 
+  it('remembers how big the moment was when it started', () => {
+    const { result, rerender } = celebrationOf(true);
+
+    act(() => {
+      result.current.start('large');
+    });
+    rerender({ isOpen: false });
+
+    expect(result.current.size).toBe('large');
+  });
+
+  it('is a small moment unless it is told otherwise', () => {
+    const { result, rerender } = celebrationOf(true);
+
+    act(() => {
+      result.current.start();
+    });
+    rerender({ isOpen: false });
+
+    expect(result.current.size).toBe('small');
+  });
+
   it('stops when it is over', () => {
     const { result, rerender } = celebrationOf(true);
     act(() => {

@@ -6,6 +6,7 @@ import controls from '../../../ui/controls.module.css';
 import { EmptyState } from '../../../ui/EmptyState';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
+import { useCelebration } from '../hooks/useCelebration';
 import { useCreateTask, useDeleteTask, useTasks, useUpdateTask } from '../hooks/useTasks';
 import { TaskItem } from './TaskItem';
 import styles from './TaskPanel.module.css';
@@ -36,6 +37,9 @@ export function TaskPanel({
   const deleteTask = useDeleteTask();
 
   const openCount = tasksQuery.data?.filter((task) => task.status === 'todo').length;
+  // Every task done, and there is at least one: a clear day. A list still loading is not clear.
+  const isClear = openCount === 0 && (tasksQuery.data?.length ?? 0) > 0;
+  const clearDay = useCelebration(!isClear);
 
   const submitTask = (event: SyntheticEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -57,6 +61,7 @@ export function TaskPanel({
   };
 
   const toggleDone = (task: Task): void => {
+    if (task.status === 'todo' && openCount === 1) clearDay.start();
     updateTask.mutate({ task, changes: { status: task.status === 'done' ? 'todo' : 'done' } });
   };
 
@@ -97,6 +102,16 @@ export function TaskPanel({
         </button>
       </form>
 
+      {/* Always on the page, so that what appears in it is read out when the last task is done. */}
+      <p
+        className={styles.praise}
+        role="status"
+        data-moment={clearDay.isCelebrating ? '' : undefined}
+        onAnimationEnd={clearDay.stop}
+      >
+        {isClear ? t('tasks.allDone') : ''}
+      </p>
+
       <QueryBoundary query={tasksQuery} loadingLabel={t('tasks.loading')}>
         {(tasks) =>
           tasks.length === 0 ? (
@@ -111,6 +126,7 @@ export function TaskPanel({
                   task={task}
                   canPlan={canPlan}
                   isPlanned={plannedTaskIds.has(task.id)}
+                  isLastOpen={task.status === 'todo' && openCount === 1}
                   onToggleDone={toggleDone}
                   onDelete={deleteTask.mutate}
                   onPlan={onPlanTask}

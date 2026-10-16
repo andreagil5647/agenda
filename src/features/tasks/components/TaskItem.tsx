@@ -16,6 +16,8 @@ interface TaskItemProps {
   canPlan: boolean;
   /** Whether a block on the day in view is already set aside for this task. */
   isPlanned: boolean;
+  /** Whether this is the last task left to do, so finishing it clears the list. */
+  isLastOpen: boolean;
   onToggleDone: (task: Task) => void;
   onDelete: (task: Task) => void;
   /** Gives the task a block on the day in view, at the next free time. */
@@ -31,13 +33,14 @@ export function TaskItem({
   task,
   canPlan,
   isPlanned,
+  isLastOpen,
   onToggleDone,
   onDelete,
   onPlan,
 }: TaskItemProps): JSX.Element {
   const { t, locale } = useI18n();
   const isOpen = task.status === 'todo';
-  const { isCelebrating, start, stop } = useCelebration(isOpen);
+  const { isCelebrating, size, start, stop } = useCelebration(isOpen);
   const { setNodeRef, listeners, isDragging } = useDraggable({
     id: `task:${task.id}`,
     data: draggedTask(task),
@@ -65,12 +68,12 @@ export function TaskItem({
             checked={!isOpen}
             onChange={() => {
               if (isOpen) {
-                start();
+                start(isLastOpen ? 'large' : 'small');
               }
               onToggleDone(task);
             }}
           />
-          {isCelebrating && <Burst onEnd={stop} />}
+          {isCelebrating && <Burst size={size} onEnd={stop} />}
         </span>
         <span className={styles.text}>{task.title}</span>
       </label>
