@@ -1,3 +1,5 @@
+import { prefersReducedMotion } from '../motion/reducedMotion';
+
 /** How long the new theme takes to spread over the old one. */
 const REVEAL_MS = 450;
 
@@ -8,8 +10,7 @@ const REVEAL_MS = 450;
  * change at once: the circle is an extra, never what makes the theme change.
  */
 export function revealFrom(origin: Element, change: () => void): void {
-  const wantsLessMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (wantsLessMotion || !('startViewTransition' in document)) {
+  if (prefersReducedMotion() || !('startViewTransition' in document)) {
     change();
     return;
   }
