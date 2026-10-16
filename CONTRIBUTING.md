@@ -38,6 +38,7 @@ Types in use: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`,
 ```bash
 pnpm run lint && pnpm run typecheck && pnpm test
 pnpm run build
+pnpm run test:e2e   # when the change touches the planner, with the API running
 ```
 
 ## Bugs worth writing up
