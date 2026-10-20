@@ -52,12 +52,12 @@ export default (env: Record<string, boolean>): Configuration =>
     },
     performance: {
       hints: 'warning',
-      // Sizes before compression. The whole app is one entry of about 402 kB
-      // (123 kB gzipped), 219 kB of it React and 39 kB of it styles, which hold
+      // Sizes before compression. The whole app is one entry of about 405 kB
+      // (124 kB gzipped), 219 kB of it React and 39 kB of it styles, which hold
       // every theme, the rules for the theme fonts and the motion. The entry
       // limit leaves a little room above that, so growth shows up as a warning;
-      // it was raised from 400 kB when blocks gained motion, with room for the
-      // rest of the motion work. No single file may pass the per-asset limit,
+      // it was raised from 400 kB when blocks gained motion, and the rest of
+      // the motion work fit in what that left. No single file may pass the per-asset limit,
       // which is what keeps the chunks split. Other languages load on demand
       // and are not in the entry.
       maxEntrypointSize: 410_000,

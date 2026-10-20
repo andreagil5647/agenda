@@ -23,7 +23,7 @@ test.describe('finishing a task', () => {
     page,
   }) => {
     await openPlanner(page);
-    const row = rowOf(page, 'Reply to Sam about the venue');
+    const row = rowOf(page, 'Plan next sprint');
     await expect(row.locator('[data-burst]')).toHaveCount(0);
     await slowMotion(page);
 
@@ -41,8 +41,54 @@ test.describe('finishing a task', () => {
 
     await page.reload();
 
-    await expect(rowOf(page, 'Reply to Sam about the venue').getByRole('checkbox')).toBeChecked();
+    await expect(rowOf(page, 'Plan next sprint').getByRole('checkbox')).toBeChecked();
     await expect(page.locator('[data-burst]')).toHaveCount(0);
+  });
+});
+
+test.describe('finishing a task, continued', () => {
+  test('shows no burst to a reader who asked for less motion, and still finishes it', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openPlanner(page);
+    const row = rowOf(page, 'Draft launch checklist');
+    // With no motion a burst would be over in an instant, so look at it the moment it appears
+    // rather than afterwards, when it would be gone either way.
+    await page.evaluate(() => {
+      new MutationObserver(() => {
+        const burst = document.querySelector('[data-burst]');
+        if (burst && getComputedStyle(burst).display !== 'none') {
+          document.documentElement.dataset.burstWasShown = 'true';
+        }
+      }).observe(document.body, { childList: true, subtree: true });
+    });
+
+    await row.getByRole('checkbox').click();
+
+    await expect(row.getByRole('checkbox')).toBeChecked();
+    await expect(page.locator('html')).not.toHaveAttribute('data-burst-was-shown', 'true');
+  });
+
+  test('rolls the number of open tasks down when the reader finishes one, and not when the page loads', async ({
+    page,
+  }) => {
+    await openPlanner(page);
+    const count = page.getByRole('region', { name: 'Tasks' }).getByText(/\d+ open/);
+    await expect(count).not.toHaveAttribute('data-tick');
+    const before = Number((await count.innerText()).split(' ')[0]);
+    await slowMotion(page);
+
+    await rowOf(page, 'Book dentist appointment').getByRole('checkbox').click();
+
+    await expect(count).toHaveText(`${String(before - 1)} open`);
+    await expect(count).toHaveAttribute('data-tick', 'down');
+    expect(await animatedProperties(count)).toEqual(['opacity', 'transform']);
+
+    await page.reload();
+
+    await expect(count).toHaveText(`${String(before - 1)} open`);
+    await expect(count).not.toHaveAttribute('data-tick');
   });
 });
 
@@ -53,16 +99,18 @@ test.describe('blocks on the grid', () => {
     await openPlanner(page);
     await expect(page.locator('[data-arrival]')).toHaveCount(0);
     await slowMotion(page);
-    const grip = rowOf(page, 'Book dentist appointment').getByTitle('Drag onto the timeline');
+    // A task near the top of the list, and a time well inside the grid: holding the pointer near
+    // the bottom edge of the window makes the page scroll, and the point aimed at would move.
+    const grip = rowOf(page, 'Reply to Sam about the venue').getByTitle('Drag onto the timeline');
     const grab = await topEdgeOf(grip);
-    const at2200 = await pointAtTime(page, '22:00');
+    const at2000 = await pointAtTime(page, '20:00');
 
-    await drag(page, grab, { x: at2200.x, y: at2200.y + HELD_BY_TOP_EDGE });
+    await drag(page, grab, { x: at2000.x, y: at2000.y + HELD_BY_TOP_EDGE });
     await page.mouse.up();
 
     const landed = page.locator('[data-arrival="settle"]');
     await expect(landed).toHaveCount(1);
-    await expect(landed).toContainText('Book dentist appointment');
+    await expect(landed).toContainText('Reply to Sam about the venue');
     expect(await animatedProperties(landed)).toEqual(['transform']);
 
     await finishAnimations(page);
@@ -71,7 +119,7 @@ test.describe('blocks on the grid', () => {
     await page.reload();
 
     await expect(
-      page.getByRole('button', { name: /^Book dentist appointment 22:00/ }),
+      page.getByRole('button', { name: /^Reply to Sam about the venue 20:00/ }),
     ).toBeVisible();
     await expect(page.locator('[data-arrival]')).toHaveCount(0);
   });
@@ -150,5 +198,69 @@ test.describe('blocks on the grid', () => {
     await expect(block).toHaveCount(0);
     await expect(page.getByRole('button', { name: /^New block/ })).toHaveCount(madeBefore + 1);
     await expect(page.locator('html')).not.toHaveAttribute('data-motion-was-shown', 'true');
+  });
+});
+
+test.describe('changing the day', () => {
+  test('slides the day in from the side the reader went towards, and not the one shown on load', async ({
+    page,
+  }) => {
+    await openPlanner(page);
+    await expect(page.locator('[data-slide]')).toHaveCount(0);
+    await slowMotion(page);
+
+    await page.getByRole('button', { name: 'Next day' }).click();
+
+    const forward = page.locator('[data-slide="forward"]');
+    await expect(forward).toHaveCount(1);
+    expect(await animatedProperties(forward)).toEqual(['opacity', 'transform']);
+    await finishAnimations(page);
+    await expect(page.locator('[data-slide]')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Previous day' }).click();
+    await expect(page.locator('[data-slide="back"]')).toHaveCount(1);
+  });
+
+  test('does not slide for a reader who asked for less motion, and still changes the day', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openPlanner(page);
+    const heading = page.getByRole('heading', { level: 1 });
+    const today = await heading.innerText();
+    await page.evaluate(() => {
+      new MutationObserver(() => {
+        if (document.querySelector('[data-slide]')) {
+          document.documentElement.dataset.slideWasShown = 'true';
+        }
+      }).observe(document.body, { childList: true, subtree: true, attributes: true });
+    });
+
+    await page.getByRole('button', { name: 'Next day' }).click();
+
+    await expect(heading).not.toHaveText(today);
+    await expect(page.locator('html')).not.toHaveAttribute('data-slide-was-shown', 'true');
+  });
+});
+
+test.describe('the details of a block', () => {
+  test('slide in when a block is first selected, and not again when another is selected', async ({
+    page,
+  }) => {
+    await openPlanner(page);
+    await slowMotion(page);
+    const details = page.getByRole('region', { name: 'Details' });
+    const panel = details.locator('..');
+
+    await page.getByRole('button', { name: /^Lunch with Marta/ }).click();
+
+    await expect(details).toBeVisible();
+    expect(await animatedProperties(panel)).toEqual(['opacity', 'transform']);
+    await finishAnimations(page);
+
+    await page.getByRole('button', { name: /^Customer call/ }).click();
+
+    await expect(details.getByRole('textbox', { name: 'Title' })).toHaveValue('Customer call');
+    expect(await animatedProperties(panel)).toEqual([]);
   });
 });

@@ -1,0 +1,23 @@
+.count {
+  display: inline-block;
+}
+
+/* Rolls in from where the number came from: down from above as it counts down. Transform and opacity only. */
+.count[data-tick='down'] {
+  --tick-from: -0.7em;
+}
+
+.count[data-tick='up'] {
+  --tick-from: 0.7em;
+}
+
+.count[data-tick] {
+  animation: tick var(--motion-feedback) var(--motion-ease);
+}
+
+@keyframes tick {
+  from {
+    opacity: 0;
+    transform: translateY(var(--tick-from));
+  }
+}

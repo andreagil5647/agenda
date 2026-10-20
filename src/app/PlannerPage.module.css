@@ -15,3 +15,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* The details of a block slide in when one is first selected, not each time another is. */
+.details {
+  animation: details-in var(--motion-feedback) var(--motion-ease);
+}
+
+@keyframes details-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}

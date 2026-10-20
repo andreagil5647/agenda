@@ -112,3 +112,106 @@ describe('finishing a task', () => {
     expect(burst()).not.toBeInTheDocument();
   });
 });
+
+describe('finishing the last open task', () => {
+  const PRAISE = 'Every task is done. Enjoy the rest of your day.';
+
+  function twoTasks(): void {
+    seedTasks(buildTask({ title: 'Draft launch checklist' }), buildTask({ title: 'Send invoice' }));
+  }
+
+  it('is a bigger moment than finishing any other, with a line of praise that is read out', async () => {
+    twoTasks();
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('checkbox', { name: /Draft launch checklist/ }));
+    await waitFor(() => {
+      expect(burst()).toHaveAttribute('data-size', 'small');
+    });
+    expect(screen.queryByText(PRAISE)).not.toBeInTheDocument();
+    fireEvent.animationEnd(burst()?.firstElementChild ?? document.body);
+
+    await user.click(screen.getByRole('checkbox', { name: /Send invoice/ }));
+
+    await waitFor(() => {
+      expect(burst()).toHaveAttribute('data-size', 'large');
+    });
+    expect(burst()?.children).toHaveLength(12);
+    const praise = await screen.findByText(PRAISE);
+    expect(praise).toHaveAttribute('role', 'status');
+    expect(praise).toHaveAttribute('data-moment');
+  });
+
+  it('keeps the line, but plays nothing, for a list that was already clear when it loaded', async () => {
+    seedTasks(buildTask({ status: 'done' }));
+    render(<App />);
+
+    const praise = await screen.findByText(PRAISE);
+
+    expect(praise).not.toHaveAttribute('data-moment');
+    expect(burst()).not.toBeInTheDocument();
+  });
+
+  it('takes the line away when a task is opened again', async () => {
+    seedTasks(buildTask({ title: 'Send invoice' }));
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(await screen.findByRole('checkbox', { name: /Send invoice/ }));
+    await screen.findByText(PRAISE);
+
+    await user.click(screen.getByRole('checkbox', { name: /Send invoice/ }));
+
+    await waitFor(() => {
+      expect(screen.queryByText(PRAISE)).not.toBeInTheDocument();
+    });
+  });
+
+  it('is not left waiting when the server refuses the last task, whatever finishes it later', async () => {
+    seedTasks(buildTask({ title: 'Send invoice' }));
+    server.use(
+      http.patch('*/api/v1/tasks/:id', () =>
+        HttpResponse.json(
+          { code: 'INTERNAL_ERROR', message: 'Something went wrong on our side', requestId: 'r' },
+          { status: 500 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole('checkbox', { name: /Send invoice/ }));
+
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /Send invoice/ })).not.toBeChecked();
+    expect(screen.queryByText(PRAISE)).not.toBeInTheDocument();
+    expect(burst()).not.toBeInTheDocument();
+  });
+
+  it('says it in Spanish too', async () => {
+    window.localStorage.setItem('agenda.preferences', JSON.stringify({ language: 'es' }));
+    seedTasks(buildTask({ status: 'done' }));
+    render(<App />);
+
+    expect(
+      await screen.findByText('Todas las tareas están hechas. Disfruta del resto del día.'),
+    ).toBeInTheDocument();
+    window.localStorage.clear();
+  });
+});
+
+describe('the number of open tasks', () => {
+  it('counts down when the reader finishes a task, and up when they add one', async () => {
+    seedTasks(buildTask({ title: 'Draft launch checklist' }), buildTask({ title: 'Send invoice' }));
+    const user = userEvent.setup();
+    render(<App />);
+    expect(await screen.findByText('2 open')).not.toHaveAttribute('data-tick');
+
+    await user.click(screen.getByRole('checkbox', { name: /Send invoice/ }));
+    expect(await screen.findByText('1 open')).toHaveAttribute('data-tick', 'down');
+
+    await user.type(screen.getByRole('textbox', { name: 'New task' }), 'Water the plants');
+    await user.click(screen.getByRole('button', { name: 'Add task' }));
+    expect(await screen.findByText('2 open')).toHaveAttribute('data-tick', 'up');
+  });
+});

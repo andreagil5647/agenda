@@ -119,6 +119,7 @@ export const es: Translation<typeof en> = {
 
   // Tasks
   'tasks.title': 'Tareas',
+  'tasks.allDone': 'Todas las tareas están hechas. Disfruta del resto del día.',
   'tasks.openCount': { one: '{count} abierta', other: '{count} abiertas' },
   'tasks.new': 'Nueva tarea',
   'tasks.dueDate': 'Fecha límite',
