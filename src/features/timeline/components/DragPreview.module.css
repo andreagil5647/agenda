@@ -14,7 +14,15 @@
   font-size: var(--text-xs);
   line-height: 1.3;
   padding: 2px var(--space-2);
-  transform: rotate(1.5deg);
+  transform: rotate(1.5deg) scale(1.03);
+  animation: lift var(--motion-fast) var(--motion-ease);
+}
+
+/* Picked up: it comes off the page a little, tilting and growing as it goes. */
+@keyframes lift {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
 }
 
 .preview strong {

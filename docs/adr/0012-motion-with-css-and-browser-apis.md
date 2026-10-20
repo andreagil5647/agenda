@@ -59,14 +59,31 @@ First use, finishing a task:
   `transform` alone, and fading its colour would show a line on every open task in forced-colours
   mode, where the browser overrides the decoration colour.
 
+Second use, blocks on the grid:
+
+- A block the reader drops or moves with the pointer lands with a small bounce; one made by a click
+  or a button grows from its top edge, and picking one up lifts it. The arrow keys move a block
+  without the bounce, since each press is a step and not a drop.
+- A deleted block shrinks away. The block is gone from the grid at once, as before, and a picture
+  of it, with no way to reach it and hidden from assistive technology, stays in the document until
+  its animation ends. If the API refuses the delete and the block comes back, the picture goes.
+- Which blocks move is decided by `useBlockMotion`, from the reader's actions only, so blocks that
+  merely turn up (a day that loads, a change from elsewhere) never do. It keeps nothing for a
+  reader who asked for less motion, so nothing waits for an animation that will not play.
+- A new block has a provisional id until it is saved, and React takes a new id for a new element.
+  A block now keeps the key it first had (`blockKey`), or the saved block would replace the one
+  that is animating and cut it short.
+
 ## Consequences
 
 - No new dependency, and nothing in the entry bundle beyond a few hundred bytes of CSS per effect.
 - Layout and exit animations are awkward by hand: a block that shrinks away when it is deleted has
-  to stay in the document until its animation ends. When that becomes more code than it is worth,
-  adopt the `motion` library for those cases only, with an ADR that says what it cost.
-- JavaScript-driven animation needs the reduced-motion check in one place. The theme reveal has its
-  own for now; a second consumer is the moment to share it.
+  to stay in the document until its animation ends. Doing it for the blocks took one hook of about
+  sixty lines, a small component and a stable key, which is not enough to justify a library. If a
+  second kind of thing needs to leave, such as a task or a calendar, that is the time to look at
+  the `motion` library again, with an ADR that says what it cost.
+- JavaScript-driven animation checks the reduced-motion query through `prefersReducedMotion()`,
+  which the theme reveal and the block motion share.
 - Each effect has to be seen to be believed: jsdom cannot play an animation, so tests cover what
   decides whether one plays (only for the reader's own action, taken back with the change), and the
   look is checked in a browser in every theme.

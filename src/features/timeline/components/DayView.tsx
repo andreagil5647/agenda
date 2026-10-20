@@ -9,6 +9,7 @@ import { Icon } from '../../../ui/Icon';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { slotStart, spanAt, type PlacedBlock, type TimeSpan } from '../dayLayout';
+import type { BlockMotion } from '../hooks/useBlockMotion';
 import { AllDayRow } from './AllDayRow';
 import { DayGrid } from './DayGrid';
 import styles from './DayView.module.css';
@@ -30,6 +31,7 @@ interface DayViewProps {
   /** Where something being dragged over the grid would land. */
   landingSpan: TimeSpan | null;
   onGridScroll: () => void;
+  motion: BlockMotion;
   selectedEventId: string | null;
   onSelectEvent: (event: PlannerEvent) => void;
   onMoveBlock: (event: PlannerEvent, span: TimeSpan) => void;
@@ -52,6 +54,7 @@ export function DayView({
   nowMinutes,
   landingSpan,
   onGridScroll,
+  motion,
   selectedEventId,
   onSelectEvent,
   onMoveBlock,
@@ -112,6 +115,7 @@ export function DayView({
               initialMinutes={initialMinutes}
               landingSpan={landingSpan}
               onScroll={onGridScroll}
+              motion={motion}
               selectedEventId={selectedEventId}
               onSelectEvent={onSelectEvent}
               onMoveBlock={onMoveBlock}

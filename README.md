@@ -109,8 +109,10 @@ Finishing a task draws its tick and sends a small burst out of the box, in the s
 theme: stars, pixel coins or petals ([ADR 0012](docs/adr/0012-motion-with-css-and-browser-apis.md)).
 It is feedback for something the reader just did, so a task that was already finished when the
 list loaded does not play it. It is written in CSS, moves only with `transform` and `opacity`,
-lasts under 300 ms and never holds up the next click. For a reader who asked for less motion
-nothing moves: the tick and the strike-through simply appear.
+lasts under 300 ms and never holds up the next click. A block dropped on the grid lands with a small
+bounce, one made by a click grows, and a deleted one shrinks away instead of vanishing. For a
+reader who asked for less motion nothing moves: the tick and the strike-through simply appear, and
+blocks arrive and go as they did before.
 
 ## Themes
 

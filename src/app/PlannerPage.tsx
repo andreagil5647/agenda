@@ -14,11 +14,13 @@ import {
 } from '../features/timeline/components/DayView';
 import { firstFreeStart, spanAt, type TimeSpan } from '../features/timeline/dayLayout';
 import { useCreateBlock } from '../features/timeline/hooks/useCreateBlock';
+import { useBlockMotion, type Arrival } from '../features/timeline/hooks/useBlockMotion';
 import { useDayPlan } from '../features/timeline/hooks/useDayPlan';
 import { useDeleteEvent, useUpdateEvent } from '../features/timeline/hooks/useEvents';
 import { useNow } from '../features/timeline/hooks/useNow';
 import { usePlanningDrag } from '../features/timeline/hooks/usePlanningDrag';
 import { useSelectedDay } from '../features/timeline/hooks/useSelectedDay';
+import { blockKey } from '../features/timeline/provisionalEvent';
 import type { AuthUser, PlannerEvent, Task } from '../lib/api/contract';
 import { useI18n } from '../lib/i18n/I18nProvider';
 import { formatTimeRange } from '../lib/time/formatTime';
@@ -45,6 +47,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
   const createBlock = useCreateBlock({ day: selected.day, timeZone, calendar: calendars[0] });
   const { mutate: updateEvent } = useUpdateEvent();
   const { mutate: deleteEvent } = useDeleteEvent();
+  const motion = useBlockMotion();
 
   // Selection is kept by id: the event itself is replaced each time it is saved.
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -63,19 +66,36 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
     createBlock({
       title: t('block.new'),
       span,
+      onShown: (key) => {
+        motion.arrive(key, 'grow');
+      },
       onSaved: (event) => {
         setSelectedEventId(event.id);
       },
     });
   };
 
+  /** Gives a task a block. A drop has it land; the Plan button has it grow, as a click does. */
   const scheduleTask = useCallback(
-    (task: Task, span: TimeSpan): void => {
-      createBlock({ title: task.title, span, taskId: task.id });
+    (task: Task, span: TimeSpan, how: Arrival): void => {
+      createBlock({
+        title: task.title,
+        span,
+        taskId: task.id,
+        onShown: (key) => {
+          motion.arrive(key, how);
+        },
+      });
       const times = formatTimeRange(span.startMinutes, span.endMinutes, hourCycle, locale);
       setAnnouncement(t('announce.planned', { title: task.title, time: times }));
     },
-    [createBlock, hourCycle, locale, t],
+    [createBlock, motion, hourCycle, locale, t],
+  );
+  const dropTask = useCallback(
+    (task: Task, span: TimeSpan): void => {
+      scheduleTask(task, span, 'settle');
+    },
+    [scheduleTask],
   );
 
   /** Gives a block new times on the day in view, and says so for those who cannot see it move. */
@@ -104,15 +124,25 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
     },
     [reschedule],
   );
+  /** A block let go of on the grid lands with a bounce; the arrow keys move it without one. */
+  const dropBlock = useCallback(
+    (event: PlannerEvent, span: TimeSpan): void => {
+      moveBlock(event, span);
+      motion.arrive(blockKey(event), 'settle');
+    },
+    [moveBlock, motion],
+  );
   const resizeBlock = (event: PlannerEvent, span: TimeSpan): void => {
     reschedule(event, span, 'resized');
   };
   const deleteBlock = (event: PlannerEvent): void => {
+    const block = plan.blocks.find((candidate) => candidate.event.id === event.id);
+    if (block) motion.leave(block);
     deleteEvent(event);
     setAnnouncement(t('announce.deleted', { title: event.title }));
   };
 
-  const drag = usePlanningDrag({ onScheduleTask: scheduleTask, onMoveBlock: moveBlock });
+  const drag = usePlanningDrag({ onScheduleTask: dropTask, onMoveBlock: dropBlock });
   const plannedTaskIds = new Set(plan.blocks.map((block) => block.event.taskId));
 
   return (
@@ -143,6 +173,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
           nowMinutes={nowMinutes}
           landingSpan={drag.landingSpan}
           onGridScroll={drag.onGridScroll}
+          motion={motion}
           selectedEventId={selectedEventId}
           onSelectEvent={(event) => {
             setSelectedEventId(event.id);
@@ -162,6 +193,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
               calendars={calendars}
               linkedTask={tasks.find((task) => task.id === selectedEvent.taskId)}
               timeZone={timeZone}
+              onDelete={deleteBlock}
               onClose={() => {
                 setSelectedEventId(null);
               }}
@@ -172,7 +204,7 @@ export function PlannerPage({ settings }: PlannerPageProps): JSX.Element {
             canPlan={calendars.length > 0}
             plannedTaskIds={plannedTaskIds}
             onPlanTask={(task) => {
-              scheduleTask(task, nextFreeSpan(task.estimateMinutes));
+              scheduleTask(task, nextFreeSpan(task.estimateMinutes), 'grow');
             }}
           />
           <CalendarPanel />
