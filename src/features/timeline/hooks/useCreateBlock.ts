@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { Calendar, PlannerEvent } from '../../../lib/api/contract';
 import { instantAt } from '../../../lib/time/zonedTime';
 import type { TimeSpan } from '../dayLayout';
-import { provisionalEvent } from '../provisionalEvent';
+import { blockKey, provisionalEvent } from '../provisionalEvent';
 import { useCreateEvent } from './useEvents';
 
 interface NewBlock {
@@ -10,6 +10,8 @@ interface NewBlock {
   span: TimeSpan;
   /** The task this block is time set aside for. */
   taskId?: string;
+  /** Called with the key of the block as soon as it is on the timeline, before it is saved. */
+  onShown?: (key: string) => void;
   onSaved?: (event: PlannerEvent) => void;
 }
 
@@ -32,7 +34,7 @@ export function useCreateBlock({
   const { mutate } = useCreateEvent();
 
   return useCallback(
-    ({ title, span, taskId, onSaved }) => {
+    ({ title, span, taskId, onShown, onSaved }) => {
       if (!calendar) return;
 
       const input = {
@@ -45,10 +47,9 @@ export function useCreateBlock({
         timeZone,
       } as const;
 
-      mutate(
-        { input, provisional: provisionalEvent(input, new Date()) },
-        onSaved ? { onSuccess: onSaved } : undefined,
-      );
+      const provisional = provisionalEvent(input, new Date());
+      onShown?.(blockKey(provisional));
+      mutate({ input, provisional }, onSaved ? { onSuccess: onSaved } : undefined);
     },
     [calendar, day, timeZone, mutate],
   );

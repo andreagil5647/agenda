@@ -15,3 +15,31 @@
   margin: 0;
   padding: 0;
 }
+
+/* A line of praise for a clear list. Nothing in it, nothing to see: the line is there to be read out. */
+.praise {
+  margin: 0 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-soft-text);
+  font-weight: 800;
+  padding: var(--space-3) var(--space-4);
+}
+
+.praise:empty {
+  margin: 0;
+  padding: 0;
+}
+
+/* The moment the last task is done: the line grows in. Only transform and opacity change. */
+.praise[data-moment] {
+  transform-origin: top;
+  animation: praise-in var(--motion-feedback) var(--motion-pop);
+}
+
+@keyframes praise-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}

@@ -6,7 +6,7 @@ import { formatTimeInputValue, parseTimeOfDay } from '../../../lib/time/formatTi
 import { instantAt, localDateOf, minutesOfDay, MINUTES_PER_DAY } from '../../../lib/time/zonedTime';
 import controls from '../../../ui/controls.module.css';
 import { Panel } from '../../../ui/Panel';
-import { useDeleteEvent, useUpdateEvent } from '../hooks/useEvents';
+import { useUpdateEvent } from '../hooks/useEvents';
 import styles from './BlockEditor.module.css';
 
 interface BlockEditorProps {
@@ -15,6 +15,8 @@ interface BlockEditorProps {
   /** The task this block is time set aside for, if any. */
   linkedTask: Task | undefined;
   timeZone: string;
+  /** Deletes the event, the way the planner does it everywhere. */
+  onDelete: (event: PlannerEvent) => void;
   onClose: () => void;
 }
 
@@ -52,10 +54,10 @@ export function BlockEditor({
   calendars,
   linkedTask,
   timeZone,
+  onDelete,
   onClose,
 }: BlockEditorProps): JSX.Element {
   const updateEvent = useUpdateEvent();
-  const deleteEvent = useDeleteEvent();
   const { t } = useI18n();
   const [hasTimeProblem, setHasTimeProblem] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -88,7 +90,7 @@ export function BlockEditor({
   };
 
   const remove = (): void => {
-    deleteEvent.mutate(event);
+    onDelete(event);
     onClose();
   };
 

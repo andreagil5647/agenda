@@ -109,8 +109,12 @@ Finishing a task draws its tick and sends a small burst out of the box, in the s
 theme: stars, pixel coins or petals ([ADR 0012](docs/adr/0012-motion-with-css-and-browser-apis.md)).
 It is feedback for something the reader just did, so a task that was already finished when the
 list loaded does not play it. It is written in CSS, moves only with `transform` and `opacity`,
-lasts under 300 ms and never holds up the next click. For a reader who asked for less motion
-nothing moves: the tick and the strike-through simply appear.
+lasts under 300 ms and never holds up the next click. A block dropped on the grid lands with a small
+bounce, one made by a click grows, and a deleted one shrinks away instead of vanishing. The day
+slides in from the side you went towards, the number of open tasks rolls when you change it, and
+finishing the last task of the list is a bigger moment with a line of praise. For a
+reader who asked for less motion nothing moves: the tick and the strike-through simply appear, and
+blocks arrive and go as they did before.
 
 ## Themes
 
@@ -215,6 +219,7 @@ pnpm run dev       # http://localhost:3000, proxies /api to http://localhost:400
 | `pnpm run lint` / `pnpm run format`    | ESLint (type-aware) / Prettier                    |
 | `pnpm run typecheck`                   | `tsc --noEmit`                                    |
 | `pnpm run test:e2e`                    | Playwright, in a real browser against the API     |
+| `pnpm run perf:motion`                 | What motion costs on a slowed-down CPU, printed   |
 | `pnpm run api:sync`                    | Copy the API contract from the backend repo       |
 | `pnpm run api:generate` / `api:check`  | Generate the API types / fail if they are stale   |
 

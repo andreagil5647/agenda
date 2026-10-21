@@ -27,6 +27,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
+    "perf:motion": "playwright test --config playwright.perf.config.ts",
     "prepare": "husky"
   },
   "lint-staged": {

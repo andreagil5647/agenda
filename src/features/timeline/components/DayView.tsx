@@ -9,6 +9,8 @@ import { Icon } from '../../../ui/Icon';
 import { Panel } from '../../../ui/Panel';
 import { QueryBoundary } from '../../../ui/QueryBoundary';
 import { slotStart, spanAt, type PlacedBlock, type TimeSpan } from '../dayLayout';
+import type { BlockMotion } from '../hooks/useBlockMotion';
+import { useDaySlide } from '../hooks/useDaySlide';
 import { AllDayRow } from './AllDayRow';
 import { DayGrid } from './DayGrid';
 import styles from './DayView.module.css';
@@ -30,6 +32,7 @@ interface DayViewProps {
   /** Where something being dragged over the grid would land. */
   landingSpan: TimeSpan | null;
   onGridScroll: () => void;
+  motion: BlockMotion;
   selectedEventId: string | null;
   onSelectEvent: (event: PlannerEvent) => void;
   onMoveBlock: (event: PlannerEvent, span: TimeSpan) => void;
@@ -52,6 +55,7 @@ export function DayView({
   nowMinutes,
   landingSpan,
   onGridScroll,
+  motion,
   selectedEventId,
   onSelectEvent,
   onMoveBlock,
@@ -61,6 +65,7 @@ export function DayView({
   onAddBlock,
 }: DayViewProps): JSX.Element {
   const { t } = useI18n();
+  const { slide, slid } = useDaySlide(day);
   const hasCalendar = calendars.length > 0;
   const isEmptyDay = blocks.length === 0 && allDayEvents.length === 0;
   const firstBlockStart = blocks[0]?.startMinutes ?? START_OF_WORKDAY_MINUTES;
@@ -96,31 +101,40 @@ export function DayView({
                 </EmptyState>
               </div>
             )}
-            <AllDayRow
-              events={allDayEvents}
-              calendars={calendars}
-              selectedEventId={selectedEventId}
-              onSelectEvent={onSelectEvent}
-            />
-            <DayGrid
-              // A different day is a different grid: it scrolls to its own first block.
-              key={day}
-              blocks={blocks}
-              calendars={calendars}
-              hourCycle={hourCycle}
-              nowMinutes={nowMinutes}
-              initialMinutes={initialMinutes}
-              landingSpan={landingSpan}
-              onScroll={onGridScroll}
-              selectedEventId={selectedEventId}
-              onSelectEvent={onSelectEvent}
-              onMoveBlock={onMoveBlock}
-              onResizeBlock={onResizeBlock}
-              onDeleteBlock={onDeleteBlock}
-              onCreateAt={(minutes) => {
-                onCreateBlock(spanAt(slotStart(minutes), NEW_BLOCK_MINUTES));
+            <div
+              className={styles.day}
+              data-slide={slide ?? undefined}
+              onAnimationEnd={(animationEvent) => {
+                if (animationEvent.target === animationEvent.currentTarget) slid();
               }}
-            />
+            >
+              <AllDayRow
+                events={allDayEvents}
+                calendars={calendars}
+                selectedEventId={selectedEventId}
+                onSelectEvent={onSelectEvent}
+              />
+              <DayGrid
+                // A different day is a different grid: it scrolls to its own first block.
+                key={day}
+                blocks={blocks}
+                calendars={calendars}
+                hourCycle={hourCycle}
+                nowMinutes={nowMinutes}
+                initialMinutes={initialMinutes}
+                landingSpan={landingSpan}
+                onScroll={onGridScroll}
+                motion={motion}
+                selectedEventId={selectedEventId}
+                onSelectEvent={onSelectEvent}
+                onMoveBlock={onMoveBlock}
+                onResizeBlock={onResizeBlock}
+                onDeleteBlock={onDeleteBlock}
+                onCreateAt={(minutes) => {
+                  onCreateBlock(spanAt(slotStart(minutes), NEW_BLOCK_MINUTES));
+                }}
+              />
+            </div>
           </>
         )}
       </QueryBoundary>

@@ -35,3 +35,22 @@ export function provisionalEvent(input: CreateEventRequest, now: Date): PlannerE
 export function isProvisional(event: PlannerEvent): boolean {
   return event.id.startsWith(PROVISIONAL_PREFIX);
 }
+
+const provisionalIdOf = new Map<string, string>();
+
+/**
+ * Notes that a saved event took the place of a provisional one. The block on screen is the same
+ * block, so it keeps its identity (see `blockKey`) instead of being replaced by a new one.
+ */
+export function rememberReplacement(provisionalId: string, saved: PlannerEvent): void {
+  provisionalIdOf.set(saved.id, provisionalId);
+}
+
+/**
+ * What identifies a block on screen: the id it first had. A block that is saved gets a new id,
+ * and React would take a block with a new id for a different one, throw the old one away and
+ * start the new one from nothing, which would cut short anything that was happening to it.
+ */
+export function blockKey(event: PlannerEvent): string {
+  return provisionalIdOf.get(event.id) ?? event.id;
+}

@@ -13,6 +13,7 @@ import {
   updateEvent,
   type InstantRange,
 } from '../api/eventsApi';
+import { rememberReplacement } from '../provisionalEvent';
 
 // Events are cached per range. Writes edit every cached range at once, since
 // the same event can be on screen in more than one of them.
@@ -36,7 +37,10 @@ export function useCreateEvent() {
     queryKey: eventsKey,
     mutationFn: ({ input }) => createEvent(input),
     optimistic: (events, { provisional }) => withItem(events, provisional),
-    confirmed: (events, saved, { provisional }) => withReplaced(events, provisional.id, saved),
+    confirmed: (events, saved, { provisional }) => {
+      rememberReplacement(provisional.id, saved);
+      return withReplaced(events, provisional.id, saved);
+    },
   });
 }
 

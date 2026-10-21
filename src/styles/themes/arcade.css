@@ -22,6 +22,7 @@
   --motion-fast: 90ms;
   --motion-ease: steps(3, end);
   --motion-feedback: 200ms;
+  --motion-pop: steps(3, end);
 
   /* Pixel coins. */
   --burst-size: 7px;
