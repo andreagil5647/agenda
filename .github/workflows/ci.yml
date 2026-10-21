@@ -72,9 +72,12 @@ jobs:
     # The tests drive a real browser against the real API, which needs its database.
     # The job does not start its steps until the database answers: a container that has started is
     # not yet one that can be connected to, and the API gives up after ten seconds.
+    #
+    # Version 7, not 8: on some of GitHub's runners MongoDB 8 aborts as it starts, which looked like
+    # an API that never came up. The API's driver supports 7. Try 8 again when the runners change.
     services:
       mongo:
-        image: mongo:8
+        image: mongo:7
         ports:
           - 27017:27017
         options: >-
